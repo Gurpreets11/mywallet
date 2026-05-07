@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'core/database/app_database.dart';
 import 'core/theme/app_theme.dart';
+import 'data/services/master_seed_service.dart';
 
 
 
@@ -12,6 +13,7 @@ void main() async {
 
   if (!kIsWeb) {
     await AppDatabase.database;
+    await MasterSeedService.seedMasterData();
   }
 
   runApp(const FinanceManagerApp());

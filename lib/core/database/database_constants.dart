@@ -47,4 +47,25 @@ class DatabaseConstants {
   static const String colLoanId = 'loan_id';
   static const String colAmountPaid = 'amount_paid';
   static const String colPaymentDate = 'payment_date';
+
+  // Transaction Type Table
+  static const String tableTransactionTypes = 'transaction_types';
+
+  static const String colTypeName = 'type_name';
+
+  // Category Table
+  static const String tableCategories = 'categories';
+
+  static const String colTransactionTypeId = 'transaction_type_id';
+  static const String colCategoryName = 'category_name';
+  static const String colIconName = 'icon_name';
+  static const String colColorCode = 'color_code';
+  static const String colIsActive = 'is_active';
+
+  // Subcategory Table
+
+  static const String tableSubcategories = 'subcategories';
+
+  static const String colCategoryId = 'category_id';
+  static const String colSubcategoryName = 'subcategory_name';
 }

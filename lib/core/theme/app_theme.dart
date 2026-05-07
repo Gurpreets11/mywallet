@@ -1,14 +1,27 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
+
+import 'app_colors.dart';
+
 class AppTheme {
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
-    colorSchemeSeed: Colors.indigo,
-    scaffoldBackgroundColor: Colors.grey.shade100,
-    appBarTheme: const AppBarTheme(
-      centerTitle: true,
-      elevation: 0,
+    colorSchemeSeed: AppColors.primary,
+    scaffoldBackgroundColor:
+    AppColors.background,
+
+    inputDecorationTheme:
+    const InputDecorationTheme(
+      border: OutlineInputBorder(),
+    ),
+
+    elevatedButtonTheme:
+    ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size.fromHeight(50),
+      ),
     ),
   );
 }

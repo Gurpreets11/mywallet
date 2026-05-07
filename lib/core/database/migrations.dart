@@ -5,11 +5,17 @@ import 'database_constants.dart';
 
 class Migrations {
   static Future<void> onCreate(Database db, int version) async {
+
+    await _createTransactionTypeTable(db);
+    await _createCategoryTable(db);
+    await _createSubcategoryTable(db);
+
     await _createExpenseTable(db);
     await _createIncomeTable(db);
     await _createInvestmentTable(db);
     await _createLoanTable(db);
     await _createLoanPaymentTable(db);
+
   }
 
   static Future<void> onUpgrade(
@@ -90,5 +96,46 @@ class Migrations {
         REFERENCES ${DatabaseConstants.tableLoans}(${DatabaseConstants.colId})
       )
     ''');
+  }
+
+
+  static Future<void> _createTransactionTypeTable(Database db) async {
+    await db.execute('''
+    CREATE TABLE ${DatabaseConstants.tableTransactionTypes} (
+      ${DatabaseConstants.colId} INTEGER PRIMARY KEY AUTOINCREMENT,
+      ${DatabaseConstants.colTypeName} TEXT NOT NULL
+    )
+  ''');
+  }
+
+  static Future<void> _createCategoryTable(Database db) async {
+    await db.execute('''
+    CREATE TABLE ${DatabaseConstants.tableCategories} (
+      ${DatabaseConstants.colId} INTEGER PRIMARY KEY AUTOINCREMENT,
+      ${DatabaseConstants.colTransactionTypeId} INTEGER NOT NULL,
+      ${DatabaseConstants.colCategoryName} TEXT NOT NULL,
+      ${DatabaseConstants.colIconName} TEXT,
+      ${DatabaseConstants.colColorCode} TEXT,
+      ${DatabaseConstants.colIsActive} INTEGER DEFAULT 1,
+      ${DatabaseConstants.colCreatedAt} TEXT NOT NULL,
+      FOREIGN KEY (${DatabaseConstants.colTransactionTypeId})
+      REFERENCES ${DatabaseConstants.tableTransactionTypes}(${DatabaseConstants.colId})
+    )
+  ''');
+  }
+
+
+  static Future<void> _createSubcategoryTable(Database db) async {
+    await db.execute('''
+    CREATE TABLE ${DatabaseConstants.tableSubcategories} (
+      ${DatabaseConstants.colId} INTEGER PRIMARY KEY AUTOINCREMENT,
+      ${DatabaseConstants.colCategoryId} INTEGER NOT NULL,
+      ${DatabaseConstants.colSubcategoryName} TEXT NOT NULL,
+      ${DatabaseConstants.colIsActive} INTEGER DEFAULT 1,
+      ${DatabaseConstants.colCreatedAt} TEXT NOT NULL,
+      FOREIGN KEY (${DatabaseConstants.colCategoryId})
+      REFERENCES ${DatabaseConstants.tableCategories}(${DatabaseConstants.colId})
+    )
+  ''');
   }
 }
