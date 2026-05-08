@@ -24,4 +24,10 @@ class AppTheme {
       ),
     ),
   );
+
+  static ThemeData darkTheme =
+  ThemeData(
+    brightness: Brightness.dark,
+    useMaterial3: true,
+  );
 }

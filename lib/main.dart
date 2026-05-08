@@ -6,7 +6,11 @@ import 'package:provider/provider.dart';
 import 'core/database/app_database.dart';
 import 'core/theme/app_theme.dart';
 import 'data/services/master_seed_service.dart';
+import 'modules/dashboard/providers/dashboard_provider.dart';
+import 'modules/dashboard/screens/dashboard_screen.dart';
 import 'modules/expenses/providers/expense_provider.dart';
+import 'modules/navigation/providers/navigation_provider.dart';
+import 'modules/navigation/screens/main_navigation_screen.dart';
 
 
 
@@ -36,12 +40,24 @@ class FinanceManagerApp extends StatelessWidget {
         ChangeNotifierProvider(
            create: (_) => ExpenseProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => DashboardProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) =>
+              NavigationProvider(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'My Wallet',
+
+        themeMode: ThemeMode.system,
+
         theme: AppTheme.lightTheme,
-        home: const HomeScreen(),
+
+        darkTheme: AppTheme.darkTheme,
+        home: const MainNavigationScreen(),
       ),
     );
 
