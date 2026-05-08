@@ -19,12 +19,28 @@ class ExpenseRepository {
   Future<List<ExpenseModel>> getAllExpenses() async {
     final Database db = await AppDatabase.database;
 
-    final List<Map<String, dynamic>> maps =
+    /*final List<Map<String, dynamic>> maps =
     await db.query(
       DatabaseConstants.tableExpenses,
       orderBy:
       '${DatabaseConstants.colDate} DESC',
-    );
+    );*/
+
+
+
+    final List<Map<String, dynamic>> maps =
+    await db.rawQuery('''
+  SELECT 
+    e.*,
+    c.category_name,
+    s.subcategory_name
+  FROM expenses e
+  LEFT JOIN categories c
+    ON e.category_id = c.id
+  LEFT JOIN subcategories s
+    ON e.subcategory_id = s.id
+  ORDER BY e.date DESC
+''');
 
     return maps
         .map((e) => ExpenseModel.fromMap(e))

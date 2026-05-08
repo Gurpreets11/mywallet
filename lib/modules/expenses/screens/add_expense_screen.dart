@@ -6,6 +6,7 @@ import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/utils/validator_utils.dart';
 import '../../../core/widgets/common_button.dart';
 import '../../../core/widgets/common_text_field.dart';
+import '../../../data/providers/master_provider.dart';
 import '../models/expense_model.dart';
 import '../providers/expense_provider.dart';
 
@@ -51,11 +52,27 @@ class _AddExpenseScreenState
   void initState() {
     super.initState();
 
+    Future.microtask(() {
+      context
+          .read<MasterProvider>()
+          .loadExpenseCategories();
+    });
+
     if (isEditMode) {
       final expense = widget.expense!;
 
       _amountController.text =
           expense.amount.toString();
+
+      if (_selectedCategoryId != null) {
+        Future.microtask(() {
+          context
+              .read<MasterProvider>()
+              .loadSubcategories(
+            _selectedCategoryId!,
+          );
+        });
+      }
 
       _notesController.text =
           expense.notes ?? '';
@@ -114,6 +131,84 @@ class _AddExpenseScreenState
 
               const SizedBox(height: 16),
 
+              Consumer<MasterProvider>(
+                builder: (context, master, _) {
+                  return DropdownButtonFormField<int>(
+                    value: _selectedCategoryId,
+                    decoration:
+                    const InputDecoration(
+                      labelText: 'Category',
+                    ),
+                    items:
+                    master.expenseCategories.map(
+                          (category) {
+                        return DropdownMenuItem<int>(
+                          value: category['id'],
+                          child: Text(
+                            category['category_name'],
+                          ),
+                        );
+                      },
+                    ).toList(),
+                    onChanged: (value) async {
+                      setState(() {
+                        _selectedCategoryId = value;
+                        _selectedSubcategoryId =
+                        null;
+                      });
+
+                      if (value != null) {
+                        await context
+                            .read<MasterProvider>()
+                            .loadSubcategories(
+                          value,
+                        );
+                      }
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Select category';
+                      }
+
+                      return null;
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              Consumer<MasterProvider>(
+                builder: (context, master, _) {
+                  return DropdownButtonFormField<int>(
+                    value:
+                    _selectedSubcategoryId,
+                    decoration:
+                    const InputDecoration(
+                      labelText:
+                      'Subcategory',
+                    ),
+                    items:
+                    master.subcategories.map(
+                          (subcategory) {
+                        return DropdownMenuItem<int>(
+                          value:
+                          subcategory['id'],
+                          child: Text(
+                            subcategory[
+                            'subcategory_name'],
+                          ),
+                        );
+                      },
+                    ).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedSubcategoryId =
+                            value;
+                      });
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
               CommonTextField(
                 controller: _notesController,
                 label: 'Notes',

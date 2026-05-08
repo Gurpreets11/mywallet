@@ -30,8 +30,17 @@ class ExpenseCard extends StatelessWidget {
             expense.amount,
           ),
         ),
-        subtitle: Text(
-          expense.paymentMode,
+        subtitle: Column(
+          crossAxisAlignment:
+          CrossAxisAlignment.start,
+          children: [
+            Text(expense.paymentMode),
+            Text(
+              '${expense.categoryName ?? ''}'
+                  ' • '
+                  '${expense.subcategoryName ?? ''}',
+            ),
+          ],
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

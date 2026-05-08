@@ -50,6 +50,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
             ),
           ),
         ),
+        actions: [
+          IconButton(onPressed: () {}, icon: const Icon(Icons.filter_alt)),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

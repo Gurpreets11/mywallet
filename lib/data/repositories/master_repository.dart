@@ -70,4 +70,46 @@ class MasterRepository {
       whereArgs: [categoryId],
     );
   }
+
+
+  Future<String> getCategoryName(
+      int categoryId,
+      ) async {
+    final Database db =
+    await AppDatabase.database;
+
+    final result = await db.query(
+      DatabaseConstants.tableCategories,
+      where: 'id = ?',
+      whereArgs: [categoryId],
+    );
+
+    if (result.isEmpty) {
+      return '';
+    }
+
+    return result.first['category_name']
+        .toString();
+  }
+
+  Future<String> getSubcategoryName(
+      int subcategoryId,
+      ) async {
+    final Database db =
+    await AppDatabase.database;
+
+    final result = await db.query(
+      DatabaseConstants.tableSubcategories,
+      where: 'id = ?',
+      whereArgs: [subcategoryId],
+    );
+
+    if (result.isEmpty) {
+      return '';
+    }
+
+    return result.first['subcategory_name']
+        .toString();
+  }
+
 }

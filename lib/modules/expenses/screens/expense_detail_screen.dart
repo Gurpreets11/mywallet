@@ -47,7 +47,18 @@ class ExpenseDetailScreen
                 ),
 
                 const SizedBox(height: 8),
-
+                Text(
+                  'Category'
+                      ' • '
+                      '${expense.categoryName ?? ''}',
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Subcategory'
+                      ' • '
+                      '${expense.subcategoryName ?? ''}',
+                ),
+                const SizedBox(height: 8),
                 Text(
                   'Date: ${AppDateUtils.formatDate(DateTime.parse(expense.date))}',
                 ),

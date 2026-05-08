@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mywallet/data/providers/master_provider.dart';
 import 'package:provider/provider.dart';
 
 import 'core/database/app_database.dart';
@@ -30,7 +31,10 @@ class FinanceManagerApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => ExpenseProvider(),
+          create: (_) => MasterProvider(),
+         ),
+        ChangeNotifierProvider(
+           create: (_) => ExpenseProvider(),
         ),
       ],
       child: MaterialApp(
