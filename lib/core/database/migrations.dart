@@ -28,16 +28,23 @@ class Migrations {
 
   static Future<void> _createExpenseTable(Database db) async {
     await db.execute('''
-      CREATE TABLE ${DatabaseConstants.tableExpenses} (
-        ${DatabaseConstants.colId} INTEGER PRIMARY KEY AUTOINCREMENT,
-        ${DatabaseConstants.colAmount} REAL NOT NULL,
-        ${DatabaseConstants.colCategory} TEXT NOT NULL,
-        ${DatabaseConstants.colDate} TEXT NOT NULL,
-        ${DatabaseConstants.colPaymentMode} TEXT,
-        ${DatabaseConstants.colNotes} TEXT,
-        ${DatabaseConstants.colCreatedAt} TEXT NOT NULL
-      )
-    ''');
+    CREATE TABLE ${DatabaseConstants.tableExpenses} (
+      ${DatabaseConstants.colId} INTEGER PRIMARY KEY AUTOINCREMENT,
+      ${DatabaseConstants.colAmount} REAL NOT NULL,
+      category_id INTEGER NOT NULL,
+      subcategory_id INTEGER,
+      ${DatabaseConstants.colDate} TEXT NOT NULL,
+      ${DatabaseConstants.colPaymentMode} TEXT,
+      ${DatabaseConstants.colNotes} TEXT,
+      ${DatabaseConstants.colCreatedAt} TEXT NOT NULL,
+
+      FOREIGN KEY (category_id)
+      REFERENCES categories(id),
+
+      FOREIGN KEY (subcategory_id)
+      REFERENCES subcategories(id)
+    )
+  ''');
   }
 
   static Future<void> _createIncomeTable(Database db) async {

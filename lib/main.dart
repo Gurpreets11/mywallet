@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'core/database/app_database.dart';
 import 'core/theme/app_theme.dart';
 import 'data/services/master_seed_service.dart';
+import 'modules/expenses/providers/expense_provider.dart';
 
 
 
@@ -24,12 +26,22 @@ class FinanceManagerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Finance Manager',
-      theme: AppTheme.lightTheme,
-      home: const HomeScreen(),
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => ExpenseProvider(),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'My Wallet',
+        theme: AppTheme.lightTheme,
+        home: const HomeScreen(),
+      ),
     );
+
+
   }
 }
 
