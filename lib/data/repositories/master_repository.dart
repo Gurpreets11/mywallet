@@ -4,79 +4,56 @@ import '../../core/database/app_database.dart';
 import '../../core/database/database_constants.dart';
 
 class MasterRepository {
-  Future<int> insertTransactionType(
-      Map<String, dynamic> data,
-      ) async {
+  Future<int> insertTransactionType(Map<String, dynamic> data) async {
     final Database db = await AppDatabase.database;
 
-    return await db.insert(
-      DatabaseConstants.tableTransactionTypes,
-      data,
-    );
+    return await db.insert(DatabaseConstants.tableTransactionTypes, data);
   }
 
-  Future<int> insertCategory(
-      Map<String, dynamic> data,
-      ) async {
+  Future<int> insertCategory(Map<String, dynamic> data) async {
     final Database db = await AppDatabase.database;
 
-    return await db.insert(
-      DatabaseConstants.tableCategories,
-      data,
-    );
+    return await db.insert(DatabaseConstants.tableCategories, data);
   }
 
-  Future<int> insertSubcategory(
-      Map<String, dynamic> data,
-      ) async {
+  Future<int> insertSubcategory(Map<String, dynamic> data) async {
     final Database db = await AppDatabase.database;
 
-    return await db.insert(
-      DatabaseConstants.tableSubcategories,
-      data,
-    );
+    return await db.insert(DatabaseConstants.tableSubcategories, data);
   }
 
   Future<List<Map<String, dynamic>>> getTransactionTypes() async {
     final Database db = await AppDatabase.database;
 
-    return await db.query(
-      DatabaseConstants.tableTransactionTypes,
-    );
+    return await db.query(DatabaseConstants.tableTransactionTypes);
   }
 
   Future<List<Map<String, dynamic>>> getCategoriesByType(
-      int transactionTypeId,
-      ) async {
+    int transactionTypeId,
+  ) async {
     final Database db = await AppDatabase.database;
 
     return await db.query(
       DatabaseConstants.tableCategories,
-      where:
-      '${DatabaseConstants.colTransactionTypeId} = ?',
+      where: '${DatabaseConstants.colTransactionTypeId} = ?',
       whereArgs: [transactionTypeId],
     );
   }
 
   Future<List<Map<String, dynamic>>> getSubcategoriesByCategory(
-      int categoryId,
-      ) async {
+    int categoryId,
+  ) async {
     final Database db = await AppDatabase.database;
 
     return await db.query(
       DatabaseConstants.tableSubcategories,
-      where:
-      '${DatabaseConstants.colCategoryId} = ?',
+      where: '${DatabaseConstants.colCategoryId} = ?',
       whereArgs: [categoryId],
     );
   }
 
-
-  Future<String> getCategoryName(
-      int categoryId,
-      ) async {
-    final Database db =
-    await AppDatabase.database;
+  Future<String> getCategoryName(int categoryId) async {
+    final Database db = await AppDatabase.database;
 
     final result = await db.query(
       DatabaseConstants.tableCategories,
@@ -88,15 +65,11 @@ class MasterRepository {
       return '';
     }
 
-    return result.first['category_name']
-        .toString();
+    return result.first['category_name'].toString();
   }
 
-  Future<String> getSubcategoryName(
-      int subcategoryId,
-      ) async {
-    final Database db =
-    await AppDatabase.database;
+  Future<String> getSubcategoryName(int subcategoryId) async {
+    final Database db = await AppDatabase.database;
 
     final result = await db.query(
       DatabaseConstants.tableSubcategories,
@@ -108,8 +81,6 @@ class MasterRepository {
       return '';
     }
 
-    return result.first['subcategory_name']
-        .toString();
+    return result.first['subcategory_name'].toString();
   }
-
 }

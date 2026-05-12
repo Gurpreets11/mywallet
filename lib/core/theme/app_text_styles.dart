@@ -6,9 +6,7 @@ class AppTextStyles {
     fontWeight: FontWeight.bold,
   );
 
-  static const TextStyle body = TextStyle(
-    fontSize: 16,
-  );
+  static const TextStyle body = TextStyle(fontSize: 16);
 
   static const TextStyle button = TextStyle(
     fontSize: 16,

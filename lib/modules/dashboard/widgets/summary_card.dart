@@ -23,59 +23,38 @@ class SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding:
-        const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius:
-          BorderRadius.circular(
-            20,
-          ),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color:
-              Colors.black.withOpacity(
-                0.05,
-              ),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Column(
-          crossAxisAlignment:
-          CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
-              backgroundColor:
-              color.withOpacity(0.1),
-              child: Icon(
-                icon,
-                color: color,
-              ),
+              backgroundColor: color.withOpacity(0.1),
+              child: Icon(icon, color: color),
             ),
 
             const SizedBox(height: 16),
 
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
 
             const SizedBox(height: 8),
 
             Text(
-              CurrencyUtils.formatAmount(
-                amount,
-              ),
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight:
-                FontWeight.bold,
-              ),
+              CurrencyUtils.formatAmount(amount),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
         ),

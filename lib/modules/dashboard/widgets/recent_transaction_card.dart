@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/currency_utils.dart';
 
-class RecentTransactionCard
-    extends StatelessWidget {
+class RecentTransactionCard extends StatelessWidget {
   final String title;
 
   final String subtitle;
@@ -26,24 +25,15 @@ class RecentTransactionCard
       elevation: 0,
       child: ListTile(
         leading: CircleAvatar(
-          child: Icon(
-            isExpense
-                ? Icons.arrow_upward
-                : Icons.arrow_downward,
-          ),
+          child: Icon(isExpense ? Icons.arrow_upward : Icons.arrow_downward),
         ),
         title: Text(title),
         subtitle: Text(subtitle),
         trailing: Text(
-          CurrencyUtils.formatAmount(
-            amount,
-          ),
+          CurrencyUtils.formatAmount(amount),
           style: TextStyle(
-            color: isExpense
-                ? Colors.red
-                : Colors.green,
-            fontWeight:
-            FontWeight.bold,
+            color: isExpense ? Colors.red : Colors.green,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

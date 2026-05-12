@@ -5,33 +5,19 @@ class SectionTitle extends StatelessWidget {
 
   final VoidCallback? onViewAll;
 
-  const SectionTitle({
-    super.key,
-    required this.title,
-    this.onViewAll,
-  });
+  const SectionTitle({super.key, required this.title, this.onViewAll});
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment:
-      MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight:
-            FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         if (onViewAll != null)
-          TextButton(
-            onPressed: onViewAll,
-            child: const Text(
-              'View All',
-            ),
-          ),
+          TextButton(onPressed: onViewAll, child: const Text('View All')),
       ],
     );
   }

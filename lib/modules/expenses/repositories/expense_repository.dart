@@ -5,15 +5,10 @@ import '../../../core/database/database_constants.dart';
 import '../models/expense_model.dart';
 
 class ExpenseRepository {
-  Future<int> insertExpense(
-      ExpenseModel expense,
-      ) async {
+  Future<int> insertExpense(ExpenseModel expense) async {
     final Database db = await AppDatabase.database;
 
-    return await db.insert(
-      DatabaseConstants.tableExpenses,
-      expense.toMap(),
-    );
+    return await db.insert(DatabaseConstants.tableExpenses, expense.toMap());
   }
 
   Future<List<ExpenseModel>> getAllExpenses() async {
@@ -26,10 +21,7 @@ class ExpenseRepository {
       '${DatabaseConstants.colDate} DESC',
     );*/
 
-
-
-    final List<Map<String, dynamic>> maps =
-    await db.rawQuery('''
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
   SELECT 
     e.*,
     c.category_name,
@@ -42,14 +34,10 @@ class ExpenseRepository {
   ORDER BY e.date DESC
 ''');
 
-    return maps
-        .map((e) => ExpenseModel.fromMap(e))
-        .toList();
+    return maps.map((e) => ExpenseModel.fromMap(e)).toList();
   }
 
-  Future<int> updateExpense(
-      ExpenseModel expense,
-      ) async {
+  Future<int> updateExpense(ExpenseModel expense) async {
     final Database db = await AppDatabase.database;
 
     return await db.update(
@@ -70,10 +58,7 @@ class ExpenseRepository {
     );
   }
 
-
-  Future<ExpenseModel?> getExpenseById(
-      int id,
-      ) async {
+  Future<ExpenseModel?> getExpenseById(int id) async {
     final Database db = await AppDatabase.database;
 
     final result = await db.query(
@@ -94,32 +79,23 @@ class ExpenseRepository {
 
     final now = DateTime.now();
 
-    final startDate = DateTime(
-      now.year,
-      now.month,
-      1,
-    ).toIso8601String();
+    final startDate = DateTime(now.year, now.month, 1).toIso8601String();
 
-    final endDate = DateTime(
-      now.year,
-      now.month + 1,
-      0,
-    ).toIso8601String();
+    final endDate = DateTime(now.year, now.month + 1, 0).toIso8601String();
 
-    final result = await db.rawQuery('''
+    final result = await db.rawQuery(
+      '''
     SELECT SUM(amount) as total
     FROM expenses
     WHERE date BETWEEN ? AND ?
-  ''', [startDate, endDate]);
+  ''',
+      [startDate, endDate],
+    );
 
-    return (result.first['total'] as num?)
-        ?.toDouble() ??
-        0.0;
+    return (result.first['total'] as num?)?.toDouble() ?? 0.0;
   }
 
-  Future<List<ExpenseModel>> searchExpenses(
-      String keyword,
-      ) async {
+  Future<List<ExpenseModel>> searchExpenses(String keyword) async {
     final Database db = await AppDatabase.database;
 
     final result = await db.query(
@@ -128,8 +104,6 @@ class ExpenseRepository {
       whereArgs: ['%$keyword%'],
     );
 
-    return result
-        .map((e) => ExpenseModel.fromMap(e))
-        .toList();
+    return result.map((e) => ExpenseModel.fromMap(e)).toList();
   }
 }

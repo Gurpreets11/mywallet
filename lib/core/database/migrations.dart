@@ -1,11 +1,9 @@
-
 import 'package:sqflite/sqflite.dart';
 
 import 'database_constants.dart';
 
 class Migrations {
   static Future<void> onCreate(Database db, int version) async {
-
     await _createTransactionTypeTable(db);
     await _createCategoryTable(db);
     await _createSubcategoryTable(db);
@@ -15,14 +13,13 @@ class Migrations {
     await _createInvestmentTable(db);
     await _createLoanTable(db);
     await _createLoanPaymentTable(db);
-
   }
 
   static Future<void> onUpgrade(
-      Database db,
-      int oldVersion,
-      int newVersion,
-      ) async {
+    Database db,
+    int oldVersion,
+    int newVersion,
+  ) async {
     // Future DB migrations
   }
 
@@ -105,7 +102,6 @@ class Migrations {
     ''');
   }
 
-
   static Future<void> _createTransactionTypeTable(Database db) async {
     await db.execute('''
     CREATE TABLE ${DatabaseConstants.tableTransactionTypes} (
@@ -130,7 +126,6 @@ class Migrations {
     )
   ''');
   }
-
 
   static Future<void> _createSubcategoryTable(Database db) async {
     await db.execute('''

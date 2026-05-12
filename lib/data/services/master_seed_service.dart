@@ -4,12 +4,10 @@ import '../models/transaction_type_model.dart';
 import '../repositories/master_repository.dart';
 
 class MasterSeedService {
-  static final MasterRepository _repository =
-  MasterRepository();
+  static final MasterRepository _repository = MasterRepository();
 
   static Future<void> seedMasterData() async {
-    final existingTypes =
-    await _repository.getTransactionTypes();
+    final existingTypes = await _repository.getTransactionTypes();
 
     if (existingTypes.isNotEmpty) {
       return;
@@ -29,9 +27,7 @@ class MasterSeedService {
     ];
 
     for (final item in transactionTypes) {
-      await _repository.insertTransactionType(
-        item.toMap(),
-      );
+      await _repository.insertTransactionType(item.toMap());
     }
   }
 
@@ -39,11 +35,7 @@ class MasterSeedService {
     final now = DateTime.now().toIso8601String();
 
     final categories = [
-      CategoryModel(
-        transactionTypeId: 0,
-        categoryName: 'Food',
-        createdAt: now,
-      ),
+      CategoryModel(transactionTypeId: 0, categoryName: 'Food', createdAt: now),
       CategoryModel(
         transactionTypeId: 1,
         categoryName: 'Travel',
@@ -67,9 +59,7 @@ class MasterSeedService {
     ];
 
     for (final item in categories) {
-      await _repository.insertCategory(
-        item.toMap(),
-      );
+      await _repository.insertCategory(item.toMap());
     }
   }
 
@@ -87,11 +77,7 @@ class MasterSeedService {
         subcategoryName: 'Dinner',
         createdAt: now,
       ),
-      SubcategoryModel(
-        categoryId: 2,
-        subcategoryName: 'Fuel',
-        createdAt: now,
-      ),
+      SubcategoryModel(categoryId: 2, subcategoryName: 'Fuel', createdAt: now),
       SubcategoryModel(
         categoryId: 3,
         subcategoryName: 'Monthly Salary',
@@ -100,9 +86,7 @@ class MasterSeedService {
     ];
 
     for (final item in subcategories) {
-      await _repository.insertSubcategory(
-        item.toMap(),
-      );
+      await _repository.insertSubcategory(item.toMap());
     }
   }
 }

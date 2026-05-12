@@ -9,31 +9,22 @@ class DashboardProvider extends ChangeNotifier {
 
   double _totalSavings = 0;
 
-  double get totalIncome =>
-      _totalIncome;
+  double get totalIncome => _totalIncome;
 
-  double get totalExpense =>
-      _totalExpense;
+  double get totalExpense => _totalExpense;
 
-  double get totalSavings =>
-      _totalSavings;
+  double get totalSavings => _totalSavings;
 
-  final ExpenseRepository
-  _expenseRepository =
-  ExpenseRepository();
+  final ExpenseRepository _expenseRepository = ExpenseRepository();
 
   Future<void> loadDashboardData() async {
     // Later:
     // Load from repositories
 
-    _totalExpense =
-    await _expenseRepository
-        .getCurrentMonthExpenseTotal();
+    _totalExpense = await _expenseRepository.getCurrentMonthExpenseTotal();
     _totalIncome = 0;
 
- 
-    _totalSavings =
-        _totalIncome - _totalExpense;
+    _totalSavings = _totalIncome - _totalExpense;
 
     notifyListeners();
   }

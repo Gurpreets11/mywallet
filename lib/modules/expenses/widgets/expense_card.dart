@@ -9,6 +9,7 @@ class ExpenseCard extends StatelessWidget {
   final VoidCallback onTap;
 
   final VoidCallback onEdit;
+
   const ExpenseCard({
     super.key,
     required this.expense,
@@ -22,41 +23,26 @@ class ExpenseCard extends StatelessWidget {
     return Card(
       child: ListTile(
         onTap: onTap,
-        leading: const CircleAvatar(
-          child: Icon(Icons.money_off),
-        ),
-        title: Text(
-          CurrencyUtils.formatAmount(
-            expense.amount,
-          ),
-        ),
+        leading: const CircleAvatar(child: Icon(Icons.money_off)),
+        title: Text(CurrencyUtils.formatAmount(expense.amount)),
         subtitle: Column(
-          crossAxisAlignment:
-          CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(expense.paymentMode),
             Text(
               '${expense.categoryName ?? ''}'
-                  ' • '
-                  '${expense.subcategoryName ?? ''}',
+              ' • '
+              '${expense.subcategoryName ?? ''}',
             ),
           ],
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              onPressed: onEdit,
-              icon: const Icon(
-                Icons.edit,
-              ),
-            ),
+            IconButton(onPressed: onEdit, icon: const Icon(Icons.edit)),
             IconButton(
               onPressed: onDelete,
-              icon: const Icon(
-                Icons.delete,
-                color: Colors.red,
-              ),
+              icon: const Icon(Icons.delete, color: Colors.red),
             ),
           ],
         ),

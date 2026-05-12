@@ -29,9 +29,7 @@ class CategoryModel {
     };
   }
 
-  factory CategoryModel.fromMap(
-      Map<String, dynamic> map,
-      ) {
+  factory CategoryModel.fromMap(Map<String, dynamic> map) {
     return CategoryModel(
       id: map['id'],
       transactionTypeId: map['transaction_type_id'],
