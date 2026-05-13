@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/analytics_card.dart';
 import '../widgets/balance_card.dart';
+import '../widgets/loan_summary_card.dart';
 import '../widgets/monthly_expense_chart.dart';
 import '../widgets/quick_action_card.dart';
 import '../widgets/recent_transaction_card.dart';
@@ -129,6 +130,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 amount: 50000,
                 isExpense: false,
               ),
+
+              const SizedBox(height: 28),
+
+              const SectionTitle(title: 'Loan Summary'),
+
+              const SizedBox(height: 16),
+
+              LoanSummaryCard(
+                totalOutstanding:
+                provider
+                    .totalOutstandingLoan,
+
+                totalPaid:
+                provider.totalLoanPaid,
+
+                activeLoans:
+                provider.activeLoanCount,
+
+                closedLoans:
+                provider.closedLoanCount,
+              ),
+
             ],
           ),
         ),

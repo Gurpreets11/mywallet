@@ -10,13 +10,12 @@ import 'modules/dashboard/providers/dashboard_provider.dart';
 import 'modules/dashboard/screens/dashboard_screen.dart';
 import 'modules/expenses/providers/expense_provider.dart';
 import 'modules/income/providers/income_provider.dart';
+import 'modules/loans/providers/loan_payment_provider.dart';
+import 'modules/loans/providers/loan_provider.dart';
 import 'modules/navigation/providers/navigation_provider.dart';
 import 'modules/navigation/screens/main_navigation_screen.dart';
 
-
-
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
 
   if (!kIsWeb) {
@@ -32,24 +31,17 @@ class FinanceManagerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => MasterProvider(),
-         ),
-        ChangeNotifierProvider(
-           create: (_) => ExpenseProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => DashboardProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => NavigationProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => IncomeProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => MasterProvider()),
+        ChangeNotifierProvider(create: (_) => ExpenseProvider()),
+        ChangeNotifierProvider(create: (_) => DashboardProvider()),
+        ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        ChangeNotifierProvider(create: (_) => IncomeProvider()),
+
+        ChangeNotifierProvider(create: (_) => LoanProvider()),
+
+        ChangeNotifierProvider(create: (_) => LoanPaymentProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -63,8 +55,6 @@ class FinanceManagerApp extends StatelessWidget {
         home: const MainNavigationScreen(),
       ),
     );
-
-
   }
 }
 
@@ -74,16 +64,11 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Finance Manager'),
-      ),
+      appBar: AppBar(title: const Text('Finance Manager')),
       body: const Center(
         child: Text(
           'Finance Manager App Initialized',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
       ),
     );

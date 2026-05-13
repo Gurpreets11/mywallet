@@ -11,8 +11,8 @@ class Migrations {
     await _createExpenseTable(db);
     await _createIncomeTable(db);
     await _createInvestmentTable(db);
-    await _createLoanTable(db);
-    await _createLoanPaymentTable(db);
+    await _createLoansTable(db);
+    await _createLoanPaymentsTable(db);
   }
 
   static Future<void> onUpgrade(
@@ -89,36 +89,66 @@ class Migrations {
     ''');
   }
 
-  static Future<void> _createLoanTable(Database db) async {
+  static Future<void> _createLoansTable(
+      Database db,
+      ) async {
     await db.execute('''
-      CREATE TABLE ${DatabaseConstants.tableLoans} (
-        ${DatabaseConstants.colId} INTEGER PRIMARY KEY AUTOINCREMENT,
-        ${DatabaseConstants.colLoanName} TEXT NOT NULL,
-        ${DatabaseConstants.colLenderName} TEXT,
-        ${DatabaseConstants.colTotalAmount} REAL NOT NULL,
-        ${DatabaseConstants.colInterestRate} REAL,
-        ${DatabaseConstants.colStartDate} TEXT NOT NULL,
-        ${DatabaseConstants.colEmiAmount} REAL,
-        ${DatabaseConstants.colTenureMonths} INTEGER,
-        ${DatabaseConstants.colOutstandingAmount} REAL,
-        ${DatabaseConstants.colStatus} TEXT
-      )
-    ''');
+    CREATE TABLE loans (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      loan_type TEXT NOT NULL,
+
+      person_name TEXT NOT NULL,
+
+      principal_amount REAL NOT NULL,
+
+      interest_rate REAL,
+
+      emi_amount REAL,
+
+      tenure_months INTEGER,
+
+      start_date TEXT NOT NULL,
+
+      end_date TEXT,
+
+      total_paid REAL DEFAULT 0,
+
+      outstanding_amount REAL NOT NULL,
+
+      loan_status TEXT DEFAULT 'ACTIVE',
+
+      notes TEXT,
+
+      created_at TEXT NOT NULL
+    )
+  ''');
   }
 
-  static Future<void> _createLoanPaymentTable(Database db) async {
+  static Future<void>
+  _createLoanPaymentsTable(
+      Database db,
+      ) async {
     await db.execute('''
-      CREATE TABLE ${DatabaseConstants.tableLoanPayments} (
-        ${DatabaseConstants.colId} INTEGER PRIMARY KEY AUTOINCREMENT,
-        ${DatabaseConstants.colLoanId} INTEGER NOT NULL,
-        ${DatabaseConstants.colAmountPaid} REAL NOT NULL,
-        ${DatabaseConstants.colPaymentDate} TEXT NOT NULL,
-        ${DatabaseConstants.colPaymentMode} TEXT,
-        ${DatabaseConstants.colNotes} TEXT,
-        FOREIGN KEY (${DatabaseConstants.colLoanId})
-        REFERENCES ${DatabaseConstants.tableLoans}(${DatabaseConstants.colId})
-      )
-    ''');
+    CREATE TABLE loan_payments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      loan_id INTEGER NOT NULL,
+
+      payment_amount REAL NOT NULL,
+
+      payment_date TEXT NOT NULL,
+
+      payment_mode TEXT,
+
+      remarks TEXT,
+
+      created_at TEXT NOT NULL,
+
+      FOREIGN KEY (loan_id)
+      REFERENCES loans(id)
+    )
+  ''');
   }
 
   static Future<void> _createTransactionTypeTable(Database db) async {

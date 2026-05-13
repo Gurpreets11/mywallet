@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 import '../../expenses/screens/expense_list_screen.dart';
 import '../../income/screens/income_list_screen.dart';
+import '../../loans/screens/loan_list_screen.dart';
 import '../providers/navigation_provider.dart';
 
 class MainNavigationScreen extends StatelessWidget {
@@ -18,6 +19,7 @@ class MainNavigationScreen extends StatelessWidget {
       const ExpenseListScreen(),
       const IncomeListScreen(),
       const Center(child: Text('Investments')),
+      const LoanListScreen(),
       const Center(child: Text('Settings')),
     ];
 
@@ -51,6 +53,10 @@ class MainNavigationScreen extends StatelessWidget {
             BottomNavigationBarItem(
               icon: Icon(Icons.trending_up),
               label: 'Investments',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.payments),
+              label: 'Loans',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.settings),
