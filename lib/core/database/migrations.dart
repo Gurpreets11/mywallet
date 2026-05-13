@@ -105,7 +105,7 @@ class Migrations {
       interest_rate REAL,
 
       emi_amount REAL,
-
+next_emi_date TEXT,
       tenure_months INTEGER,
 
       start_date TEXT NOT NULL,

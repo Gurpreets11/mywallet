@@ -123,4 +123,23 @@ class LoanRepository {
 
     return (result.first['total'] as num?)?.toDouble() ?? 0.0;
   }
+
+  Future<LoanModel?> getUpcomingEmiLoan() async {
+    final Database db = await AppDatabase.database;
+
+    final result = await db.rawQuery('''
+    SELECT *
+    FROM loans
+    WHERE loan_status = 'ACTIVE'
+    AND next_emi_date IS NOT NULL
+    ORDER BY next_emi_date ASC
+    LIMIT 1
+  ''');
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return LoanModel.fromMap(result.first);
+  }
 }

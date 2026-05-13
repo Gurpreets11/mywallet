@@ -10,7 +10,7 @@ class LoanModel {
   final double interestRate;
 
   final double emiAmount;
-
+  final String? nextEmiDate;
   final int tenureMonths;
 
   final String startDate;
@@ -34,6 +34,7 @@ class LoanModel {
     required this.principalAmount,
     required this.interestRate,
     required this.emiAmount,
+    required this.nextEmiDate,
     required this.tenureMonths,
     required this.startDate,
     this.endDate,
@@ -52,6 +53,7 @@ class LoanModel {
       'principal_amount': principalAmount,
       'interest_rate': interestRate,
       'emi_amount': emiAmount,
+      'next_emi_date': nextEmiDate,
       'tenure_months': tenureMonths,
       'start_date': startDate,
       'end_date': endDate,
@@ -71,6 +73,7 @@ class LoanModel {
       principalAmount: map['principal_amount'],
       interestRate: map['interest_rate'],
       emiAmount: map['emi_amount'],
+      nextEmiDate: map['next_emi_date'],
       tenureMonths: map['tenure_months'],
       startDate: map['start_date'],
       endDate: map['end_date'],

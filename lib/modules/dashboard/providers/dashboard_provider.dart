@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../expenses/repositories/expense_repository.dart';
 import '../../income/repositories/income_repository.dart';
+import '../../loans/models/loan_model.dart';
 import '../../loans/repositories/loan_repository.dart';
 
 class DashboardProvider extends ChangeNotifier {
@@ -38,6 +39,10 @@ class DashboardProvider extends ChangeNotifier {
 
   int get closedLoanCount => _closedLoanCount;
 
+  LoanModel? _upcomingLoan;
+
+  LoanModel? get upcomingLoan => _upcomingLoan;
+
   Future<void> loadDashboardData() async {
     // Later:
     // Load from repositories
@@ -54,6 +59,8 @@ class DashboardProvider extends ChangeNotifier {
     _activeLoanCount = await _loanRepository.getActiveLoanCount();
 
     _closedLoanCount = await _loanRepository.getClosedLoanCount();
+
+    _upcomingLoan = await _loanRepository.getUpcomingEmiLoan();
 
     notifyListeners();
   }

@@ -11,6 +11,7 @@ import '../widgets/quick_action_card.dart';
 import '../widgets/recent_transaction_card.dart';
 import '../widgets/section_title.dart';
 import '../widgets/summary_card.dart';
+import '../widgets/upcoming_emi_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -111,25 +112,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
 
-              const SizedBox(height: 28),
-
-              const SectionTitle(title: 'Recent Transactions'),
-
-              const SizedBox(height: 16),
-
-              const RecentTransactionCard(
-                title: 'Food',
-                subtitle: 'Cash Payment',
-                amount: 250,
-                isExpense: true,
-              ),
-
-              const RecentTransactionCard(
-                title: 'Salary',
-                subtitle: 'Bank Transfer',
-                amount: 50000,
-                isExpense: false,
-              ),
 
               const SizedBox(height: 28),
 
@@ -150,6 +132,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                 closedLoans:
                 provider.closedLoanCount,
+              ),
+
+              const SizedBox(height: 16),
+              UpcomingEmiCard(
+                loan:
+                provider.upcomingLoan,
+              ),
+
+              const SizedBox(height: 28),
+
+              const SectionTitle(title: 'Recent Transactions'),
+
+              const SizedBox(height: 16),
+
+              const RecentTransactionCard(
+                title: 'Food',
+                subtitle: 'Cash Payment',
+                amount: 250,
+                isExpense: true,
+              ),
+
+              const RecentTransactionCard(
+                title: 'Salary',
+                subtitle: 'Bank Transfer',
+                amount: 50000,
+                isExpense: false,
               ),
 
             ],
