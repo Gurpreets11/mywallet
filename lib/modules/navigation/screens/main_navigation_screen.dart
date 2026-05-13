@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../dashboard/screens/dashboard_screen.dart';
 import '../../expenses/screens/expense_list_screen.dart';
+import '../../income/screens/income_list_screen.dart';
 import '../providers/navigation_provider.dart';
 
 class MainNavigationScreen extends StatelessWidget {
@@ -15,7 +16,7 @@ class MainNavigationScreen extends StatelessWidget {
     final screens = [
       const DashboardScreen(),
       const ExpenseListScreen(),
-      const Center(child: Text('Income')),
+      const IncomeListScreen(),
       const Center(child: Text('Investments')),
       const Center(child: Text('Settings')),
     ];

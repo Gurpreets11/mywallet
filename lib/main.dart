@@ -9,6 +9,7 @@ import 'data/services/master_seed_service.dart';
 import 'modules/dashboard/providers/dashboard_provider.dart';
 import 'modules/dashboard/screens/dashboard_screen.dart';
 import 'modules/expenses/providers/expense_provider.dart';
+import 'modules/income/providers/income_provider.dart';
 import 'modules/navigation/providers/navigation_provider.dart';
 import 'modules/navigation/screens/main_navigation_screen.dart';
 
@@ -44,8 +45,10 @@ class FinanceManagerApp extends StatelessWidget {
           create: (_) => DashboardProvider(),
         ),
         ChangeNotifierProvider(
-          create: (_) =>
-              NavigationProvider(),
+          create: (_) => NavigationProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => IncomeProvider(),
         ),
       ],
       child: MaterialApp(
