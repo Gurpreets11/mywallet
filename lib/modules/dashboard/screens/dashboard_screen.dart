@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/common_button.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/analytics_card.dart';
 import '../widgets/balance_card.dart';
@@ -52,6 +54,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 'My Wallet',
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
+
+          CommonButton(
+            text: 'Save Expense',
+            onPressed: () async {
+
+
+              await NotificationService
+                  .instance
+                  .showInstantNotification(
+                id: 1,
+                title: 'Expense Reminder',
+                body:
+                'Don’t forget to track today’s expenses',
+              );
+
+
+
+
+            },
+          ),
+
 
               const SizedBox(height: 28),
 

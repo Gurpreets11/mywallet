@@ -4,6 +4,7 @@ import 'package:mywallet/data/providers/master_provider.dart';
 import 'package:provider/provider.dart';
 
 import 'core/database/app_database.dart';
+import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'data/services/master_seed_service.dart';
 import 'modules/dashboard/providers/dashboard_provider.dart';
@@ -22,7 +23,9 @@ void main() async {
     await AppDatabase.database;
     await MasterSeedService.seedMasterData();
   }
-
+  await NotificationService
+      .instance
+      .initialize();
   runApp(const FinanceManagerApp());
 }
 
