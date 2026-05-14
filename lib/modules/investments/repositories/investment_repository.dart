@@ -87,4 +87,56 @@ class InvestmentRepository {
     GROUP BY investment_type
   ''');
   }
+
+
+  Future<List<InvestmentModel>>
+  getUpcomingSips() async {
+
+    final Database db =
+    await AppDatabase.database;
+
+    final currentDay =
+        DateTime.now().day;
+
+    final result =
+    await db.rawQuery('''
+    SELECT *
+    FROM investments
+    WHERE is_sip = 1
+    AND sip_date >= ?
+    ORDER BY sip_date ASC
+  ''', [
+      currentDay,
+    ]);
+
+    return result
+        .map(
+          (e) =>
+          InvestmentModel
+              .fromMap(e),
+    )
+        .toList();
+  }
+
+
+  Future<double>
+  getMonthlySipTotal()
+  async {
+
+    final Database db =
+    await AppDatabase.database;
+
+    final result =
+    await db.rawQuery('''
+    SELECT SUM(sip_amount)
+    AS total
+    FROM investments
+    WHERE is_sip = 1
+  ''');
+
+    return (result.first['total']
+    as num?)
+        ?.toDouble() ??
+        0;
+  }
 }

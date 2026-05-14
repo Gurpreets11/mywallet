@@ -182,7 +182,9 @@ class NotificationService {
         break;
 
       default:
-        await NavigationService.instance.navigateTo(const MainNavigationScreen(),);
+        await NavigationService.instance.navigateTo(
+          const MainNavigationScreen(),
+        );
     }
   }
 
@@ -198,5 +200,42 @@ class NotificationService {
         details.notificationResponse?.payload != null) {
       await _handleNotificationTap(details.notificationResponse!.payload);
     }
+  }
+
+  Future<void> scheduleSipReminder({
+    required int id,
+
+    required String investmentName,
+
+    required double amount,
+
+    required int sipDate,
+  }) async {
+    final now = DateTime.now();
+
+    DateTime scheduledDate = DateTime(now.year, now.month, sipDate, 9, 0);
+
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = DateTime(now.year, now.month + 1, sipDate, 9, 0);
+    }
+
+    await scheduleNotification(
+      id: id,
+
+      title: 'SIP Reminder',
+
+      body:
+          '₹${amount.toStringAsFixed(0)} '
+          'SIP due for '
+          '$investmentName',
+
+      scheduledDate: scheduledDate,
+
+      payload: '''
+{
+  "type":"investment"
+}
+''',
+    );
   }
 }

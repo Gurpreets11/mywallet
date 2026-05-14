@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
+import '../../../core/services/notification_service.dart';
 import '../../../core/utils/date_utils.dart';
 
 import '../../../core/utils/snackbar_utils.dart';
@@ -9,7 +10,6 @@ import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/common_button.dart';
 
 import '../../../core/widgets/common_text_field.dart';
-
 
 import '../constant/investment_constants.dart';
 import '../models/investment_model.dart';
@@ -46,6 +46,10 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
 
   bool get isEditMode => widget.investment != null;
 
+  final _sipAmountController = TextEditingController();
+
+  int _sipDate = 1;
+
   @override
   void initState() {
     super.initState();
@@ -66,6 +70,10 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
       _investmentType = investment.investmentType;
 
       _isSip = investment.isSip;
+
+      _sipAmountController.text = investment.sipAmount?.toString() ?? '';
+
+      _sipDate = investment.sipDate ?? 1;
     }
   }
 
@@ -88,6 +96,10 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
       isSip: _isSip,
 
       createdAt: AppDateUtils.getCurrentTimestamp(),
+
+      sipAmount: _isSip ? double.tryParse(_sipAmountController.text) : null,
+
+      sipDate: _isSip ? _sipDate : null,
     );
 
     final provider = context.read<InvestmentProvider>();
@@ -96,6 +108,18 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
       await provider.updateInvestment(investment);
     } else {
       await provider.addInvestment(investment);
+    }
+
+    if (_isSip) {
+      await NotificationService.instance.scheduleSipReminder(
+        id: DateTime.now().millisecondsSinceEpoch,
+
+        investmentName: _nameController.text,
+
+        amount: double.parse(_sipAmountController.text),
+
+        sipDate: _sipDate,
+      );
     }
 
     if (!mounted) {
@@ -188,6 +212,39 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
 
               const SizedBox(height: 16),
 
+              if (_isSip) ...[
+                const SizedBox(height: 16),
+
+                CommonTextField(
+                  controller: _sipAmountController,
+
+                  label: 'SIP Amount',
+
+                  keyboardType: TextInputType.number,
+                ),
+
+                const SizedBox(height: 16),
+
+                DropdownButtonFormField<int>(
+                  value: _sipDate,
+
+                  decoration: const InputDecoration(labelText: 'SIP Date'),
+
+                  items: List.generate(28, (index) {
+                    final day = index + 1;
+
+                    return DropdownMenuItem(value: day, child: Text('$day'));
+                  }),
+
+                  onChanged: (value) {
+                    setState(() {
+                      _sipDate = value!;
+                    });
+                  },
+                ),
+              ],
+
+              const SizedBox(height: 16),
               CommonTextField(controller: _notesController, label: 'Notes'),
 
               const SizedBox(height: 30),

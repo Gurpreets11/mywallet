@@ -13,8 +13,10 @@ import '../widgets/monthly_expense_chart.dart';
 import '../widgets/quick_action_card.dart';
 import '../widgets/recent_transaction_card.dart';
 import '../widgets/section_title.dart';
+import '../widgets/sip_summary_card.dart';
 import '../widgets/summary_card.dart';
 import '../widgets/upcoming_emi_card.dart';
+import '../widgets/upcoming_sip_card.dart';
 import '../widgets/wealth_summary_card.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -57,7 +59,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
 
-         /* CommonButton(
+              /* CommonButton(
             text: 'Save Expense',
             onPressed: () async {
               await NotificationService.instance.showInstantNotification(
@@ -67,8 +69,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               );
             },
           ),*/
-
-
               const SizedBox(height: 28),
 
               BalanceCard(totalBalance: provider.totalSavings),
@@ -128,7 +128,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
 
-
               const SizedBox(height: 28),
 
               const SectionTitle(title: 'Loan Summary'),
@@ -136,43 +135,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 16),
 
               LoanSummaryCard(
-                totalOutstanding:
-                provider
-                    .totalOutstandingLoan,
+                totalOutstanding: provider.totalOutstandingLoan,
 
-                totalPaid:
-                provider.totalLoanPaid,
+                totalPaid: provider.totalLoanPaid,
 
-                activeLoans:
-                provider.activeLoanCount,
+                activeLoans: provider.activeLoanCount,
 
-                closedLoans:
-                provider.closedLoanCount,
+                closedLoans: provider.closedLoanCount,
               ),
 
               const SizedBox(height: 16),
-              UpcomingEmiCard(
-                loan:
-                provider.upcomingLoan,
-              ),
+              UpcomingEmiCard(loan: provider.upcomingLoan),
 
               const SizedBox(height: 28),
 
-
               WealthSummaryCard(
-                investedAmount:
-                provider
-                    .totalInvestedAmount,
+                investedAmount: provider.totalInvestedAmount,
 
-                currentValue:
-                provider
-                    .totalInvestmentValue,
+                currentValue: provider.totalInvestmentValue,
               ),
+              const SizedBox(height: 16),
+              AssetAllocationCard(allocations: provider.assetAllocation),
 
-              AssetAllocationCard(
-                allocations:
-                provider.assetAllocation,
+              const SizedBox(height: 16),
+              SipSummaryCard(
+                monthlySipTotal: provider.monthlySipTotal,
+
+                totalSipCount: provider.upcomingSips.length,
               ),
+              const SizedBox(height: 16),
+              UpcomingSipCard(upcomingSips: provider.upcomingSips),
 
               const SizedBox(height: 28),
 
@@ -193,7 +185,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 amount: 50000,
                 isExpense: false,
               ),
-
             ],
           ),
         ),

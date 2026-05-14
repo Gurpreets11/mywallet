@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../expenses/repositories/expense_repository.dart';
 import '../../income/repositories/income_repository.dart';
+import '../../investments/models/investment_model.dart';
 import '../../investments/repositories/investment_repository.dart';
 import '../../loans/models/loan_model.dart';
 import '../../loans/repositories/loan_repository.dart';
@@ -58,6 +59,17 @@ class DashboardProvider extends ChangeNotifier {
 
   List<Map<String, dynamic>> get assetAllocation => _assetAllocation;
 
+  List<InvestmentModel> _upcomingSips = [];
+
+  double _monthlySipTotal = 0;
+
+  List<InvestmentModel>
+  get upcomingSips =>
+      _upcomingSips;
+
+  double get monthlySipTotal =>
+      _monthlySipTotal;
+
   Future<void> loadDashboardData() async {
     // Later:
     // Load from repositories
@@ -82,6 +94,10 @@ class DashboardProvider extends ChangeNotifier {
     _totalInvestmentValue = await _investmentRepository.getTotalCurrentValue();
 
     _assetAllocation = await _investmentRepository.getAssetAllocation();
+
+    _upcomingSips = await _investmentRepository.getUpcomingSips();
+
+    _monthlySipTotal = await _investmentRepository.getMonthlySipTotal();
 
     notifyListeners();
   }
