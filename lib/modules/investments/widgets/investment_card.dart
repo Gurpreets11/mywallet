@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/utils/currency_utils.dart';
 
 import '../models/investment_model.dart';
+import '../utils/investment_utils.dart';
 
 class InvestmentCard extends StatelessWidget {
   final InvestmentModel investment;
@@ -23,7 +24,19 @@ class InvestmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double profit = investment.currentValue - investment.investedAmount;
+    //final double profit = investment.currentValue - investment.investedAmount;
+
+    final double profit = InvestmentUtils.calculateProfit(
+      investedAmount: investment.investedAmount,
+
+      currentValue: investment.currentValue,
+    );
+
+    final double roi = InvestmentUtils.calculateRoi(
+      investedAmount: investment.investedAmount,
+
+      currentValue: investment.currentValue,
+    );
 
     final bool isProfit = profit >= 0;
 
@@ -60,12 +73,44 @@ class InvestmentCard extends StatelessWidget {
 
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+
           crossAxisAlignment: CrossAxisAlignment.end,
+
           children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+
+              children: [
+                Icon(
+                  isProfit ? Icons.trending_up : Icons.trending_down,
+
+                  size: 18,
+
+                  color: isProfit ? Colors.green : Colors.red,
+                ),
+
+                const SizedBox(width: 4),
+
+                Text(
+                  '${roi.toStringAsFixed(1)}%',
+
+                  style: TextStyle(
+                    color: isProfit ? Colors.green : Colors.red,
+
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 4),
+
             Text(
               CurrencyUtils.formatAmount(profit),
+
               style: TextStyle(
                 color: isProfit ? Colors.green : Colors.red,
+
                 fontWeight: FontWeight.bold,
               ),
             ),

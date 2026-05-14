@@ -2,7 +2,9 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../../core/database/app_database.dart';
 
+import '../models/investment_analytics_model.dart';
 import '../models/investment_model.dart';
+import '../utils/investment_utils.dart';
 
 class InvestmentRepository {
   Future<int> insertInvestment(InvestmentModel investment) async {
@@ -88,55 +90,115 @@ class InvestmentRepository {
   ''');
   }
 
+  Future<List<InvestmentModel>> getUpcomingSips() async {
+    final Database db = await AppDatabase.database;
 
-  Future<List<InvestmentModel>>
-  getUpcomingSips() async {
+    final currentDay = DateTime.now().day;
 
-    final Database db =
-    await AppDatabase.database;
-
-    final currentDay =
-        DateTime.now().day;
-
-    final result =
-    await db.rawQuery('''
+    final result = await db.rawQuery(
+      '''
     SELECT *
     FROM investments
     WHERE is_sip = 1
     AND sip_date >= ?
     ORDER BY sip_date ASC
-  ''', [
-      currentDay,
-    ]);
+  ''',
+      [currentDay],
+    );
 
-    return result
-        .map(
-          (e) =>
-          InvestmentModel
-              .fromMap(e),
-    )
-        .toList();
+    return result.map((e) => InvestmentModel.fromMap(e)).toList();
   }
 
+  Future<double> getMonthlySipTotal() async {
+    final Database db = await AppDatabase.database;
 
-  Future<double>
-  getMonthlySipTotal()
-  async {
-
-    final Database db =
-    await AppDatabase.database;
-
-    final result =
-    await db.rawQuery('''
+    final result = await db.rawQuery('''
     SELECT SUM(sip_amount)
     AS total
     FROM investments
     WHERE is_sip = 1
   ''');
 
-    return (result.first['total']
-    as num?)
-        ?.toDouble() ??
-        0;
+    return (result.first['total'] as num?)?.toDouble() ?? 0;
+  }
+
+  Future<InvestmentAnalyticsModel> getInvestmentAnalytics() async {
+    final investments = await getAllInvestments();
+
+    if (investments.isEmpty) {
+      return const InvestmentAnalyticsModel();
+    }
+
+    InvestmentModel? topPerformer;
+
+    InvestmentModel? worstPerformer;
+
+    InvestmentModel? highestRoi;
+
+    InvestmentModel? highestInvestment;
+
+    double topProfit = double.negativeInfinity;
+
+    double worstProfit = double.infinity;
+
+    double topRoi = double.negativeInfinity;
+
+    double highestAmount = double.negativeInfinity;
+
+    for (final investment in investments) {
+      final profit = InvestmentUtils.calculateProfit(
+        investedAmount: investment.investedAmount,
+
+        currentValue: investment.currentValue,
+      );
+
+      final roi = InvestmentUtils.calculateRoi(
+        investedAmount: investment.investedAmount,
+
+        currentValue: investment.currentValue,
+      );
+
+      /// TOP PROFIT
+
+      if (profit > topProfit) {
+        topProfit = profit;
+
+        topPerformer = investment;
+      }
+
+      /// WORST PROFIT
+
+      if (profit < worstProfit) {
+        worstProfit = profit;
+
+        worstPerformer = investment;
+      }
+
+      /// ROI
+
+      if (roi > topRoi) {
+        topRoi = roi;
+
+        highestRoi = investment;
+      }
+
+      /// HIGHEST INVESTMENT
+
+      if (investment.investedAmount > highestAmount) {
+        highestAmount = investment.investedAmount;
+
+        highestInvestment = investment;
+      }
+    }
+
+    return InvestmentAnalyticsModel(
+      topPerformer: topPerformer,
+
+      worstPerformer: worstPerformer,
+
+      highestRoi: highestRoi,
+
+      highestInvestment: highestInvestment,
+    );
   }
 }
