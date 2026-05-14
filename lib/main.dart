@@ -4,6 +4,7 @@ import 'package:mywallet/data/providers/master_provider.dart';
 import 'package:provider/provider.dart';
 
 import 'core/database/app_database.dart';
+import 'core/services/navigation_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'data/services/master_seed_service.dart';
@@ -23,9 +24,10 @@ void main() async {
     await AppDatabase.database;
     await MasterSeedService.seedMasterData();
   }
-  await NotificationService
-      .instance
-      .initialize();
+  await NotificationService.instance.initialize();
+  await NotificationService.instance.handleInitialNotification();
+  await NotificationService.instance.scheduleDailyReminder();
+
   runApp(const FinanceManagerApp());
 }
 
@@ -56,6 +58,7 @@ class FinanceManagerApp extends StatelessWidget {
 
         darkTheme: AppTheme.darkTheme,
         home: const MainNavigationScreen(),
+        navigatorKey: NavigationService.instance.navigatorKey,
       ),
     );
   }

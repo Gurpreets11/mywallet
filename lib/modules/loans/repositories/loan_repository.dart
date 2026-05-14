@@ -142,4 +142,16 @@ class LoanRepository {
 
     return LoanModel.fromMap(result.first);
   }
+
+  Future<LoanModel?> getLoanById(int id) async {
+    final Database db = await AppDatabase.database;
+
+    final result = await db.query('loans', where: 'id = ?', whereArgs: [id]);
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return LoanModel.fromMap(result.first);
+  }
 }

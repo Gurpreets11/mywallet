@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/services/notification_service.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/common_button.dart';
@@ -39,8 +42,8 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
   DateTime _startDate = DateTime.now();
 
   bool get isEditMode => widget.loan != null;
-  DateTime _nextEmiDate =
-  DateTime.now();
+  DateTime _nextEmiDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
@@ -78,9 +81,7 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
       principalAmount: amount,
       interestRate: double.parse(_interestController.text),
       emiAmount: double.parse(_emiController.text),
-      nextEmiDate:
-      _nextEmiDate
-          .toIso8601String(),
+      nextEmiDate: _nextEmiDate.toIso8601String(),
       tenureMonths: int.parse(_tenureController.text),
       startDate: _startDate.toIso8601String(),
       endDate: null,
@@ -98,6 +99,22 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
     } else {
       await provider.addLoan(loan);
     }
+
+    await NotificationService.instance.scheduleNotification(
+      id: DateTime.now().millisecondsSinceEpoch,
+
+      title: 'EMI Reminder',
+
+      body:
+          'EMI payment due for '
+          '${loan.personName}',
+
+      scheduledDate: _nextEmiDate.subtract(const Duration(days: 1)),
+      payload: jsonEncode({
+        'type': 'loan',
+        'loanId': loan.id,
+      }),
+    );
 
     if (!mounted) {
       return;
@@ -169,18 +186,14 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
               const SizedBox(height: 16),
 
               ListTile(
-                contentPadding:
-                EdgeInsets.zero,
+                contentPadding: EdgeInsets.zero,
                 title: Text(
                   'Next EMI Date: '
-                      '${AppDateUtils.formatDate(_nextEmiDate)}',
+                  '${AppDateUtils.formatDate(_nextEmiDate)}',
                 ),
                 trailing: IconButton(
-                  onPressed:
-                  _pickNextEmiDate,
-                  icon: const Icon(
-                    Icons.calendar_month,
-                  ),
+                  onPressed: _pickNextEmiDate,
+                  icon: const Icon(Icons.calendar_month),
                 ),
               ),
               const SizedBox(height: 16),
@@ -224,23 +237,17 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
     );
   }
 
-  Future<void>
-  _pickNextEmiDate() async {
-    final pickedDate =
-    await showDatePicker(
+  Future<void> _pickNextEmiDate() async {
+    final pickedDate = await showDatePicker(
       context: context,
       initialDate: _nextEmiDate,
       firstDate: DateTime.now(),
-      lastDate:
-      DateTime.now().add(
-        const Duration(days: 3650),
-      ),
+      lastDate: DateTime.now().add(const Duration(days: 3650)),
     );
 
     if (pickedDate != null) {
       setState(() {
-        _nextEmiDate =
-            pickedDate;
+        _nextEmiDate = pickedDate;
       });
     }
   }

@@ -55,25 +55,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
 
-          CommonButton(
+         /* CommonButton(
             text: 'Save Expense',
             onPressed: () async {
-
-
-              await NotificationService
-                  .instance
-                  .showInstantNotification(
+              await NotificationService.instance.showInstantNotification(
                 id: 1,
                 title: 'Expense Reminder',
-                body:
-                'Don’t forget to track today’s expenses',
+                body: 'Don’t forget to track today’s expenses',
               );
-
-
-
-
             },
-          ),
+          ),*/
 
 
               const SizedBox(height: 28),
