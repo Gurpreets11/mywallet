@@ -78,20 +78,46 @@ class Migrations {
 
   static Future<void> _createInvestmentTable(Database db) async {
     await db.execute('''
-      CREATE TABLE ${DatabaseConstants.tableInvestments} (
-        ${DatabaseConstants.colId} INTEGER PRIMARY KEY AUTOINCREMENT,
-        ${DatabaseConstants.colInvestmentType} TEXT NOT NULL,
-        ${DatabaseConstants.colAmountInvested} REAL NOT NULL,
-        ${DatabaseConstants.colCurrentValue} REAL NOT NULL,
-        ${DatabaseConstants.colInvestmentDate} TEXT NOT NULL,
-        ${DatabaseConstants.colNotes} TEXT
-      )
-    ''');
+CREATE TABLE investments(
+
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+  investment_type TEXT NOT NULL,
+
+  investment_name TEXT NOT NULL,
+
+  investment_platform TEXT,
+
+  invested_amount REAL NOT NULL,
+
+  current_value REAL NOT NULL,
+
+  quantity REAL,
+
+  purchase_price REAL,
+
+  current_price REAL,
+
+  investment_date TEXT NOT NULL,
+
+  maturity_date TEXT,
+
+  interest_rate REAL,
+
+  is_sip INTEGER DEFAULT 0,
+
+  sip_amount REAL,
+
+  sip_date INTEGER,
+
+  notes TEXT,
+
+  created_at TEXT NOT NULL
+)
+''');
   }
 
-  static Future<void> _createLoansTable(
-      Database db,
-      ) async {
+  static Future<void> _createLoansTable(Database db) async {
     await db.execute('''
     CREATE TABLE loans (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -125,10 +151,7 @@ next_emi_date TEXT,
   ''');
   }
 
-  static Future<void>
-  _createLoanPaymentsTable(
-      Database db,
-      ) async {
+  static Future<void> _createLoanPaymentsTable(Database db) async {
     await db.execute('''
     CREATE TABLE loan_payments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

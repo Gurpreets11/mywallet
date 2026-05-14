@@ -1,6 +1,6 @@
 class DatabaseConstants {
   static const String databaseName = 'my_wallet.db';
-  static const int databaseVersion = 6;
+  static const int databaseVersion = 7;
 
   // Common Columns
   static const String colId = 'id';

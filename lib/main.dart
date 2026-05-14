@@ -12,6 +12,7 @@ import 'modules/dashboard/providers/dashboard_provider.dart';
 import 'modules/dashboard/screens/dashboard_screen.dart';
 import 'modules/expenses/providers/expense_provider.dart';
 import 'modules/income/providers/income_provider.dart';
+import 'modules/investments/providers/investment_provider.dart';
 import 'modules/loans/providers/loan_payment_provider.dart';
 import 'modules/loans/providers/loan_provider.dart';
 import 'modules/navigation/providers/navigation_provider.dart';
@@ -47,6 +48,8 @@ class FinanceManagerApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LoanProvider()),
 
         ChangeNotifierProvider(create: (_) => LoanPaymentProvider()),
+
+        ChangeNotifierProvider(create: (_) => InvestmentProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
