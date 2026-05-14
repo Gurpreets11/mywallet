@@ -50,4 +50,41 @@ class InvestmentRepository {
 
     return (result.first['total'] as num?)?.toDouble() ?? 0;
   }
+
+  Future<double> getTotalInvestedAmount() async {
+    final Database db = await AppDatabase.database;
+
+    final result = await db.rawQuery('''
+    SELECT SUM(invested_amount)
+    AS total
+    FROM investments
+  ''');
+
+    return (result.first['total'] as num?)?.toDouble() ?? 0;
+  }
+
+  Future<double> getTotalCurrentValue() async {
+    final Database db = await AppDatabase.database;
+
+    final result = await db.rawQuery('''
+    SELECT SUM(current_value)
+    AS total
+    FROM investments
+  ''');
+
+    return (result.first['total'] as num?)?.toDouble() ?? 0;
+  }
+
+  Future<List<Map<String, dynamic>>> getAssetAllocation() async {
+    final Database db = await AppDatabase.database;
+
+    return db.rawQuery('''
+    SELECT
+      investment_type,
+      SUM(current_value)
+      AS total
+    FROM investments
+    GROUP BY investment_type
+  ''');
+  }
 }

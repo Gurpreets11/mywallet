@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../expenses/repositories/expense_repository.dart';
 import '../../income/repositories/income_repository.dart';
+import '../../investments/repositories/investment_repository.dart';
 import '../../loans/models/loan_model.dart';
 import '../../loans/repositories/loan_repository.dart';
 
@@ -23,6 +24,8 @@ class DashboardProvider extends ChangeNotifier {
 
   final LoanRepository _loanRepository = LoanRepository();
 
+  final InvestmentRepository _investmentRepository = InvestmentRepository();
+
   double _totalOutstandingLoan = 0;
 
   double _totalLoanPaid = 0;
@@ -43,6 +46,18 @@ class DashboardProvider extends ChangeNotifier {
 
   LoanModel? get upcomingLoan => _upcomingLoan;
 
+  double _totalInvestedAmount = 0;
+
+  double _totalInvestmentValue = 0;
+
+  List<Map<String, dynamic>> _assetAllocation = [];
+
+  double get totalInvestedAmount => _totalInvestedAmount;
+
+  double get totalInvestmentValue => _totalInvestmentValue;
+
+  List<Map<String, dynamic>> get assetAllocation => _assetAllocation;
+
   Future<void> loadDashboardData() async {
     // Later:
     // Load from repositories
@@ -61,6 +76,12 @@ class DashboardProvider extends ChangeNotifier {
     _closedLoanCount = await _loanRepository.getClosedLoanCount();
 
     _upcomingLoan = await _loanRepository.getUpcomingEmiLoan();
+
+    _totalInvestedAmount = await _investmentRepository.getTotalInvestedAmount();
+
+    _totalInvestmentValue = await _investmentRepository.getTotalCurrentValue();
+
+    _assetAllocation = await _investmentRepository.getAssetAllocation();
 
     notifyListeners();
   }

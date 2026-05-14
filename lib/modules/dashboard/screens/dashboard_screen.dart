@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/common_button.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/analytics_card.dart';
+import '../widgets/asset_allocation_card.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/loan_summary_card.dart';
 import '../widgets/monthly_expense_chart.dart';
@@ -14,6 +15,7 @@ import '../widgets/recent_transaction_card.dart';
 import '../widgets/section_title.dart';
 import '../widgets/summary_card.dart';
 import '../widgets/upcoming_emi_card.dart';
+import '../widgets/wealth_summary_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -152,6 +154,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
               UpcomingEmiCard(
                 loan:
                 provider.upcomingLoan,
+              ),
+
+              const SizedBox(height: 28),
+
+
+              WealthSummaryCard(
+                investedAmount:
+                provider
+                    .totalInvestedAmount,
+
+                currentValue:
+                provider
+                    .totalInvestmentValue,
+              ),
+
+              AssetAllocationCard(
+                allocations:
+                provider.assetAllocation,
               ),
 
               const SizedBox(height: 28),
