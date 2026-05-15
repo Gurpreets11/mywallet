@@ -4,6 +4,7 @@ import '../../../core/utils/currency_utils.dart';
 
 import '../../../core/utils/date_utils.dart';
 
+import '../../../core/widgets/app_section_header.dart';
 import '../models/loan_payment_model.dart';
 
 class LoanPaymentHistorySection extends StatelessWidget {
@@ -31,11 +32,7 @@ class LoanPaymentHistorySection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
 
           children: [
-            const Text(
-              'Payment History',
-
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            const AppSectionHeader(title: 'Payment History'),
 
             const SizedBox(height: 16),
 

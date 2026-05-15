@@ -110,10 +110,7 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
           '${loan.personName}',
 
       scheduledDate: _nextEmiDate.subtract(const Duration(days: 1)),
-      payload: jsonEncode({
-        'type': 'loan',
-        'loanId': loan.id,
-      }),
+      payload: jsonEncode({'type': 'loan', 'loanId': loan.id}),
     );
 
     if (!mounted) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/app_section_header.dart';
+
 class PayEmiBottomSheet extends StatefulWidget {
   final Function({
     required double paymentAmount,
@@ -38,10 +40,8 @@ class _PayEmiBottomSheetState extends State<PayEmiBottomSheet> {
         mainAxisSize: MainAxisSize.min,
 
         children: [
-          const Text(
-            'Pay EMI',
-
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          const AppSectionHeader(
+            title: 'Pay EMI',
           ),
 
           const SizedBox(height: 20),

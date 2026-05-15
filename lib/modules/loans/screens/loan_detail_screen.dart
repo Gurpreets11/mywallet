@@ -11,6 +11,7 @@ import '../utils/loan_analytics_utils.dart';
 import '../widgets/loan_analytics_card.dart';
 import '../widgets/loan_payment_card.dart';
 import '../widgets/loan_status_badge.dart';
+import '../widgets/loan_warning_banner.dart';
 import 'add_loan_payment_screen.dart';
 import 'loan_payment_history_section.dart';
 
@@ -96,6 +97,51 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
                   status: isOverdue ? 'Overdue' : widget.loan.loanStatus,
                 ),
 
+
+                if (widget.loan.loanStatus ==
+                    'Closed')
+
+                  const Padding(
+
+                    padding:
+                    EdgeInsets.only(
+                      top: 12,
+                    ),
+
+                    child: Row(
+
+                      children: [
+
+                        Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                        ),
+
+                        SizedBox(width: 8),
+
+                        Text(
+
+                          'Loan fully repaid',
+
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontWeight:
+                            FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                if (isOverdue) const SizedBox(height: 16),
+
+                if (isOverdue)
+                  const LoanWarningBanner(
+                    message:
+                        'EMI overdue. '
+                        'Please pay immediately.',
+                  ),
+
                 _buildRow('Loan Type', widget.loan.loanType),
 
                 _buildRow(
@@ -126,7 +172,9 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
                 const SizedBox(height: 6),
 
                 Text(
-                  AppDateUtils.formatDate(DateTime.parse( widget.loan.nextEmiDate!)),
+                  AppDateUtils.formatDate(
+                    DateTime.parse(widget.loan.nextEmiDate!),
+                  ),
 
                   style: TextStyle(
                     color: isOverdue ? Colors.red : null,
@@ -240,41 +288,52 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
                     width: double.infinity,
 
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
+                      onPressed: widget.loan.loanStatus == 'Closed'
+                          ? null
+                          : () {
+                              showModalBottomSheet(
+                                context: context,
 
-                          isScrollControlled: true,
+                                isScrollControlled: true,
 
-                          builder: (_) {
-                            return PayEmiBottomSheet(
-                              onSubmit:
-                                  ({
-                                    required paymentAmount,
-                                    required paymentMode,
-                                    remarks,
-                                  }) async {
-                                    await loanProvider.payEmi(
-                                      loan: widget.loan,
-                                      paymentAmount: paymentAmount,
-                                      paymentMode: paymentMode,
-                                      remarks: remarks,
-                                    );
+                                builder: (_) {
+                                  return PayEmiBottomSheet(
+                                    onSubmit:
+                                        ({
+                                          required paymentAmount,
+                                          required paymentMode,
+                                          remarks,
+                                        }) async {
+                                          await loanProvider.payEmi(
+                                            loan: widget.loan,
+                                            paymentAmount: paymentAmount,
+                                            paymentMode: paymentMode,
+                                            remarks: remarks,
+                                          );
 
-                                    await loanProvider.loadLoanPayments(
-                                      widget.loan.id!,
-                                    );
+                                          await loanProvider.loadLoanPayments(
+                                            widget.loan.id!,
+                                          );
 
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('EMI paid successfully'),
-                                      ),
-                                    );
-                                  },
-                            );
-                          },
-                        );
-                      },
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'EMI payment recorded successfully',
+                                              ),
+
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+
+                                              backgroundColor: Colors.green,
+                                            ),
+                                          );
+                                        },
+                                  );
+                                },
+                              );
+                            },
 
                       icon: const Icon(Icons.payment),
 
