@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../../core/database/app_database.dart';
 import '../models/loan_model.dart';
+import '../models/loan_payment_model.dart';
 
 class LoanRepository {
   Future<int> insertLoan(LoanModel loan) async {
@@ -153,5 +154,91 @@ class LoanRepository {
     }
 
     return LoanModel.fromMap(result.first);
+  }
+
+  Future<void> payEmi({
+    required LoanModel loan,
+
+    required double paymentAmount,
+
+    required String paymentMode,
+
+    String? remarks,
+  }) async {
+    final Database db = await AppDatabase.database;
+
+    /// INSERT PAYMENT HISTORY
+
+    final payment = LoanPaymentModel(
+      loanId: loan.id!,
+
+      paymentAmount: paymentAmount,
+
+      paymentDate: DateTime.now().toIso8601String(),
+
+      paymentMode: paymentMode,
+
+      remarks: remarks,
+
+      createdAt: DateTime.now().toIso8601String(),
+    );
+
+    await db.insert('loan_payments', payment.toMap());
+
+    /// CALCULATE UPDATED VALUES
+
+    double updatedOutstanding = loan.outstandingAmount - paymentAmount;
+
+    if (updatedOutstanding < 0) {
+      updatedOutstanding = 0;
+    }
+
+    final currentNextEmiDate = DateTime.parse(loan.nextEmiDate!);
+
+    final updatedNextEmiDate = DateTime(
+      currentNextEmiDate.year,
+
+      currentNextEmiDate.month + 1,
+
+      currentNextEmiDate.day,
+    );
+
+    final updatedStatus = updatedOutstanding <= 0 ? 'Closed' : 'Active';
+
+    /// UPDATE LOAN
+
+    await db.update(
+      'loans',
+
+      {
+        'outstanding_amount': updatedOutstanding,
+
+        'total_paid': loan.totalPaid + paymentAmount,
+
+        'next_emi_date': updatedNextEmiDate.toIso8601String(),
+
+        'loan_status': updatedStatus,
+      },
+
+      where: 'id = ?',
+
+      whereArgs: [loan.id],
+    );
+  }
+
+  Future<List<LoanPaymentModel>> getLoanPayments(int loanId) async {
+    final Database db = await AppDatabase.database;
+
+    final result = await db.query(
+      'loan_payments',
+
+      where: 'loan_id = ?',
+
+      whereArgs: [loanId],
+
+      orderBy: 'payment_date DESC',
+    );
+
+    return result.map((e) => LoanPaymentModel.fromMap(e)).toList();
   }
 }
