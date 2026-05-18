@@ -69,33 +69,29 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
           ? const LoadingView()
           : Column(
               children: [
+                // SEARCH BAR (FIXED)
                 Padding(
-                  padding: const EdgeInsets.all(16),
-
+                  padding: const EdgeInsets.all(10),
                   child: TextField(
                     decoration: InputDecoration(
                       hintText: 'Search investments',
-
                       prefixIcon: const Icon(Icons.search),
-
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-
                     onChanged: provider.updateSearchQuery,
                   ),
                 ),
 
+                // FILTER + SORT (FIXED)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Row(
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: provider.selectedFilter,
-
                           decoration: const InputDecoration(
                             labelText: 'Filter',
                           ),
@@ -132,7 +128,7 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
                         ),
                       ),
 
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 6),
 
                       Expanded(
                         child: DropdownButtonFormField<InvestmentSortType>(
@@ -143,26 +139,34 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
                           items: const [
                             DropdownMenuItem(
                               value: InvestmentSortType.latest,
-
-                              child: Text('Latest'),
+                              child: Text(
+                                'Latest',
+                                style: TextStyle(fontSize: 12),
+                              ),
                             ),
 
                             DropdownMenuItem(
                               value: InvestmentSortType.highestInvestment,
-
-                              child: Text('Highest Investment'),
+                              child: Text(
+                                'Highest Investment',
+                                style: TextStyle(fontSize: 12),
+                              ),
                             ),
 
                             DropdownMenuItem(
                               value: InvestmentSortType.highestProfit,
-
-                              child: Text('Highest Profit'),
+                              child: Text(
+                                'Highest Profit',
+                                style: TextStyle(fontSize: 12),
+                              ),
                             ),
 
                             DropdownMenuItem(
                               value: InvestmentSortType.highestRoi,
-
-                              child: Text('Highest ROI'),
+                              child: Text(
+                                'Highest ROI',
+                                style: TextStyle(fontSize: 12),
+                              ),
                             ),
                           ],
 
@@ -175,183 +179,9 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 16),
-
-                SizedBox(
-
-                  height: 150,
-
-                  child: ListView(
-
-                    scrollDirection:
-                    Axis.horizontal,
-
-                    padding:
-                    const EdgeInsets.symmetric(
-                      horizontal: 16,
-                    ),
-
-                    children: [
-
-                      _buildAnalyticsCard(
-                        title:
-                        'Top Performer',
-
-                        investment:
-                        provider
-                            .analytics
-                            .topPerformer,
-
-                        icon:
-                        Icons.trending_up,
-
-                        color:
-                        Colors.green,
-                      ),
-
-                      _buildAnalyticsCard(
-                        title:
-                        'Highest ROI',
-
-                        investment:
-                        provider
-                            .analytics
-                            .highestRoi,
-
-                        icon:
-                        Icons.show_chart,
-
-                        color:
-                        Colors.blue,
-                      ),
-
-                      _buildAnalyticsCard(
-                        title:
-                        'Highest Investment',
-
-                        investment:
-                        provider
-                            .analytics
-                            .highestInvestment,
-
-                        icon:
-                        Icons.account_balance_wallet,
-
-                        color:
-                        Colors.orange,
-                      ),
-
-                      _buildAnalyticsCard(
-                        title:
-                        'Worst Performer',
-
-                        investment:
-                        provider
-                            .analytics
-                            .worstPerformer,
-
-                        icon:
-                        Icons.trending_down,
-
-                        color:
-                        Colors.red,
-                      ),
-                    ],
-                  ),
-                ),
-
-
-                const SizedBox(height: 16),
-
-                SizedBox(
-
-                  height: 150,
-
-                  child: ListView(
-
-                    scrollDirection:
-                    Axis.horizontal,
-
-                    padding:
-                    const EdgeInsets.symmetric(
-                      horizontal: 16,
-                    ),
-
-                    children: [
-
-                      _buildAnalyticsCard(
-                        title:
-                        'Top Performer',
-
-                        investment:
-                        provider
-                            .analytics
-                            .topPerformer,
-
-                        icon:
-                        Icons.trending_up,
-
-                        color:
-                        Colors.green,
-                      ),
-
-                      _buildAnalyticsCard(
-                        title:
-                        'Highest ROI',
-
-                        investment:
-                        provider
-                            .analytics
-                            .highestRoi,
-
-                        icon:
-                        Icons.show_chart,
-
-                        color:
-                        Colors.blue,
-                      ),
-
-                      _buildAnalyticsCard(
-                        title:
-                        'Highest Investment',
-
-                        investment:
-                        provider
-                            .analytics
-                            .highestInvestment,
-
-                        icon:
-                        Icons.account_balance_wallet,
-
-                        color:
-                        Colors.orange,
-                      ),
-
-                      _buildAnalyticsCard(
-                        title:
-                        'Worst Performer',
-
-                        investment:
-                        provider
-                            .analytics
-                            .worstPerformer,
-
-                        icon:
-                        Icons.trending_down,
-
-                        color:
-                        Colors.red,
-                      ),
-                    ],
-                  ),
-                ),
                 const SizedBox(height: 12),
-                InvestmentSummaryCard(
-                  investedAmount: investedAmount,
 
-                  currentValue: currentValue,
-                ),
-                const SizedBox(height: 12),
+                // SCROLLABLE CONTENT
                 Expanded(
                   child: provider.filteredInvestments.isEmpty
                       ? EmptyView(
@@ -366,66 +196,140 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
                           onAction: () {
                             Navigator.push(
                               context,
-
                               MaterialPageRoute(
                                 builder: (_) => const AddInvestmentScreen(),
                               ),
                             );
                           },
                         )
-                      : ListView.builder(
-                          itemCount: provider.filteredInvestments.length,
+                      : SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 4),
 
-                          itemBuilder: (context, index) {
-                            final investment =
-                                provider.filteredInvestments[index];
+                              // ANALYTICS
+                              SizedBox(
+                                height: 150,
+                                child: ListView(
+                                  scrollDirection: Axis.horizontal,
 
-                            return InvestmentCard(
-                              investment: investment,
-
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => InvestmentDetailScreen(
-                                      investment: investment,
-                                    ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
                                   ),
-                                );
-                              },
 
-                              onEdit: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => AddInvestmentScreen(
-                                      investment: investment,
+                                  children: [
+                                    _buildAnalyticsCard(
+                                      title: 'Top Performer',
+                                      investment:
+                                          provider.analytics.topPerformer,
+                                      icon: Icons.trending_up,
+                                      color: Colors.green,
                                     ),
-                                  ),
-                                );
-                              },
 
-                              onDelete: () {
-                                showDialog(
-                                  context: context,
+                                    _buildAnalyticsCard(
+                                      title: 'Highest ROI',
+                                      investment: provider.analytics.highestRoi,
+                                      icon: Icons.show_chart,
+                                      color: Colors.blue,
+                                    ),
 
-                                  builder: (_) => CommonDeleteDialog(
-                                    title: 'Delete Investment',
+                                    _buildAnalyticsCard(
+                                      title: 'Highest Investment',
+                                      investment:
+                                          provider.analytics.highestInvestment,
+                                      icon: Icons.account_balance_wallet,
+                                      color: Colors.orange,
+                                    ),
 
-                                    message:
-                                        'Are you sure you want '
-                                        'to delete this investment?',
+                                    _buildAnalyticsCard(
+                                      title: 'Worst Performer',
+                                      investment:
+                                          provider.analytics.worstPerformer,
+                                      icon: Icons.trending_down,
+                                      color: Colors.red,
+                                    ),
+                                  ],
+                                ),
+                              ),
 
-                                    onConfirm: () async {
-                                      await provider.deleteInvestment(
-                                        investment.id!,
+                              const SizedBox(height: 12),
+
+                              // SUMMARY
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+
+                                child: InvestmentSummaryCard(
+                                  investedAmount: investedAmount,
+                                  currentValue: currentValue,
+                                ),
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              // LIST
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+
+                                itemCount: provider.filteredInvestments.length,
+
+                                itemBuilder: (context, index) {
+                                  final investment =
+                                      provider.filteredInvestments[index];
+
+                                  return InvestmentCard(
+                                    investment: investment,
+
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              InvestmentDetailScreen(
+                                                investment: investment,
+                                              ),
+                                        ),
                                       );
                                     },
-                                  ),
-                                );
-                              },
-                            );
-                          },
+
+                                    onEdit: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => AddInvestmentScreen(
+                                            investment: investment,
+                                          ),
+                                        ),
+                                      );
+                                    },
+
+                                    onDelete: () {
+                                      showDialog(
+                                        context: context,
+
+                                        builder: (_) => CommonDeleteDialog(
+                                          title: 'Delete Investment',
+
+                                          message:
+                                              'Are you sure you want to delete this investment?',
+
+                                          onConfirm: () async {
+                                            await provider.deleteInvestment(
+                                              investment.id!,
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+
+                              const SizedBox(height: 90),
+                            ],
+                          ),
                         ),
                 ),
               ],
@@ -433,46 +337,28 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
     );
   }
 
-
   Widget _buildAnalyticsCard({
-
     required String title,
-
-    required InvestmentModel?
-    investment,
-
+    required InvestmentModel? investment,
     required IconData icon,
-
     required Color color,
   }) {
-
     if (investment == null) {
-
       return const SizedBox();
     }
 
-    final roi =
-    InvestmentUtils
-        .calculateRoi(
-      investedAmount:
-      investment
-          .investedAmount,
-
-      currentValue:
-      investment.currentValue,
+    final roi = InvestmentUtils.calculateRoi(
+      investedAmount: investment.investedAmount,
+      currentValue: investment.currentValue,
     );
 
     return SizedBox(
+      width: 180,
 
-      width: 220,
-
-      child:
-      InvestmentAnalyticsCard(
-
+      child: InvestmentAnalyticsCard(
         title: title,
-
         value:
-        '${investment.investmentName}\n'
+            '${investment.investmentName}\n'
             '${roi.toStringAsFixed(1)}% ROI',
 
         icon: icon,
@@ -481,5 +367,4 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
       ),
     );
   }
-
 }

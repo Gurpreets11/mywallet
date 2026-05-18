@@ -25,16 +25,13 @@ class InvestmentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //final double profit = investment.currentValue - investment.investedAmount;
-
     final double profit = InvestmentUtils.calculateProfit(
       investedAmount: investment.investedAmount,
-
       currentValue: investment.currentValue,
     );
 
     final double roi = InvestmentUtils.calculateRoi(
       investedAmount: investment.investedAmount,
-
       currentValue: investment.currentValue,
     );
 
@@ -42,89 +39,163 @@ class InvestmentCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        onTap: onTap,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
 
-        leading: CircleAvatar(child: Icon(_getIcon())),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
 
-        title: Text(
-          investment.investmentName,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(investment.investmentType),
-
-            const SizedBox(height: 4),
-
-            Text(
-              'Invested: '
-              '${CurrencyUtils.formatAmount(investment.investedAmount)}',
-            ),
-
-            Text(
-              'Current: '
-              '${CurrencyUtils.formatAmount(investment.currentValue)}',
-            ),
-          ],
-        ),
-
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-
-          crossAxisAlignment: CrossAxisAlignment.end,
-
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
+            child: Row(
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
 
               children: [
-                Icon(
-                  isProfit ? Icons.trending_up : Icons.trending_down,
 
-                  size: 18,
+                // LEFT CONTENT
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
 
-                  color: isProfit ? Colors.green : Colors.red,
-                ),
+                    children: [
 
-                const SizedBox(width: 4),
+                      Text(
+                        investment.investmentName,
+                        style: const TextStyle(
+                          fontWeight:
+                          FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
 
-                Text(
-                  '${roi.toStringAsFixed(1)}%',
+                      const SizedBox(height: 4),
 
-                  style: TextStyle(
-                    color: isProfit ? Colors.green : Colors.red,
+                      Text(
+                        investment.investmentType,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
 
-                    fontWeight: FontWeight.bold,
+                      const SizedBox(height: 8),
+
+                      Text(
+                        'Invested: '
+                            '${CurrencyUtils.formatAmount(
+                          investment.investedAmount,
+                        )}',
+                        style:
+                        const TextStyle(
+                          fontSize: 12,
+                        ),
+                      ),
+
+                      const SizedBox(height: 2),
+
+                      Text(
+                        'Current: '
+                            '${CurrencyUtils.formatAmount(
+                          investment.currentValue,
+                        )}',
+                        style:
+                        const TextStyle(
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+
+                const SizedBox(width: 10),
+
+                // RIGHT SIDE
+                Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.end,
+
+                  children: [
+
+                    Row(
+                      mainAxisSize:
+                      MainAxisSize.min,
+
+                      children: [
+
+                        Icon(
+                          isProfit
+                              ? Icons.trending_up
+                              : Icons.trending_down,
+                          size: 18,
+                          color: isProfit
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+
+                        const SizedBox(width: 4),
+
+                        Text(
+                          '${roi.toStringAsFixed(1)}%',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isProfit
+                                ? Colors.green
+                                : Colors.red,
+                            fontWeight:
+                            FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Text(
+                      CurrencyUtils
+                          .formatAmount(
+                        profit,
+                      ),
+                      style: TextStyle(
+                        color: isProfit
+                            ? Colors.green
+                            : Colors.red,
+                        fontWeight:
+                        FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+
+                    PopupMenuButton(
+                      padding:
+                      EdgeInsets.zero,
+
+                      itemBuilder:
+                          (context) => [
+
+                        PopupMenuItem(
+                          onTap: onEdit,
+                          child:
+                          const Text(
+                            'Edit',
+                          ),
+                        ),
+
+                        PopupMenuItem(
+                          onTap: onDelete,
+                          child:
+                          const Text(
+                            'Delete',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
-
-            const SizedBox(height: 4),
-
-            Text(
-              CurrencyUtils.formatAmount(profit),
-
-              style: TextStyle(
-                color: isProfit ? Colors.green : Colors.red,
-
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            PopupMenuButton(
-              itemBuilder: (context) => [
-                PopupMenuItem(onTap: onEdit, child: const Text('Edit')),
-
-                PopupMenuItem(onTap: onDelete, child: const Text('Delete')),
-              ],
-            ),
-          ],
+          ),
         ),
-      ),
     );
   }
 
