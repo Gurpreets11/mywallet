@@ -6,6 +6,7 @@ import '../../investments/models/investment_model.dart';
 import '../../investments/repositories/investment_repository.dart';
 import '../../loans/models/loan_model.dart';
 import '../../loans/repositories/loan_repository.dart';
+import '../models/dashboard_transaction_model.dart';
 
 class DashboardProvider extends ChangeNotifier {
   double _totalIncome = 0;
@@ -63,12 +64,11 @@ class DashboardProvider extends ChangeNotifier {
 
   double _monthlySipTotal = 0;
 
-  List<InvestmentModel>
-  get upcomingSips =>
-      _upcomingSips;
+  List<InvestmentModel> get upcomingSips => _upcomingSips;
 
-  double get monthlySipTotal =>
-      _monthlySipTotal;
+  double get monthlySipTotal => _monthlySipTotal;
+
+  List<DashboardTransactionModel> recentTransactions = [];
 
   Future<void> loadDashboardData() async {
     // Later:
@@ -76,9 +76,11 @@ class DashboardProvider extends ChangeNotifier {
 
     _totalExpense = await _expenseRepository.getCurrentMonthExpenseTotal();
 
+    debugPrint("_totalExpense :: $_totalExpense");
     _totalIncome = await _incomeRepository.getCurrentMonthIncomeTotal();
     _totalSavings = _totalIncome - _totalExpense;
-
+    debugPrint("_totalIncome :: $_totalIncome");
+    debugPrint("_totalSavings :: $_totalSavings");
     _totalOutstandingLoan = await _loanRepository.getTotalOutstandingLoan();
 
     _totalLoanPaid = await _loanRepository.getTotalLoanPaid();
@@ -98,7 +100,55 @@ class DashboardProvider extends ChangeNotifier {
     _upcomingSips = await _investmentRepository.getUpcomingSips();
 
     _monthlySipTotal = await _investmentRepository.getMonthlySipTotal();
+    notifyListeners();
+
+    await loadRecentTransactions();
 
     notifyListeners();
+  }
+
+  Future<void> loadRecentTransactions() async {
+    final List<DashboardTransactionModel> transactions = [];
+
+    // EXPENSES
+    final expenses = await _expenseRepository.getAllExpenses();
+
+    for (final e in expenses.take(5)) {
+      transactions.add(
+        DashboardTransactionModel(
+          title: e.notes ?? 'Expense',
+          subtitle: e.paymentMode,
+          amount: e.amount,
+          date: e.date,
+          isExpense: true,
+        ),
+      );
+    }
+
+    // INCOME
+    final incomes = await _incomeRepository.getAllIncomes();
+
+    for (final i in incomes.take(5)) {
+      transactions.add(
+        DashboardTransactionModel(
+          title: i.categoryName ?? 'Income',
+
+          subtitle: i.paymentMode,
+
+          amount: i.amount,
+
+          date: i.date,
+
+          isExpense: false,
+        ),
+      );
+    }
+
+    // SORT BY DATE
+    transactions.sort(
+      (a, b) => DateTime.parse(b.date).compareTo(DateTime.parse(a.date)),
+    );
+
+    recentTransactions = transactions.take(5).toList();
   }
 }

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:mywallet/modules/expenses/screens/add_expense_screen.dart';
+import 'package:mywallet/modules/income/screens/add_income_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/greeting_utils.dart';
 import '../../../core/widgets/common_button.dart';
+import '../../../core/widgets/empty_view.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/analytics_card.dart';
 import '../widgets/asset_allocation_card.dart';
@@ -58,21 +62,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
 
-                      children: const [
+                      children: [
                         Text(
-                          'Good Morning',
-
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                          GreetingUtils.getGreeting(),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
                         ),
 
                         SizedBox(height: 4),
 
                         Text(
                           'My Wallet',
-
                           style: TextStyle(
                             fontSize: 30,
-
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -81,7 +85,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                     IconButton(
                       icon: const Icon(Icons.refresh),
-
                       tooltip: 'Refresh',
 
                       onPressed: () async {
@@ -159,7 +162,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     QuickActionCard(
                       title: 'Add Expense',
                       icon: Icons.money_off,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AddExpenseScreen(),
+                          ),
+                        );
+                      },
                     ),
 
                     const SizedBox(width: 12),
@@ -167,7 +177,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     QuickActionCard(
                       title: 'Add Income',
                       icon: Icons.payments,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AddIncomeScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -216,18 +233,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                 const SizedBox(height: 16),
 
-                const RecentTransactionCard(
-                  title: 'Food',
-                  subtitle: 'Cash Payment',
-                  amount: 250,
-                  isExpense: true,
-                ),
+                Consumer<DashboardProvider>(
+                  builder: (context, provider, _) {
+                    if (provider.recentTransactions.isEmpty) {
+                      return const EmptyView(
+                        icon: Icons.receipt_long,
+                        message: 'No recent transactions',
+                      );
+                    }
 
-                const RecentTransactionCard(
-                  title: 'Salary',
-                  subtitle: 'Bank Transfer',
-                  amount: 50000,
-                  isExpense: false,
+                    return Column(
+                      children: provider.recentTransactions
+                          .map(
+                            (txn) => RecentTransactionCard(
+                              title: txn.title,
+
+                              subtitle: txn.subtitle,
+
+                              amount: txn.amount,
+
+                              isExpense: txn.isExpense,
+                            ),
+                          )
+                          .toList(),
+                    );
+                  },
                 ),
               ],
             ),

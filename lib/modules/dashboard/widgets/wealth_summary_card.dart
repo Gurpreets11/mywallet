@@ -24,10 +24,10 @@ class WealthSummaryCard extends StatelessWidget {
     final bool isProfit = profit >= 0;
 
     return Card(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(5),
 
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
