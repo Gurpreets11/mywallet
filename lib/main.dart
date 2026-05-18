@@ -22,9 +22,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (!kIsWeb) {
-    await AppDatabase.database;
+   await AppDatabase.database;
     await MasterSeedService.seedMasterData();
   }
+  // final database = AppDatabase();
   await NotificationService.instance.initialize();
   await NotificationService.instance.handleInitialNotification();
   await NotificationService.instance.scheduleDailyReminder();
