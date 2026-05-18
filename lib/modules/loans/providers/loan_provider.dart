@@ -52,18 +52,21 @@ class LoanProvider extends ChangeNotifier {
     await _repository.insertLoan(loan);
 
     await loadLoans();
+    notifyListeners();
   }
 
   Future<void> updateLoan(LoanModel loan) async {
     await _repository.updateLoan(loan);
 
     await loadLoans();
+    notifyListeners();
   }
 
   Future<void> deleteLoan(int id) async {
     await _repository.deleteLoan(id);
 
     await loadLoans();
+    notifyListeners();
   }
 
   Future<void> payEmi({
@@ -86,6 +89,7 @@ class LoanProvider extends ChangeNotifier {
     );
 
     await loadLoans();
+    notifyListeners();
   }
 
   Future<void> loadLoanPayments(int loanId) async {

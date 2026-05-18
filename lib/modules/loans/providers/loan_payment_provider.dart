@@ -30,5 +30,6 @@ class LoanPaymentProvider extends ChangeNotifier {
     await _repository.insertPayment(payment);
 
     await loadPayments(payment.loanId);
+    notifyListeners();
   }
 }

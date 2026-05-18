@@ -24,7 +24,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     Future.microtask(() {
       context.read<ExpenseProvider>().loadExpenses();
 
-      context.read<ExpenseProvider>().loadMonthlySummary();
+      //context.read<ExpenseProvider>().loadMonthlySummary();
     });
   }
 
@@ -94,36 +94,38 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                       ),
                     ),
                   ),
-                  ListView.builder(
-                    itemCount: provider.filteredExpenses.length,
-                    itemBuilder: (context, index) {
-                      final expense = provider.expenses[index];
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: provider.filteredExpenses.length,
+                      itemBuilder: (context, index) {
+                        final expense = provider.expenses[index];
 
-                      return ExpenseCard(
-                        expense: expense,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  ExpenseDetailScreen(expense: expense),
-                            ),
-                          );
-                        },
-                        onDelete: () async {
-                          await provider.deleteExpense(expense.id!);
-                        },
-                        onEdit: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  AddExpenseScreen(expense: expense),
-                            ),
-                          );
-                        },
-                      );
-                    },
+                        return ExpenseCard(
+                          expense: expense,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    ExpenseDetailScreen(expense: expense),
+                              ),
+                            );
+                          },
+                          onDelete: () async {
+                            await provider.deleteExpense(expense.id!);
+                          },
+                          onEdit: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    AddExpenseScreen(expense: expense),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),

@@ -7,6 +7,7 @@ import '../../../core/utils/validator_utils.dart';
 import '../../../core/widgets/common_button.dart';
 import '../../../core/widgets/common_text_field.dart';
 import '../../../data/providers/master_provider.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/income_model.dart';
 import '../providers/income_provider.dart';
 
@@ -126,7 +127,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
       context,
       isEditMode ? 'Income Updated' : 'Income Added',
     );
-
+    await context.read<DashboardProvider>().loadDashboardData();
     Navigator.pop(context);
   }
 

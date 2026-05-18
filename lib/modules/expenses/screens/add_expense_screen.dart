@@ -7,6 +7,7 @@ import '../../../core/utils/validator_utils.dart';
 import '../../../core/widgets/common_button.dart';
 import '../../../core/widgets/common_text_field.dart';
 import '../../../data/providers/master_provider.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/expense_model.dart';
 import '../providers/expense_provider.dart';
 
@@ -214,6 +215,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     return;
                   }
 
+                  await context.read<DashboardProvider>().loadDashboardData();
                   SnackbarUtils.showSnackbar(context, 'Expense Added');
 
                   Navigator.pop(context);

@@ -11,6 +11,7 @@ import '../../../core/widgets/common_button.dart';
 
 import '../../../core/widgets/common_text_field.dart';
 
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../constant/investment_constants.dart';
 import '../models/investment_model.dart';
 
@@ -130,7 +131,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
       context,
       isEditMode ? 'Investment Updated' : 'Investment Added',
     );
-
+    await context.read<DashboardProvider>().loadDashboardData();
     Navigator.pop(context);
   }
 

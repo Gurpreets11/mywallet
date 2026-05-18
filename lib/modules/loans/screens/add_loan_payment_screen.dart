@@ -5,6 +5,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/common_button.dart';
 import '../../../core/widgets/common_text_field.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/loan_model.dart';
 import '../models/loan_payment_model.dart';
 import '../providers/loan_payment_provider.dart';
@@ -66,7 +67,7 @@ class _AddLoanPaymentScreenState extends State<AddLoanPaymentScreen> {
     }
 
     SnackbarUtils.showSnackbar(context, 'EMI Payment Added');
-
+    await context.read<DashboardProvider>().loadDashboardData();
     Navigator.pop(context);
   }
 

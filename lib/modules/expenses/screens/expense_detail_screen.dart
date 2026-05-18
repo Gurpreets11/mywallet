@@ -34,7 +34,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                 Text('Payment Mode: ${expense.paymentMode}'),
 
                 const SizedBox(height: 8),
-                Text(
+                /*Text(
                   'Category'
                   ' • '
                   '${expense.categoryName ?? ''}',
@@ -44,7 +44,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                   'Subcategory'
                   ' • '
                   '${expense.subcategoryName ?? ''}',
-                ),
+                ),*/
                 const SizedBox(height: 8),
                 Text('Date: ${AppDateUtils.formatDate(DateTime.parse(expense.date))}',),
 

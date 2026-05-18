@@ -45,9 +45,7 @@ class InvestmentProvider extends ChangeNotifier {
 
     _investments = await _repository.getAllInvestments();
     _applyFilters();
-    _analytics =
-    await _repository
-        .getInvestmentAnalytics();
+    _analytics = await _repository.getInvestmentAnalytics();
     _isLoading = false;
 
     notifyListeners();
@@ -158,17 +156,20 @@ class InvestmentProvider extends ChangeNotifier {
     await _repository.insertInvestment(investment);
 
     await loadInvestments();
+    notifyListeners();
   }
 
   Future<void> updateInvestment(InvestmentModel investment) async {
     await _repository.updateInvestment(investment);
 
     await loadInvestments();
+    notifyListeners();
   }
 
   Future<void> deleteInvestment(int id) async {
     await _repository.deleteInvestment(id);
 
     await loadInvestments();
+    notifyListeners();
   }
 }

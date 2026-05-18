@@ -8,6 +8,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/common_button.dart';
 import '../../../core/widgets/common_text_field.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/loan_model.dart';
 import '../providers/loan_provider.dart';
 
@@ -121,7 +122,7 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
       context,
       isEditMode ? 'Loan Updated' : 'Loan Added',
     );
-
+    await context.read<DashboardProvider>().loadDashboardData();
     Navigator.pop(context);
   }
 

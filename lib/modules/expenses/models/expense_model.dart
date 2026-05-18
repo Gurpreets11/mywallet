@@ -3,9 +3,9 @@ class ExpenseModel {
   final double amount;
   final int categoryId;
   final int? subcategoryId;
-  final String? categoryName;
+  //final String? categoryName;
 
-  final String? subcategoryName;
+  //final String? subcategoryName;
   final String date;
   final String paymentMode;
   final String? notes;
@@ -16,8 +16,8 @@ class ExpenseModel {
     required this.amount,
     required this.categoryId,
     this.subcategoryId,
-    this.categoryName,
-    this.subcategoryName,
+   // this.categoryName,
+   // this.subcategoryName,
     required this.date,
     required this.paymentMode,
     this.notes,
@@ -30,8 +30,8 @@ class ExpenseModel {
       'amount': amount,
       'category_id': categoryId,
       'subcategory_id': subcategoryId,
-      'category_name': categoryName,
-      'subcategory_name': subcategoryName,
+      //'category_name': categoryName,
+    //  'subcategory_name': subcategoryName,
       'date': date,
       'payment_mode': paymentMode,
       'notes': notes,
@@ -47,8 +47,8 @@ class ExpenseModel {
       amount: map['amount'],
       categoryId: map['category_id'],
       subcategoryId: map['subcategory_id'],
-      categoryName: map['category_name'],
-      subcategoryName: map['subcategory_name'],
+      //categoryName: map['category_name'],
+     // subcategoryName: map['subcategory_name'],
       date: map['date'],
       paymentMode: map['payment_mode'],
       notes: map['notes'],

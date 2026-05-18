@@ -42,150 +42,195 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Good Morning',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await context.read<DashboardProvider>().loadDashboardData();
+          },
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-              const SizedBox(height: 4),
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
 
-              const Text(
-                'My Wallet',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-              ),
+                      children: const [
+                        Text(
+                          'Good Morning',
 
-              /* CommonButton(
-            text: 'Save Expense',
-            onPressed: () async {
-              await NotificationService.instance.showInstantNotification(
-                id: 1,
-                title: 'Expense Reminder',
-                body: 'Don’t forget to track today’s expenses',
-              );
-            },
-          ),*/
-              const SizedBox(height: 28),
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
 
-              BalanceCard(totalBalance: provider.totalSavings),
+                        SizedBox(height: 4),
 
-              const SizedBox(height: 28),
+                        Text(
+                          'My Wallet',
 
-              Row(
-                children: [
-                  SummaryCard(
-                    title: 'Income',
-                    amount: provider.totalIncome,
-                    color: AppColors.income,
-                    icon: Icons.arrow_downward,
-                  ),
+                          style: TextStyle(
+                            fontSize: 30,
 
-                  const SizedBox(width: 12),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
 
-                  SummaryCard(
-                    title: 'Expense',
-                    amount: provider.totalExpense,
-                    color: AppColors.expense,
-                    icon: Icons.arrow_upward,
-                  ),
-                ],
-              ),
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
 
-              const SizedBox(height: 28),
+                      tooltip: 'Refresh',
 
-              const SectionTitle(title: 'Analytics'),
+                      onPressed: () async {
+                        await context
+                            .read<DashboardProvider>()
+                            .loadDashboardData();
 
-              const SizedBox(height: 16),
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Dashboard refreshed'),
 
-              const AnalyticsCard(
-                title: 'Monthly Expenses',
-                child: MonthlyExpenseChart(),
-              ),
-              const SizedBox(height: 28),
-              const SectionTitle(title: 'Quick Actions'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
 
-              const SizedBox(height: 16),
+                /* CommonButton(
+              text: 'Save Expense',
+              onPressed: () async {
+                await NotificationService.instance.showInstantNotification(
+                  id: 1,
+                  title: 'Expense Reminder',
+                  body: 'Don’t forget to track today’s expenses',
+                );
+              },
+            ),*/
+                const SizedBox(height: 28),
 
-              Row(
-                children: [
-                  QuickActionCard(
-                    title: 'Add Expense',
-                    icon: Icons.money_off,
-                    onTap: () {},
-                  ),
+                BalanceCard(totalBalance: provider.totalSavings),
 
-                  const SizedBox(width: 12),
+                const SizedBox(height: 28),
 
-                  QuickActionCard(
-                    title: 'Add Income',
-                    icon: Icons.payments,
-                    onTap: () {},
-                  ),
-                ],
-              ),
+                Row(
+                  children: [
+                    SummaryCard(
+                      title: 'Income',
+                      amount: provider.totalIncome,
+                      color: AppColors.income,
+                      icon: Icons.arrow_downward,
+                    ),
 
-              const SizedBox(height: 28),
+                    const SizedBox(width: 12),
 
-              const SectionTitle(title: 'Loan Summary'),
+                    SummaryCard(
+                      title: 'Expense',
+                      amount: provider.totalExpense,
+                      color: AppColors.expense,
+                      icon: Icons.arrow_upward,
+                    ),
+                  ],
+                ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 28),
 
-              LoanSummaryCard(
-                totalOutstanding: provider.totalOutstandingLoan,
+                const SectionTitle(title: 'Analytics'),
 
-                totalPaid: provider.totalLoanPaid,
+                const SizedBox(height: 16),
 
-                activeLoans: provider.activeLoanCount,
+                const AnalyticsCard(
+                  title: 'Monthly Expenses',
+                  child: MonthlyExpenseChart(),
+                ),
+                const SizedBox(height: 28),
+                const SectionTitle(title: 'Quick Actions'),
 
-                closedLoans: provider.closedLoanCount,
-              ),
+                const SizedBox(height: 16),
 
-              const SizedBox(height: 16),
-              UpcomingEmiCard(loan: provider.upcomingLoan),
+                Row(
+                  children: [
+                    QuickActionCard(
+                      title: 'Add Expense',
+                      icon: Icons.money_off,
+                      onTap: () {},
+                    ),
 
-              const SizedBox(height: 28),
+                    const SizedBox(width: 12),
 
-              WealthSummaryCard(
-                investedAmount: provider.totalInvestedAmount,
+                    QuickActionCard(
+                      title: 'Add Income',
+                      icon: Icons.payments,
+                      onTap: () {},
+                    ),
+                  ],
+                ),
 
-                currentValue: provider.totalInvestmentValue,
-              ),
-              const SizedBox(height: 16),
-              AssetAllocationCard(allocations: provider.assetAllocation),
+                const SizedBox(height: 28),
 
-              const SizedBox(height: 16),
-              SipSummaryCard(
-                monthlySipTotal: provider.monthlySipTotal,
+                const SectionTitle(title: 'Loan Summary'),
 
-                totalSipCount: provider.upcomingSips.length,
-              ),
-              const SizedBox(height: 16),
-              UpcomingSipCard(upcomingSips: provider.upcomingSips),
+                const SizedBox(height: 16),
 
-              const SizedBox(height: 28),
+                LoanSummaryCard(
+                  totalOutstanding: provider.totalOutstandingLoan,
 
-              const SectionTitle(title: 'Recent Transactions'),
+                  totalPaid: provider.totalLoanPaid,
 
-              const SizedBox(height: 16),
+                  activeLoans: provider.activeLoanCount,
 
-              const RecentTransactionCard(
-                title: 'Food',
-                subtitle: 'Cash Payment',
-                amount: 250,
-                isExpense: true,
-              ),
+                  closedLoans: provider.closedLoanCount,
+                ),
 
-              const RecentTransactionCard(
-                title: 'Salary',
-                subtitle: 'Bank Transfer',
-                amount: 50000,
-                isExpense: false,
-              ),
-            ],
+                const SizedBox(height: 16),
+                UpcomingEmiCard(loan: provider.upcomingLoan),
+
+                const SizedBox(height: 28),
+
+                WealthSummaryCard(
+                  investedAmount: provider.totalInvestedAmount,
+
+                  currentValue: provider.totalInvestmentValue,
+                ),
+                const SizedBox(height: 16),
+                AssetAllocationCard(allocations: provider.assetAllocation),
+
+                const SizedBox(height: 16),
+                SipSummaryCard(
+                  monthlySipTotal: provider.monthlySipTotal,
+
+                  totalSipCount: provider.upcomingSips.length,
+                ),
+                const SizedBox(height: 16),
+                UpcomingSipCard(upcomingSips: provider.upcomingSips),
+
+                const SizedBox(height: 28),
+
+                const SectionTitle(title: 'Recent Transactions'),
+
+                const SizedBox(height: 16),
+
+                const RecentTransactionCard(
+                  title: 'Food',
+                  subtitle: 'Cash Payment',
+                  amount: 250,
+                  isExpense: true,
+                ),
+
+                const RecentTransactionCard(
+                  title: 'Salary',
+                  subtitle: 'Bank Transfer',
+                  amount: 50000,
+                  isExpense: false,
+                ),
+              ],
+            ),
           ),
         ),
       ),
