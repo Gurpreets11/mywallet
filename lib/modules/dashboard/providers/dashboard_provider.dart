@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../data/repositories/master_repository.dart';
 import '../../expenses/repositories/expense_repository.dart';
 import '../../income/repositories/income_repository.dart';
 import '../../investments/models/investment_model.dart';
 import '../../investments/repositories/investment_repository.dart';
 import '../../loans/models/loan_model.dart';
 import '../../loans/repositories/loan_repository.dart';
+import '../models/dashboard_chart_model.dart';
 import '../models/dashboard_transaction_model.dart';
 
 class DashboardProvider extends ChangeNotifier {
@@ -21,12 +23,22 @@ class DashboardProvider extends ChangeNotifier {
 
   double get totalSavings => _totalSavings;
 
+  final MasterRepository _masterRepository = MasterRepository();
+
   final ExpenseRepository _expenseRepository = ExpenseRepository();
   final IncomeRepository _incomeRepository = IncomeRepository();
 
   final LoanRepository _loanRepository = LoanRepository();
 
+
+
   final InvestmentRepository _investmentRepository = InvestmentRepository();
+
+
+
+
+  List<DashboardChartModel> _monthlyExpense = [];
+  List<DashboardChartModel> get monthlyExpense => _monthlyExpense;
 
   double _totalOutstandingLoan = 0;
 
@@ -102,6 +114,11 @@ class DashboardProvider extends ChangeNotifier {
     _monthlySipTotal = await _investmentRepository.getMonthlySipTotal();
     notifyListeners();
 
+
+    _monthlyExpense = await _masterRepository.getMonthlyExpenseChart();
+
+    notifyListeners();
+
     await loadRecentTransactions();
 
     notifyListeners();
@@ -151,4 +168,8 @@ class DashboardProvider extends ChangeNotifier {
 
     recentTransactions = transactions.take(5).toList();
   }
+
+
+
+
 }

@@ -148,9 +148,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                 const SizedBox(height: 16),
 
-                const AnalyticsCard(
+                  AnalyticsCard(
                   title: 'Monthly Expenses',
-                  child: MonthlyExpenseChart(),
+                  child: MonthlyExpenseChart(data: provider.monthlyExpense,),
                 ),
                 const SizedBox(height: 28),
                 const SectionTitle(title: 'Quick Actions'),

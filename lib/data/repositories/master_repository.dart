@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../core/database/app_database.dart';
 import '../../core/database/database_constants.dart';
+import '../../modules/dashboard/models/dashboard_chart_model.dart';
 
 class MasterRepository {
   Future<int> insertTransactionType(Map<String, dynamic> data) async {
@@ -83,4 +84,62 @@ class MasterRepository {
 
     return result.first['subcategory_name'].toString();
   }
+
+
+  /*Future<List<DashboardChartModel>> getMonthlyExpenseChart() async {
+    final db = await AppDatabase.database;
+
+    final result = await db.rawQuery('''
+    SELECT
+      strftime('%m', transaction_date) as month,
+      SUM(amount) as total
+    FROM transactions
+    WHERE transaction_type = 'EXPENSE'
+    GROUP BY strftime('%m', transaction_date)
+    ORDER BY month
+  ''');
+
+    return result.map((e) {
+      return DashboardChartModel(
+        month: e['month'].toString(),
+        amount: (e['total'] as num).toDouble(),
+      );
+    }).toList();
+  }*/
+
+  Future<List<DashboardChartModel>> getMonthlyExpenseChart() async {
+    final db = await AppDatabase.database;
+
+    final result = await db.rawQuery('''
+    SELECT
+      strftime('%m', date) AS month,
+      SUM(amount) AS total
+    FROM expenses
+    GROUP BY strftime('%m', date)
+    ORDER BY month
+  ''');
+
+    const months = {
+      '1': 'Jan',
+      '2': 'Feb',
+      '3': 'Mar',
+      '4': 'Apr',
+      '5': 'May',
+      '6': 'Jun',
+      '7': 'Jul',
+      '8': 'Aug',
+      '9': 'Sep',
+      '10': 'Oct',
+      '11': 'Nov',
+      '12': 'Dec',
+    };
+
+    return result.map((e) {
+      return DashboardChartModel(
+        month: months[e['month']].toString(),
+        amount: (e['total'] as num).toDouble(),
+      );
+    }).toList();
+  }
+
 }

@@ -1,37 +1,37 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../models/dashboard_chart_model.dart';
+
 class MonthlyExpenseChart extends StatelessWidget {
-  const MonthlyExpenseChart({super.key});
+  final List<DashboardChartModel> data;
+
+  const MonthlyExpenseChart({
+    super.key,
+    required this.data,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 220,
-      child: LineChart(
-        LineChartData(
-          borderData: FlBorderData(show: false),
-          gridData: FlGridData(show: true),
-          titlesData: FlTitlesData(
-            leftTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: true),
-            ),
-            bottomTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: true),
-            ),
+      child: BarChart(
+        BarChartData(
+          barGroups: List.generate(
+            data.length,
+                (index) {
+              final item = data[index];
+
+              return BarChartGroupData(
+                x: index,
+                barRods: [
+                  BarChartRodData(
+                    toY: item.amount,
+                  ),
+                ],
+              );
+            },
           ),
-          lineBarsData: [
-            LineChartBarData(
-              isCurved: true,
-              spots: const [
-                FlSpot(0, 1000),
-                FlSpot(1, 2000),
-                FlSpot(2, 1500),
-                FlSpot(3, 3000),
-                FlSpot(4, 2800),
-              ],
-            ),
-          ],
         ),
       ),
     );
