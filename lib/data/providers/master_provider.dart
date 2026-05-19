@@ -14,13 +14,37 @@ class MasterProvider extends ChangeNotifier {
   List<Map<String, dynamic>> get subcategories => _subcategories;
 
   Future<void> loadExpenseCategories() async {
-    _expenseCategories = await _repository.getCategoriesByType(1);
+    _expenseCategories = await _repository.getCategoriesByType(0);
 
     notifyListeners();
   }
 
   Future<void> loadSubcategories(int categoryId) async {
     _subcategories = await _repository.getSubcategoriesByCategory(categoryId);
+
+    notifyListeners();
+  }
+
+
+  //
+
+
+  List<Map<String, dynamic>> _incomeCategories = [];
+
+  List<Map<String, dynamic>> _incomeSubcategories = [];
+
+  List<Map<String, dynamic>> get incomeCategories => _incomeCategories;
+
+  List<Map<String, dynamic>> get incomeSubCategories => _incomeSubcategories;
+
+  Future<void> loadIncomeCategories() async {
+    _incomeCategories = await _repository.getCategoriesByType(1);
+
+    notifyListeners();
+  }
+
+  Future<void> loadIncomeSubcategories(int categoryId) async {
+    _incomeSubcategories = await _repository.getSubcategoriesByCategory(categoryId);
 
     notifyListeners();
   }

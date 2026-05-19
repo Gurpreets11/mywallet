@@ -46,7 +46,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
     super.initState();
 
     Future.microtask(() {
-      context.read<MasterProvider>().loadExpenseCategories();
+      context.read<MasterProvider>().loadIncomeCategories();
     });
 
     if (isEditMode) {
@@ -70,7 +70,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
 
       if (_selectedCategoryId != null) {
         Future.microtask(() {
-          context.read<MasterProvider>().loadSubcategories(
+          context.read<MasterProvider>().loadIncomeSubcategories(
             _selectedCategoryId!,
           );
         });
@@ -155,7 +155,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                   return DropdownButtonFormField<int>(
                     value: _selectedCategoryId,
                     decoration: const InputDecoration(labelText: 'Category'),
-                    items: master.expenseCategories.map((category) {
+                    items: master.incomeCategories.map((category) {
                       return DropdownMenuItem<int>(
                         value: category['id'],
                         child: Text(category['category_name']),
@@ -169,7 +169,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                       });
 
                       if (value != null) {
-                        await context.read<MasterProvider>().loadSubcategories(
+                        await context.read<MasterProvider>().loadIncomeSubcategories(
                           value,
                         );
                       }

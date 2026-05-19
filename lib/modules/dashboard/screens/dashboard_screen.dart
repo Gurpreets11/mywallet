@@ -247,11 +247,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           .map(
                             (txn) => RecentTransactionCard(
                               title: txn.title,
-
                               subtitle: txn.subtitle,
-
                               amount: txn.amount,
-
                               isExpense: txn.isExpense,
                             ),
                           )
