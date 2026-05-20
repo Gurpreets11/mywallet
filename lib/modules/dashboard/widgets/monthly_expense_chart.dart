@@ -14,7 +14,7 @@ class MonthlyExpenseChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 220,
+      height: 250,
       child: BarChart(
         BarChartData(
           barGroups: List.generate(
@@ -27,10 +27,51 @@ class MonthlyExpenseChart extends StatelessWidget {
                 barRods: [
                   BarChartRodData(
                     toY: item.amount,
+                    width: 18,
+                    borderRadius: BorderRadius.circular(4),
                   ),
                 ],
               );
             },
+          ),
+
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 30,
+                getTitlesWidget: (value, meta) {
+                  int index = value.toInt();
+
+                  if (index >= 0 && index < data.length) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        data[index].month, // Jan / Feb / Food / Travel
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    );
+                  }
+
+                  return const SizedBox();
+                },
+              ),
+            ),
+
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 40,
+              ),
+            ),
+
+            topTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+
+            rightTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
           ),
         ),
       ),

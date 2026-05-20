@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../core/database/app_database.dart';
@@ -120,21 +121,24 @@ class MasterRepository {
   ''');
 
     const months = {
-      '1': 'Jan',
-      '2': 'Feb',
-      '3': 'Mar',
-      '4': 'Apr',
-      '5': 'May',
-      '6': 'Jun',
-      '7': 'Jul',
-      '8': 'Aug',
-      '9': 'Sep',
+      '01': 'Jan',
+      '02': 'Feb',
+      '03': 'Mar',
+      '04': 'Apr',
+      '05': 'May',
+      '06': 'Jun',
+      '07': 'Jul',
+      '08': 'Aug',
+      '09': 'Sep',
       '10': 'Oct',
       '11': 'Nov',
       '12': 'Dec',
     };
 
+
     return result.map((e) {
+      debugPrint("e['month'] ::  ${e['month']}");
+      debugPrint("months[e['month']] ::  ${months[e['month']]}");
       return DashboardChartModel(
         month: months[e['month']].toString(),
         amount: (e['total'] as num).toDouble(),
