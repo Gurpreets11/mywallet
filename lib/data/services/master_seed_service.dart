@@ -79,15 +79,22 @@ class MasterSeedService {
         categoryName: 'Business',
         createdAt: now,
       ),
+
       CategoryModel(
         transactionTypeId: 1,
+        categoryName: 'Other',
+        createdAt: now,
+      ),
+      // Investment Categories
+      CategoryModel(
+        transactionTypeId: 2,
         categoryName: 'Investment',
         createdAt: now,
       ),
 
       // Finance / Loan
       CategoryModel(
-        transactionTypeId: 0,
+        transactionTypeId: 3,
         categoryName: 'Loan & EMI',
         createdAt: now,
       ),
@@ -219,36 +226,49 @@ class MasterSeedService {
         createdAt: now,
       ),
 
-      // Investment (9)
+      // Other income (9)
       SubcategoryModel(
         categoryId: 9,
+        subcategoryName: 'Carpool',
+        createdAt: now,
+      ),
+
+      SubcategoryModel(
+        categoryId: 9,
+        subcategoryName: 'Other',
+        createdAt: now,
+      ),
+
+      // Investment (10)
+      SubcategoryModel(
+        categoryId: 10,
         subcategoryName: 'Stocks',
         createdAt: now,
       ),
       SubcategoryModel(
-        categoryId: 9,
+        categoryId: 10,
         subcategoryName: 'Mutual Funds',
         createdAt: now,
       ),
       SubcategoryModel(
-        categoryId: 9,
+        categoryId: 10,
         subcategoryName: 'Interest',
         createdAt: now,
       ),
 
-      // Loan & EMI (10)
+      // Loan & EMI (11)
       SubcategoryModel(
-        categoryId: 10,
+        categoryId: 11,
         subcategoryName: 'Personal Loan',
         createdAt: now,
       ),
       SubcategoryModel(
-        categoryId: 10,
+        categoryId: 11,
         subcategoryName: 'Home Loan',
         createdAt: now,
       ),
       SubcategoryModel(
-        categoryId: 10,
+        categoryId: 11,
         subcategoryName: 'EMI Payment',
         createdAt: now,
       ),

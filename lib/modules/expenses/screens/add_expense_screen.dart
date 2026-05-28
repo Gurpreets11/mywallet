@@ -193,7 +193,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   icon: const Icon(Icons.calendar_month),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               CommonButton(
                 text: 'Save Expense',
                 onPressed: () async {

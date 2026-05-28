@@ -32,13 +32,10 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Income')),
-
       floatingActionButton: FloatingActionButton(
+        heroTag: "addIncome",
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddIncomeScreen()),
-          );
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const AddIncomeScreen()),);
         },
         child: const Icon(Icons.add),
       ),
@@ -48,28 +45,23 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
           : Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Monthly Income',
-                            style: TextStyle(fontSize: 16),
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          Text(
-                            CurrencyUtils.formatAmount(provider.monthlyIncome),
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                  padding: const EdgeInsets.all(10),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Monthly Income', style: TextStyle(fontSize: 16),),
+                            const SizedBox(height: 8),
+                            Text(
+                              CurrencyUtils.formatAmount(provider.monthlyIncome),
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold,),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -82,30 +74,18 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                           itemCount: provider.incomes.length,
                           itemBuilder: (context, index) {
                             final income = provider.incomes[index];
-
                             return IncomeCard(
                               income: income,
-
                               onTap: () {
                                 Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        IncomeDetailScreen(income: income),
-                                  ),
+                                  context, MaterialPageRoute(builder: (_) => IncomeDetailScreen(income: income),),
                                 );
                               },
-
                               onEdit: () {
                                 Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        AddIncomeScreen(income: income),
-                                  ),
+                                  context, MaterialPageRoute(builder: (_) => AddIncomeScreen(income: income),),
                                 );
                               },
-
                               onDelete: () async {
                                 await provider.deleteIncome(income.id!);
                               },

@@ -37,7 +37,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
 
   int? _selectedCategoryId;
 
+  String? _selectedCategoryName;
   int? _selectedSubcategoryId;
+  String? _selectedSubCategoryName;
 
   bool get isEditMode => widget.income != null;
 
@@ -148,7 +150,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                 validator: ValidatorUtils.validateAmount,
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               Consumer<MasterProvider>(
                 builder: (context, master, _) {
@@ -162,9 +164,12 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                       );
                     }).toList(),
                     onChanged: (value) async {
+                      final selectedCategory = master.incomeCategories.firstWhere(
+                            (category) => category['id'] == value,
+                      );
                       setState(() {
                         _selectedCategoryId = value;
-
+                        _selectedCategoryName = selectedCategory['category_name'];
                         _selectedSubcategoryId = null;
                       });
 
@@ -185,9 +190,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
-              Consumer<MasterProvider>(
+             /* Consumer<MasterProvider>(
                 builder: (context, master, _) {
                   return DropdownButtonFormField<int>(
                     value: _selectedSubcategoryId,
@@ -205,9 +210,35 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                     },
                   );
                 },
+              ),*/
+
+
+              Consumer<MasterProvider>(
+                builder: (context, master, _) {
+                  return DropdownButtonFormField<int>(
+                    value: _selectedSubcategoryId,
+                    decoration: const InputDecoration(labelText: 'Subcategory'),
+                    items: master.incomeSubCategories.map((subcategory) {
+                      return DropdownMenuItem<int>(
+                        value: subcategory['id'],
+                        child: Text(subcategory['subcategory_name']),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      final selectedSubCategory = master.incomeSubCategories.firstWhere(
+                            (subcategory) => subcategory['id'] == value,
+                      );
+
+                      setState(() {
+                        _selectedSubcategoryId = value;
+                        _selectedSubCategoryName = selectedSubCategory['subcategory_name'];
+                      });
+                    },
+                  );
+                },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               DropdownButtonFormField<String>(
                 value: _paymentMode,
@@ -224,7 +255,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -264,11 +295,11 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                   },
                 ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               CommonTextField(controller: _notesController, label: 'Notes'),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               CommonButton(
                 text: isEditMode ? 'Update Income' : 'Save Income',
