@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mywallet/core/utils/date_utils.dart';
 
 import '../../../core/utils/currency_utils.dart';
 
@@ -6,6 +7,7 @@ class RecentTransactionCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final double amount;
+  final String date;
   final bool isExpense;
 
   const RecentTransactionCard({
@@ -13,6 +15,7 @@ class RecentTransactionCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.amount,
+    required this.date,
     required this.isExpense,
   });
 
@@ -38,7 +41,7 @@ class RecentTransactionCard extends StatelessWidget {
           ),
         ),
         title: Text(title),
-        subtitle: Text(subtitle),
+        subtitle: Text('${subtitle} - ${AppDateUtils.formatDateTime(DateTime.parse(date))} '),
         trailing: Text(
           CurrencyUtils.formatAmount(amount),
           style: TextStyle(

@@ -24,17 +24,11 @@ class ExpenseProvider extends ChangeNotifier {
 
   Future<void> loadExpenses() async {
     _isLoading = true;
-
     notifyListeners();
-
     /*_expenses = await _repository.getAllExpenses();*/
-
     _expenses = await _repository.getAllExpenses();
-
     _filteredExpenses = _expenses;
-
     _isLoading = false;
-
     notifyListeners();
   }
 
@@ -47,16 +41,13 @@ class ExpenseProvider extends ChangeNotifier {
 
   Future<void> deleteExpense(int id) async {
     await _repository.deleteExpense(id);
-
     await loadExpenses();
     notifyListeners();
   }
 
   Future<void> loadMonthlySummary() async {
     _monthlyExpenseTotal = await _repository.getCurrentMonthExpenseTotal();
-
     notifyListeners();
-
   }
 
   Future<void> searchExpense(String keyword) async {
@@ -71,7 +62,6 @@ class ExpenseProvider extends ChangeNotifier {
 
   Future<void> updateExpense(ExpenseModel expense) async {
     await _repository.updateExpense(expense);
-
     await loadExpenses();
     notifyListeners();
   }

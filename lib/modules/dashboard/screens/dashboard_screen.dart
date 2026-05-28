@@ -225,6 +225,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               title: txn.title,
                               subtitle: txn.subtitle,
                               amount: txn.amount,
+                              date : txn.date,
                               isExpense: txn.isExpense,
                             ),
                           )

@@ -133,7 +133,7 @@ class DashboardProvider extends ChangeNotifier {
     for (final e in expenses.take(5)) {
       transactions.add(
         DashboardTransactionModel(
-          title: e.notes ?? 'Expense',
+          title: '${e.categoryName} - ${e.subcategoryName}' ?? 'Expense',
           subtitle: e.paymentMode,
           amount: e.amount,
           date: e.date,

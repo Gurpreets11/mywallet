@@ -30,6 +30,8 @@ class Migrations {
       ${DatabaseConstants.colAmount} REAL NOT NULL,
       category_id INTEGER NOT NULL,
       subcategory_id INTEGER,
+      category_name TEXT NOT NULL,
+      subcategory_name TEXT,
       ${DatabaseConstants.colDate} TEXT NOT NULL,
       ${DatabaseConstants.colPaymentMode} TEXT,
       ${DatabaseConstants.colNotes} TEXT,

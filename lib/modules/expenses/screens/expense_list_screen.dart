@@ -24,7 +24,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     Future.microtask(() {
       context.read<ExpenseProvider>().loadExpenses();
 
-      //context.read<ExpenseProvider>().loadMonthlySummary();
+      context.read<ExpenseProvider>().loadMonthlySummary();
     });
   }
 
@@ -71,25 +71,28 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('This Month Expense'),
-                            const SizedBox(height: 8),
-                            Text(
-                              CurrencyUtils.formatAmount(
-                                provider.monthlyExpenseTotal,
+                    padding: const EdgeInsets.all(10),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('This Month Expense'),
+                              const SizedBox(height: 8),
+                              Text(
+                                CurrencyUtils.formatAmount(
+                                  provider.monthlyExpenseTotal,
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -103,25 +106,13 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                         return ExpenseCard(
                           expense: expense,
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    ExpenseDetailScreen(expense: expense),
-                              ),
-                            );
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => ExpenseDetailScreen(expense: expense),),);
                           },
                           onDelete: () async {
                             await provider.deleteExpense(expense.id!);
                           },
                           onEdit: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    AddExpenseScreen(expense: expense),
-                              ),
-                            );
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => AddExpenseScreen(expense: expense),));
                           },
                         );
                       },

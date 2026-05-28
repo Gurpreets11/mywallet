@@ -32,9 +32,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   String _paymentMode = 'Cash';
 
   int? _selectedCategoryId;
-
+  String? _selectedCategoryName;
   int? _selectedSubcategoryId;
-
+  String? _selectedSubCategoryName;
   bool get isEditMode => widget.expense != null;
 
   @override
@@ -59,13 +59,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       }
 
       _notesController.text = expense.notes ?? '';
-
       _paymentMode = expense.paymentMode;
-
       _selectedDate = DateTime.parse(expense.date);
-
       _selectedCategoryId = expense.categoryId;
-
       _selectedSubcategoryId = expense.subcategoryId;
     }
   }
@@ -102,7 +98,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 validator: ValidatorUtils.validateAmount,
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               Consumer<MasterProvider>(
                 builder: (context, master, _) {
@@ -116,8 +112,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       );
                     }).toList(),
                     onChanged: (value) async {
+
+                      final selectedCategory = master.expenseCategories.firstWhere(
+                            (category) => category['id'] == value,
+                      );
+
                       setState(() {
                         _selectedCategoryId = value;
+                        _selectedCategoryName = selectedCategory['category_name'];
+
                         _selectedSubcategoryId = null;
                       });
 
@@ -137,7 +140,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   );
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               Consumer<MasterProvider>(
                 builder: (context, master, _) {
                   return DropdownButtonFormField<int>(
@@ -150,17 +153,22 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       );
                     }).toList(),
                     onChanged: (value) {
+                      final selectedSubCategory = master.subcategories.firstWhere(
+                            (subcategory) => subcategory['id'] == value,
+                      );
+
                       setState(() {
                         _selectedSubcategoryId = value;
+                        _selectedSubCategoryName = selectedSubCategory['subcategory_name'];
                       });
                     },
                   );
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               CommonTextField(controller: _notesController, label: 'Notes'),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               DropdownButtonFormField<String>(
                 value: _paymentMode,
@@ -168,6 +176,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   DropdownMenuItem(value: 'Cash', child: Text('Cash')),
                   DropdownMenuItem(value: 'UPI', child: Text('UPI')),
                   DropdownMenuItem(value: 'Card', child: Text('Card')),
+                  DropdownMenuItem(value: 'Bank', child: Text('Bank')),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -196,7 +205,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     id: isEditMode ? widget.expense!.id : null,
                     amount: double.parse(_amountController.text),
                     categoryId: _selectedCategoryId ?? 1,
+                    categoryName: _selectedCategoryName,
                     subcategoryId: _selectedSubcategoryId,
+                    subcategoryName: _selectedSubCategoryName,
                     date: _selectedDate.toIso8601String(),
                     paymentMode: _paymentMode,
                     notes: _notesController.text,
