@@ -6,10 +6,7 @@ import '../models/dashboard_chart_model.dart';
 class MonthlyExpenseChart extends StatelessWidget {
   final List<DashboardChartModel> data;
 
-  const MonthlyExpenseChart({
-    super.key,
-    required this.data,
-  });
+  const MonthlyExpenseChart({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -17,23 +14,20 @@ class MonthlyExpenseChart extends StatelessWidget {
       height: 250,
       child: BarChart(
         BarChartData(
-          barGroups: List.generate(
-            data.length,
-                (index) {
-              final item = data[index];
+          barGroups: List.generate(data.length, (index) {
+            final item = data[index];
 
-              return BarChartGroupData(
-                x: index,
-                barRods: [
-                  BarChartRodData(
-                    toY: item.amount,
-                    width: 18,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ],
-              );
-            },
-          ),
+            return BarChartGroupData(
+              x: index,
+              barRods: [
+                BarChartRodData(
+                  toY: item.amount,
+                  width: 18,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ],
+            );
+          }),
 
           titlesData: FlTitlesData(
             bottomTitles: AxisTitles(
@@ -59,19 +53,12 @@ class MonthlyExpenseChart extends StatelessWidget {
             ),
 
             leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 40,
-              ),
+              sideTitles: SideTitles(showTitles: true, reservedSize: 40),
             ),
 
-            topTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
 
-            rightTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mywallet/core/widgets/vertical_spacing.dart';
 
 import '../../../core/utils/currency_utils.dart';
 
@@ -14,72 +15,61 @@ class AssetAllocationCard extends StatelessWidget {
       (sum, item) => sum + ((item['total'] as num?)?.toDouble() ?? 0),
     );
 
-    return Card(
-      margin: const EdgeInsets.all(5),
-
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-
+    return Column(
+      children: [
+        const Row(
           children: [
-            const Row(
-              children: [
-                Icon(Icons.pie_chart),
-
-                SizedBox(width: 8),
-
-                Text(
-                  'Asset Allocation',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
+            Icon(Icons.pie_chart),
+            SizedBox(width: 8),
+            Text(
+              'Asset Allocation',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
+          ],
+        ),
+        VerticalSpacing(height: 14),
+        Card(
+          color: Colors.white,
 
-            const SizedBox(height: 20),
-
-            ...allocations.map((item) {
-              final double value = ((item['total'] as num?)?.toDouble() ?? 0);
-
-              final double percent = total == 0 ? 0 : (value / total) * 100;
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...allocations.map((item) {
+                  final double value = ((item['total'] as num?)?.toDouble() ?? 0);
+                  final double percent = total == 0 ? 0 : (value / total) * 100;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: Column(
                       children: [
-                        Text(item['investment_type']),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(item['investment_type']),
+                            Text(
+                              '${percent.toStringAsFixed(1)}%',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
 
-                        Text(
-                          '${percent.toStringAsFixed(1)}%',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        const SizedBox(height: 6),
+                        LinearProgressIndicator(value: percent / 100),
+                        const SizedBox(height: 4),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(CurrencyUtils.formatAmount(value)),
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 6),
-
-                    LinearProgressIndicator(value: percent / 100),
-
-                    const SizedBox(height: 4),
-
-                    Align(
-                      alignment: Alignment.centerRight,
-
-                      child: Text(CurrencyUtils.formatAmount(value)),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ],
+                  );
+                }),
+              ],
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }

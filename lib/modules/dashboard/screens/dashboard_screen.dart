@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mywallet/core/widgets/vertical_spacing.dart';
 import 'package:mywallet/modules/expenses/screens/add_expense_screen.dart';
 import 'package:mywallet/modules/income/screens/add_income_screen.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/greeting_utils.dart';
-import '../../../core/widgets/common_button.dart';
 import '../../../core/widgets/empty_view.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/analytics_card.dart';
@@ -51,17 +50,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             await context.read<DashboardProvider>().loadDashboardData();
           },
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-
                       children: [
                         Text(
                           GreetingUtils.getGreeting(),
@@ -76,7 +73,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Text(
                           'My Wallet',
                           style: TextStyle(
-                            fontSize: 30,
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -106,21 +103,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
 
-                /* CommonButton(
-              text: 'Save Expense',
-              onPressed: () async {
-                await NotificationService.instance.showInstantNotification(
-                  id: 1,
-                  title: 'Expense Reminder',
-                  body: 'Don’t forget to track today’s expenses',
-                );
-              },
-            ),*/
-                const SizedBox(height: 28),
 
+                VerticalSpacing(height: 14),
                 BalanceCard(totalBalance: provider.totalSavings),
-
-                const SizedBox(height: 28),
+                VerticalSpacing(height: 14),
 
                 Row(
                   children: [
@@ -131,7 +117,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: Icons.arrow_downward,
                     ),
 
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
 
                     SummaryCard(
                       title: 'Expense',
@@ -142,20 +128,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 28),
+                VerticalSpacing(height: 14),
 
-                const SectionTitle(title: 'Analytics'),
-
-                const SizedBox(height: 16),
-
-                  AnalyticsCard(
-                  title: 'Monthly Expenses',
-                  child: MonthlyExpenseChart(data: provider.monthlyExpense,),
-                ),
-                const SizedBox(height: 28),
                 const SectionTitle(title: 'Quick Actions'),
 
-                const SizedBox(height: 16),
+                VerticalSpacing(height: 10),
 
                 Row(
                   children: [
@@ -172,7 +149,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       },
                     ),
 
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
 
                     QuickActionCard(
                       title: 'Add Income',
@@ -189,49 +166,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 28),
-
-                const SectionTitle(title: 'Loan Summary'),
-
-                const SizedBox(height: 16),
+                VerticalSpacing(height: 14),
+                //const SectionTitle(title: 'Loan Summary'),
+                //VerticalSpacing(height: 10),
 
                 LoanSummaryCard(
                   totalOutstanding: provider.totalOutstandingLoan,
-
                   totalPaid: provider.totalLoanPaid,
-
                   activeLoans: provider.activeLoanCount,
-
                   closedLoans: provider.closedLoanCount,
                 ),
 
-                const SizedBox(height: 16),
+                VerticalSpacing(height: 14),
                 UpcomingEmiCard(loan: provider.upcomingLoan),
-
-                const SizedBox(height: 28),
+                VerticalSpacing(height: 14),
 
                 WealthSummaryCard(
                   investedAmount: provider.totalInvestedAmount,
-
                   currentValue: provider.totalInvestmentValue,
                 ),
-                const SizedBox(height: 16),
+                VerticalSpacing(height: 10),
                 AssetAllocationCard(allocations: provider.assetAllocation),
 
-                const SizedBox(height: 16),
+                VerticalSpacing(height: 10),
                 SipSummaryCard(
                   monthlySipTotal: provider.monthlySipTotal,
-
                   totalSipCount: provider.upcomingSips.length,
                 ),
-                const SizedBox(height: 16),
+                VerticalSpacing(height: 10),
                 UpcomingSipCard(upcomingSips: provider.upcomingSips),
 
-                const SizedBox(height: 28),
+                VerticalSpacing(height: 14),
+                const SectionTitle(title: 'Analytics'),
+                VerticalSpacing(height: 10),
 
+                AnalyticsCard(
+                  title: 'Monthly Expenses',
+                  child: MonthlyExpenseChart(data: provider.monthlyExpense),
+                ),
+                VerticalSpacing(height: 14),
                 const SectionTitle(title: 'Recent Transactions'),
 
-                const SizedBox(height: 16),
+                VerticalSpacing(height: 10),
 
                 Consumer<DashboardProvider>(
                   builder: (context, provider, _) {
@@ -264,3 +240,5 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 }
+
+//267

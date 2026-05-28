@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/currency_utils.dart';
+import '../../../core/widgets/vertical_spacing.dart';
 
 class BalanceCard extends StatelessWidget {
   final double totalBalance;
@@ -11,9 +12,9 @@ class BalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         gradient: const LinearGradient(
           colors: [Color(0xFF3949AB), Color(0xFF1E88E5)],
         ),
@@ -23,16 +24,16 @@ class BalanceCard extends StatelessWidget {
         children: [
           const Text(
             'Total Balance',
-            style: TextStyle(color: Colors.white70, fontSize: 16),
+            style: TextStyle(color: Colors.white70, fontSize: 18),
           ),
 
-          const SizedBox(height: 12),
+          VerticalSpacing( height: 8),
 
           Text(
             CurrencyUtils.formatAmount(totalBalance),
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 32,
+              fontSize: 28,
               fontWeight: FontWeight.bold,
             ),
           ),

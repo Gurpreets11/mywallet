@@ -4,11 +4,8 @@ import '../../../core/utils/currency_utils.dart';
 
 class SummaryCard extends StatelessWidget {
   final String title;
-
   final double amount;
-
   final Color color;
-
   final IconData icon;
 
   const SummaryCard({
@@ -23,10 +20,10 @@ class SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -43,18 +40,18 @@ class SummaryCard extends StatelessWidget {
               child: Icon(icon, color: color),
             ),
 
-            const SizedBox(height: 16),
-
-            Text(
-              title,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-
             const SizedBox(height: 8),
 
             Text(
+              title,
+              style: const TextStyle(fontSize: 14, color: Colors.black),
+            ),
+
+            const SizedBox(height: 4),
+
+            Text(
               CurrencyUtils.formatAmount(amount),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style:   TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
             ),
           ],
         ),

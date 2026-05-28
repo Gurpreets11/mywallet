@@ -14,7 +14,7 @@ class SectionTitle extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         if (onViewAll != null)
           TextButton(onPressed: onViewAll, child: const Text('View All')),
