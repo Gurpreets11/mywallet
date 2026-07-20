@@ -15,12 +15,32 @@ class Migrations {
     await _createLoanPaymentsTable(db);
   }
 
-  static Future<void> onUpgrade(
-    Database db,
-    int oldVersion,
-    int newVersion,
-  ) async {
-    // Future DB migrations
+  static Future<void> onUpgrade(Database db, int oldVersion, int newVersion,) async {
+    if (oldVersion < 2) {
+      // Example: v2 added a new table
+      await db.execute('''
+      CREATE TABLE IF NOT EXISTS transaction_types (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        icon TEXT
+      )
+    ''');
+    }
+
+    if (oldVersion < 3) {
+      // Example: v3 added a new column to an existing table
+      // ALTER TABLE ... ADD COLUMN is safe and won't touch existing rows
+      await db.execute('ALTER TABLE expenses ADD COLUMN notes TEXT');
+    }
+
+    if (oldVersion < 4) {
+      // Example: v4 added a foreign key column linking expenses to transaction_types
+      await db.execute(
+        'ALTER TABLE expenses ADD COLUMN type_id INTEGER REFERENCES transaction_types(id)',
+      );
+    }
+
+    // Bump `newVersion` in your openDatabase() call every time you add a block here
   }
 
   static Future<void> _createExpenseTable(Database db) async {
@@ -36,10 +56,8 @@ class Migrations {
       ${DatabaseConstants.colPaymentMode} TEXT,
       ${DatabaseConstants.colNotes} TEXT,
       ${DatabaseConstants.colCreatedAt} TEXT NOT NULL,
-
       FOREIGN KEY (category_id)
       REFERENCES categories(id),
-
       FOREIGN KEY (subcategory_id)
       REFERENCES subcategories(id)
     )
@@ -50,28 +68,17 @@ class Migrations {
     await db.execute('''
     CREATE TABLE incomes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-
       amount REAL NOT NULL,
-
       category_id INTEGER NOT NULL,
-
       subcategory_id INTEGER,
-
       date TEXT NOT NULL,
-
       payment_mode TEXT,
-
       notes TEXT,
-
       is_recurring INTEGER DEFAULT 0,
-
       recurring_type TEXT,
-
       created_at TEXT NOT NULL,
-
       FOREIGN KEY (category_id)
       REFERENCES categories(id),
-
       FOREIGN KEY (subcategory_id)
       REFERENCES subcategories(id)
     )
@@ -80,74 +87,46 @@ class Migrations {
 
   static Future<void> _createInvestmentTable(Database db) async {
     await db.execute('''
-CREATE TABLE investments(
+    CREATE TABLE investments(
 
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-  investment_type TEXT NOT NULL,
-
-  investment_name TEXT NOT NULL,
-
-  investment_platform TEXT,
-
-  invested_amount REAL NOT NULL,
-
-  current_value REAL NOT NULL,
-
-  quantity REAL,
-
-  purchase_price REAL,
-
-  current_price REAL,
-
-  investment_date TEXT NOT NULL,
-
-  maturity_date TEXT,
-
-  interest_rate REAL,
-
-  is_sip INTEGER DEFAULT 0,
-
-  sip_amount REAL,
-
-  sip_date INTEGER,
-
-  notes TEXT,
-
-  created_at TEXT NOT NULL
-)
-''');
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      investment_type TEXT NOT NULL,
+      investment_name TEXT NOT NULL,
+      investment_platform TEXT,
+      invested_amount REAL NOT NULL,
+      current_value REAL NOT NULL,
+      quantity REAL,
+      purchase_price REAL,
+      current_price REAL,
+      investment_date TEXT NOT NULL,
+      maturity_date TEXT,
+      interest_rate REAL,
+      is_sip INTEGER DEFAULT 0,
+      sip_amount REAL,
+      sip_date INTEGER,
+      notes TEXT,
+      created_at TEXT NOT NULL
+    )
+  ''');
   }
 
   static Future<void> _createLoansTable(Database db) async {
     await db.execute('''
     CREATE TABLE loans (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-
       loan_type TEXT NOT NULL,
-
       person_name TEXT NOT NULL,
-
       principal_amount REAL NOT NULL,
-
       interest_rate REAL,
-
       emi_amount REAL,
-next_emi_date TEXT,
+      next_emi_date TEXT,
       tenure_months INTEGER,
-
       start_date TEXT NOT NULL,
-
       end_date TEXT,
-
       total_paid REAL DEFAULT 0,
-
       outstanding_amount REAL NOT NULL,
-
       loan_status TEXT DEFAULT 'ACTIVE',
-
       notes TEXT,
-
       created_at TEXT NOT NULL
     )
   ''');
@@ -157,19 +136,12 @@ next_emi_date TEXT,
     await db.execute('''
     CREATE TABLE loan_payments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-
       loan_id INTEGER NOT NULL,
-
       payment_amount REAL NOT NULL,
-
       payment_date TEXT NOT NULL,
-
       payment_mode TEXT,
-
       remarks TEXT,
-
       created_at TEXT NOT NULL,
-
       FOREIGN KEY (loan_id)
       REFERENCES loans(id)
     )

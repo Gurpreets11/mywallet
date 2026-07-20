@@ -85,7 +85,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add Expense')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
@@ -215,10 +215,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   );
 
                   if (isEditMode) {
+                    debugPrint( 'Update Expense called..');
                     await context.read<ExpenseProvider>().updateExpense(
                       expense,
                     );
                   } else {
+                    debugPrint( 'Add Expense called..');
                     await context.read<ExpenseProvider>().addExpense(expense);
                   }
 

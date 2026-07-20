@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../core/database/app_database.dart';
@@ -7,7 +8,7 @@ import '../models/expense_model.dart';
 class ExpenseRepository {
   Future<int> insertExpense(ExpenseModel expense) async {
     final Database db = await AppDatabase.database;
-
+    debugPrint( 'db.insert called..');
     return await db.insert(DatabaseConstants.tableExpenses, expense.toMap());
   }
 
@@ -82,7 +83,8 @@ class ExpenseRepository {
     final startDate = DateTime(now.year, now.month, 1).toIso8601String();
 
     final endDate = DateTime(now.year, now.month + 1, 0).toIso8601String();
-
+debugPrint("startDate : $startDate");
+    debugPrint("endDate : $endDate");
     final result = await db.rawQuery(
       '''
     SELECT SUM(amount) as total
@@ -91,6 +93,8 @@ class ExpenseRepository {
   ''',
       [startDate, endDate],
     );
+
+    debugPrint("Expenses result : $result");
 
     return (result.first['total'] as num?)?.toDouble() ?? 0.0;
   }
