@@ -22,7 +22,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (!kIsWeb) {
-   await AppDatabase.database;
+    await AppDatabase.database;
     await MasterSeedService.seedMasterData();
   }
   // final database = AppDatabase();

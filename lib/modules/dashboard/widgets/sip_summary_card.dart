@@ -22,7 +22,8 @@ class SipSummaryCard extends StatelessWidget {
           children: [
             Icon(Icons.repeat),
             SizedBox(width: 8),
-            Text('SIP Summary',
+            Text(
+              'SIP Summary',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ],

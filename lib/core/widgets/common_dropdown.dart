@@ -21,9 +21,7 @@ class CommonDropdown<T> extends StatelessWidget {
       items: items,
       onChanged: onChanged,
       decoration: InputDecoration(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       hint: Text(hint),
     );

@@ -21,7 +21,6 @@ class LoanSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-
         const Row(
           children: [
             Icon(Icons.account_balance),
@@ -40,7 +39,10 @@ class LoanSummaryCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildRow('Outstanding', CurrencyUtils.formatAmount(totalOutstanding),),
+                _buildRow(
+                  'Outstanding',
+                  CurrencyUtils.formatAmount(totalOutstanding),
+                ),
                 _buildRow('Paid Amount', CurrencyUtils.formatAmount(totalPaid)),
                 _buildRow('Active Loans', activeLoans.toString()),
                 _buildRow('Closed Loans', closedLoans.toString()),

@@ -38,13 +38,12 @@ class MainNavigationScreen extends StatelessWidget {
     return Scaffold(
       body: IndexedStack(index: provider.currentIndex, children: screens),
 
-     /* floatingActionButton: FloatingActionButton(
+      /* floatingActionButton: FloatingActionButton(
         onPressed: () {},
         child: const Icon(Icons.add),
       ),
 
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,*/
-
       bottomNavigationBar: NavigationBar(
         selectedIndex: provider.currentIndex,
 

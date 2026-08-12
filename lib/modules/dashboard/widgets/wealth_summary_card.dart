@@ -43,7 +43,6 @@ class WealthSummaryCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 _buildRow(
                   'Invested',
                   CurrencyUtils.formatAmount(investedAmount),
@@ -77,7 +76,8 @@ class WealthSummaryCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title),
-          Text(value,
+          Text(
+            value,
             style: TextStyle(fontWeight: FontWeight.bold, color: valueColor),
           ),
         ],

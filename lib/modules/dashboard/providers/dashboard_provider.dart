@@ -30,12 +30,7 @@ class DashboardProvider extends ChangeNotifier {
 
   final LoanRepository _loanRepository = LoanRepository();
 
-
-
   final InvestmentRepository _investmentRepository = InvestmentRepository();
-
-
-
 
   List<DashboardChartModel> _monthlyExpense = [];
   List<DashboardChartModel> get monthlyExpense => _monthlyExpense;
@@ -114,7 +109,6 @@ class DashboardProvider extends ChangeNotifier {
     _monthlySipTotal = await _investmentRepository.getMonthlySipTotal();
     notifyListeners();
 
-
     _monthlyExpense = await _masterRepository.getMonthlyExpenseChart();
 
     notifyListeners();
@@ -168,8 +162,4 @@ class DashboardProvider extends ChangeNotifier {
 
     recentTransactions = transactions.take(5).toList();
   }
-
-
-
-
 }

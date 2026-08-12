@@ -86,7 +86,6 @@ class MasterRepository {
     return result.first['subcategory_name'].toString();
   }
 
-
   /*Future<List<DashboardChartModel>> getMonthlyExpenseChart() async {
     final db = await AppDatabase.database;
 
@@ -135,7 +134,6 @@ class MasterRepository {
       '12': 'Dec',
     };
 
-
     return result.map((e) {
       debugPrint("e['month'] ::  ${e['month']}");
       debugPrint("months[e['month']] ::  ${months[e['month']]}");
@@ -145,5 +143,4 @@ class MasterRepository {
       );
     }).toList();
   }
-
 }

@@ -164,19 +164,19 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                       );
                     }).toList(),
                     onChanged: (value) async {
-                      final selectedCategory = master.incomeCategories.firstWhere(
-                            (category) => category['id'] == value,
-                      );
+                      final selectedCategory = master.incomeCategories
+                          .firstWhere((category) => category['id'] == value);
                       setState(() {
                         _selectedCategoryId = value;
-                        _selectedCategoryName = selectedCategory['category_name'];
+                        _selectedCategoryName =
+                            selectedCategory['category_name'];
                         _selectedSubcategoryId = null;
                       });
 
                       if (value != null) {
-                        await context.read<MasterProvider>().loadIncomeSubcategories(
-                          value,
-                        );
+                        await context
+                            .read<MasterProvider>()
+                            .loadIncomeSubcategories(value);
                       }
                     },
                     validator: (value) {
@@ -192,7 +192,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
 
               const SizedBox(height: 10),
 
-             /* Consumer<MasterProvider>(
+              /* Consumer<MasterProvider>(
                 builder: (context, master, _) {
                   return DropdownButtonFormField<int>(
                     value: _selectedSubcategoryId,
@@ -211,8 +211,6 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                   );
                 },
               ),*/
-
-
               Consumer<MasterProvider>(
                 builder: (context, master, _) {
                   return DropdownButtonFormField<int>(
@@ -225,13 +223,15 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                       );
                     }).toList(),
                     onChanged: (value) {
-                      final selectedSubCategory = master.incomeSubCategories.firstWhere(
+                      final selectedSubCategory = master.incomeSubCategories
+                          .firstWhere(
                             (subcategory) => subcategory['id'] == value,
-                      );
+                          );
 
                       setState(() {
                         _selectedSubcategoryId = value;
-                        _selectedSubCategoryName = selectedSubCategory['subcategory_name'];
+                        _selectedSubCategoryName =
+                            selectedSubCategory['subcategory_name'];
                       });
                     },
                   );

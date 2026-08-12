@@ -46,7 +46,9 @@ class ExpenseDetailScreen extends StatelessWidget {
                   '${expense.subcategoryName ?? ''}',
                 ),*/
                 const SizedBox(height: 8),
-                Text('Date: ${AppDateUtils.formatDate(DateTime.parse(expense.date))}',),
+                Text(
+                  'Date: ${AppDateUtils.formatDate(DateTime.parse(expense.date))}',
+                ),
 
                 const SizedBox(height: 8),
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
- import '../../investments/screens/investment_list_screen.dart';
- import '../../loans/screens/loan_list_screen.dart';
+import '../../investments/screens/investment_list_screen.dart';
+import '../../loans/screens/loan_list_screen.dart';
 import '../../settings/setting_screen.dart';
 
 class MoreScreen extends StatelessWidget {

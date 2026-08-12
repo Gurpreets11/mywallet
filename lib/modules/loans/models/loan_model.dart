@@ -21,7 +21,7 @@ class LoanModel {
 
   final double outstandingAmount;
 
-    String loanStatus;
+  String loanStatus;
 
   final String? notes;
 

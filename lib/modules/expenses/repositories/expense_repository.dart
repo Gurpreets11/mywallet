@@ -8,7 +8,7 @@ import '../models/expense_model.dart';
 class ExpenseRepository {
   Future<int> insertExpense(ExpenseModel expense) async {
     final Database db = await AppDatabase.database;
-    debugPrint( 'db.insert called..');
+    debugPrint('db.insert called..');
     return await db.insert(DatabaseConstants.tableExpenses, expense.toMap());
   }
 
@@ -83,7 +83,7 @@ class ExpenseRepository {
     final startDate = DateTime(now.year, now.month, 1).toIso8601String();
 
     final endDate = DateTime(now.year, now.month + 1, 0).toIso8601String();
-debugPrint("startDate : $startDate");
+    debugPrint("startDate : $startDate");
     debugPrint("endDate : $endDate");
     final result = await db.rawQuery(
       '''

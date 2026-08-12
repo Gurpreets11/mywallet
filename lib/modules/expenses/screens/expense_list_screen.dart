@@ -106,13 +106,25 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                         return ExpenseCard(
                           expense: expense,
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => ExpenseDetailScreen(expense: expense),),);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    ExpenseDetailScreen(expense: expense),
+                              ),
+                            );
                           },
                           onDelete: () async {
                             await provider.deleteExpense(expense.id!);
                           },
                           onEdit: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => AddExpenseScreen(expense: expense),));
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    AddExpenseScreen(expense: expense),
+                              ),
+                            );
                           },
                         );
                       },

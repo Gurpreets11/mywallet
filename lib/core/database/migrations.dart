@@ -15,7 +15,11 @@ class Migrations {
     await _createLoanPaymentsTable(db);
   }
 
-  static Future<void> onUpgrade(Database db, int oldVersion, int newVersion,) async {
+  static Future<void> onUpgrade(
+    Database db,
+    int oldVersion,
+    int newVersion,
+  ) async {
     if (oldVersion < 2) {
       // Example: v2 added a new table
       await db.execute('''

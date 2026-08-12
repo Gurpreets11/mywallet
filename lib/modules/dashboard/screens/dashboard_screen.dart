@@ -103,7 +103,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
 
-
                 VerticalSpacing(height: 14),
                 BalanceCard(totalBalance: provider.totalSavings),
                 VerticalSpacing(height: 14),
@@ -167,9 +166,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
 
                 VerticalSpacing(height: 14),
+
                 //const SectionTitle(title: 'Loan Summary'),
                 //VerticalSpacing(height: 10),
-
                 LoanSummaryCard(
                   totalOutstanding: provider.totalOutstandingLoan,
                   totalPaid: provider.totalLoanPaid,
@@ -225,7 +224,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               title: txn.title,
                               subtitle: txn.subtitle,
                               amount: txn.amount,
-                              date : txn.date,
+                              date: txn.date,
                               isExpense: txn.isExpense,
                             ),
                           )

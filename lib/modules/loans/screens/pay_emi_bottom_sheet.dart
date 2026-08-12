@@ -40,9 +40,7 @@ class _PayEmiBottomSheetState extends State<PayEmiBottomSheet> {
         mainAxisSize: MainAxisSize.min,
 
         children: [
-          const AppSectionHeader(
-            title: 'Pay EMI',
-          ),
+          const AppSectionHeader(title: 'Pay EMI'),
 
           const SizedBox(height: 20),
 

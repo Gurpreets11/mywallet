@@ -47,36 +47,26 @@ class IncomeModel {
       'date': date,
       'payment_mode': paymentMode,
       'notes': notes,
-      'is_recurring':
-      isRecurring ? 1 : 0,
-      'recurring_type':
-      recurringType,
+      'is_recurring': isRecurring ? 1 : 0,
+      'recurring_type': recurringType,
       'created_at': createdAt,
     };
   }
 
-  factory IncomeModel.fromMap(
-      Map<String, dynamic> map,
-      ) {
+  factory IncomeModel.fromMap(Map<String, dynamic> map) {
     return IncomeModel(
       id: map['id'],
       amount: map['amount'],
       categoryId: map['category_id'],
-      subcategoryId:
-      map['subcategory_id'],
+      subcategoryId: map['subcategory_id'],
       date: map['date'],
-      paymentMode:
-      map['payment_mode'],
+      paymentMode: map['payment_mode'],
       notes: map['notes'],
-      isRecurring:
-      map['is_recurring'] == 1,
-      recurringType:
-      map['recurring_type'],
+      isRecurring: map['is_recurring'] == 1,
+      recurringType: map['recurring_type'],
       createdAt: map['created_at'],
-      categoryName:
-      map['category_name'],
-      subcategoryName:
-      map['subcategory_name'],
+      categoryName: map['category_name'],
+      subcategoryName: map['subcategory_name'],
     );
   }
 }

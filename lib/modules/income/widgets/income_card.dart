@@ -33,52 +33,45 @@ class IncomeCard extends StatelessWidget {
         onTap: onTap,
 
         leading: const CircleAvatar(
-          child: Icon(Icons.payments, size: 20,), radius: 16,),
-
+          child: Icon(Icons.payments, size: 20),
+          radius: 16,
+        ),
 
         title: Text(
-          CurrencyUtils.formatAmount(
-            income.amount,
-          ),style: TextStyle(fontWeight: FontWeight.bold),
+          CurrencyUtils.formatAmount(income.amount),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
 
         subtitle: Column(
-          crossAxisAlignment:
-          CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(income.paymentMode),
             Text(
               '${income.categoryName ?? ''}'
-                  ' • '
-                  '${income.subcategoryName ?? ''}',
+              ' • '
+              '${income.subcategoryName ?? ''}',
             ),
-            Text(AppDateUtils.formatDateTime( DateTime.parse(income.date))),
-
+            Text(AppDateUtils.formatDateTime(DateTime.parse(income.date))),
           ],
         ),
 
         trailing: Row(
-          mainAxisSize:
-          MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
               onPressed: onEdit,
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(  minWidth: 30,
-                minHeight: 30,),
-              icon: const Icon(Icons.edit, size: 20, ),
+              constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+              icon: const Icon(Icons.edit, size: 20),
               visualDensity: VisualDensity.compact,
             ),
 
             IconButton(
               onPressed: onDelete,
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(  minWidth: 30,
-                minHeight: 30,),
-              icon: const Icon(Icons.delete,
-                color: Colors.red, size: 20, ),
+              constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+              icon: const Icon(Icons.delete, color: Colors.red, size: 20),
               visualDensity: VisualDensity.compact,
-
             ),
           ],
         ),

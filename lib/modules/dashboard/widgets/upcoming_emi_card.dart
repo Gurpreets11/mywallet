@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/currency_utils.dart';
@@ -46,7 +45,10 @@ class UpcomingEmiCard extends StatelessWidget {
                 children: [
                   Text(
                     CurrencyUtils.formatAmount(loan!.emiAmount),
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   VerticalSpacing(height: 6),
                   Text(loan!.personName, style: const TextStyle(fontSize: 16)),
@@ -59,7 +61,10 @@ class UpcomingEmiCard extends StatelessWidget {
                   VerticalSpacing(height: 6),
 
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: daysLeft <= 3
                           ? Colors.red.shade100

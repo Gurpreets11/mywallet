@@ -44,17 +44,18 @@ class RestoreService {
   /// - New tables/columns you've added since the backup was made are simply
   ///   left untouched (they weren't in the backup, so there's nothing to restore).
   Future<void> restoreFromBackupMap(
-      Map<String, dynamic> backupMap, {
-        RestoreMode mode = RestoreMode.replace,
-      }) async {
+    Map<String, dynamic> backupMap, {
+    RestoreMode mode = RestoreMode.replace,
+  }) async {
     final data = backupMap['data'] as Map<String, dynamic>;
 
     final currentTablesResult = await db.rawQuery(
       "SELECT name FROM sqlite_master WHERE type='table' "
-          "AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'android_metadata'",
+      "AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'android_metadata'",
     );
-    final currentTables =
-    currentTablesResult.map((r) => r['name'] as String).toSet();
+    final currentTables = currentTablesResult
+        .map((r) => r['name'] as String)
+        .toSet();
 
     // Your tables reference each other via foreign keys (e.g. transactions ->
     // transaction_types). Deleting/inserting in the wrong order trips a
@@ -76,10 +77,12 @@ class RestoreService {
           if (rows.isEmpty) continue;
 
           // Find which columns actually exist in the *current* table definition.
-          final columnsInfo =
-          await txn.rawQuery('PRAGMA table_info($tableName)');
-          final validColumns =
-          columnsInfo.map((c) => c['name'] as String).toSet();
+          final columnsInfo = await txn.rawQuery(
+            'PRAGMA table_info($tableName)',
+          );
+          final validColumns = columnsInfo
+              .map((c) => c['name'] as String)
+              .toSet();
 
           if (mode == RestoreMode.replace) {
             await txn.delete(tableName);

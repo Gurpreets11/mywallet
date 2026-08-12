@@ -41,7 +41,9 @@ class RecentTransactionCard extends StatelessWidget {
           ),
         ),
         title: Text(title),
-        subtitle: Text('${subtitle} - ${AppDateUtils.formatDateTime(DateTime.parse(date))} '),
+        subtitle: Text(
+          '${subtitle} - ${AppDateUtils.formatDateTime(DateTime.parse(date))} ',
+        ),
         trailing: Text(
           CurrencyUtils.formatAmount(amount),
           style: TextStyle(

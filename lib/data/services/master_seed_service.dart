@@ -31,7 +31,6 @@ class MasterSeedService {
     }
   }
 
-
   static Future<void> _seedCategories() async {
     final now = DateTime.now().toIso8601String();
 
@@ -109,18 +108,13 @@ class MasterSeedService {
     final now = DateTime.now().toIso8601String();
 
     final subcategories = [
-
       // Food & Dining (1)
       SubcategoryModel(
         categoryId: 1,
         subcategoryName: 'Breakfast',
         createdAt: now,
       ),
-      SubcategoryModel(
-        categoryId: 1,
-        subcategoryName: 'Lunch',
-        createdAt: now,
-      ),
+      SubcategoryModel(categoryId: 1, subcategoryName: 'Lunch', createdAt: now),
       SubcategoryModel(
         categoryId: 1,
         subcategoryName: 'Dinner',
@@ -133,21 +127,9 @@ class MasterSeedService {
       ),
 
       // Travel (2)
-      SubcategoryModel(
-        categoryId: 2,
-        subcategoryName: 'Fuel',
-        createdAt: now,
-      ),
-      SubcategoryModel(
-        categoryId: 2,
-        subcategoryName: 'Taxi',
-        createdAt: now,
-      ),
-      SubcategoryModel(
-        categoryId: 2,
-        subcategoryName: 'Bus',
-        createdAt: now,
-      ),
+      SubcategoryModel(categoryId: 2, subcategoryName: 'Fuel', createdAt: now),
+      SubcategoryModel(categoryId: 2, subcategoryName: 'Taxi', createdAt: now),
+      SubcategoryModel(categoryId: 2, subcategoryName: 'Bus', createdAt: now),
       SubcategoryModel(
         categoryId: 2,
         subcategoryName: 'Flight',
@@ -213,11 +195,7 @@ class MasterSeedService {
         subcategoryName: 'Monthly Salary',
         createdAt: now,
       ),
-      SubcategoryModel(
-        categoryId: 7,
-        subcategoryName: 'Bonus',
-        createdAt: now,
-      ),
+      SubcategoryModel(categoryId: 7, subcategoryName: 'Bonus', createdAt: now),
 
       // Business (8)
       SubcategoryModel(
@@ -233,11 +211,7 @@ class MasterSeedService {
         createdAt: now,
       ),
 
-      SubcategoryModel(
-        categoryId: 9,
-        subcategoryName: 'Other',
-        createdAt: now,
-      ),
+      SubcategoryModel(categoryId: 9, subcategoryName: 'Other', createdAt: now),
 
       // Investment (10)
       SubcategoryModel(

@@ -37,7 +37,8 @@ class AssetAllocationCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ...allocations.map((item) {
-                  final double value = ((item['total'] as num?)?.toDouble() ?? 0);
+                  final double value =
+                      ((item['total'] as num?)?.toDouble() ?? 0);
                   final double percent = total == 0 ? 0 : (value / total) * 100;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 14),
@@ -49,7 +50,9 @@ class AssetAllocationCard extends StatelessWidget {
                             Text(item['investment_type']),
                             Text(
                               '${percent.toStringAsFixed(1)}%',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),

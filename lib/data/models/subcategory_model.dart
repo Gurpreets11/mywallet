@@ -23,9 +23,7 @@ class SubcategoryModel {
     };
   }
 
-  factory SubcategoryModel.fromMap(
-      Map<String, dynamic> map,
-      ) {
+  factory SubcategoryModel.fromMap(Map<String, dynamic> map) {
     return SubcategoryModel(
       id: map['id'],
       categoryId: map['category_id'],

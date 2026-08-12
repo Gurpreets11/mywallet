@@ -28,10 +28,7 @@ class DatabaseHelper {
   Future<Database> _initializeDatabase() async {
     final databasePath = await getDatabasesPath();
 
-    final path = join(
-      databasePath,
-      DatabaseConstants.databaseName,
-    );
+    final path = join(databasePath, DatabaseConstants.databaseName);
 
     return await openDatabase(
       path,
@@ -54,6 +51,7 @@ class DatabaseHelper {
       _database = null;
     }
   }
+
   /// Reopen database
   Future<Database> reopenDatabase() async {
     await closeDatabase();
@@ -66,10 +64,7 @@ class DatabaseHelper {
 
     final databasePath = await getDatabasesPath();
 
-    final path = join(
-      databasePath,
-      DatabaseConstants.databaseName,
-    );
+    final path = join(databasePath, DatabaseConstants.databaseName);
 
     await deleteDatabase(path);
   }
@@ -83,9 +78,6 @@ class DatabaseHelper {
   Future<String> getDatabasePath() async {
     final databasePath = await getDatabasesPath();
 
-    return join(
-      databasePath,
-      DatabaseConstants.databaseName,
-    );
+    return join(databasePath, DatabaseConstants.databaseName);
   }
 }

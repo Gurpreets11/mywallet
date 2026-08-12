@@ -16,8 +16,8 @@ class ExpenseModel {
     required this.amount,
     required this.categoryId,
     this.subcategoryId,
-   this.categoryName,
-   this.subcategoryName,
+    this.categoryName,
+    this.subcategoryName,
     required this.date,
     required this.paymentMode,
     this.notes,
@@ -31,7 +31,7 @@ class ExpenseModel {
       'category_id': categoryId,
       'subcategory_id': subcategoryId,
       'category_name': categoryName,
-     'subcategory_name': subcategoryName,
+      'subcategory_name': subcategoryName,
       'date': date,
       'payment_mode': paymentMode,
       'notes': notes,
@@ -39,16 +39,14 @@ class ExpenseModel {
     };
   }
 
-  factory ExpenseModel.fromMap(
-      Map<String, dynamic> map,
-      ) {
+  factory ExpenseModel.fromMap(Map<String, dynamic> map) {
     return ExpenseModel(
       id: map['id'],
       amount: map['amount'],
       categoryId: map['category_id'],
       subcategoryId: map['subcategory_id'],
       categoryName: map['category_name'],
-     subcategoryName: map['subcategory_name'],
+      subcategoryName: map['subcategory_name'],
       date: map['date'],
       paymentMode: map['payment_mode'],
       notes: map['notes'],

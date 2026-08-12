@@ -1,5 +1,4 @@
 class DashboardTransactionModel {
-
   final String title;
 
   final String subtitle;

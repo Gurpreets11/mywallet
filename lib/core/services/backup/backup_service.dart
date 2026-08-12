@@ -18,7 +18,7 @@ class BackupService {
   Future<List<String>> _getAllTableNames() async {
     final tables = await db.rawQuery(
       "SELECT name FROM sqlite_master WHERE type='table' "
-          "AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'android_metadata'",
+      "AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'android_metadata'",
     );
     return tables.map((row) => row['name'] as String).toList();
   }
@@ -75,7 +75,8 @@ class BackupService {
     final savedPath = await FilePicker.platform.saveFile(
       dialogTitle: 'Save MyWallet Backup',
       fileName: _buildFileName(),
-      bytes: bytes, // required on Android/iOS so FilePicker can write it for you
+      bytes:
+          bytes, // required on Android/iOS so FilePicker can write it for you
     );
 
     return savedPath;

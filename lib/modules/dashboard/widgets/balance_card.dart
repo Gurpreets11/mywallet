@@ -27,7 +27,7 @@ class BalanceCard extends StatelessWidget {
             style: TextStyle(color: Colors.white70, fontSize: 18),
           ),
 
-          VerticalSpacing( height: 8),
+          VerticalSpacing(height: 8),
 
           Text(
             CurrencyUtils.formatAmount(totalBalance),

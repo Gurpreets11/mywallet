@@ -112,14 +112,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       );
                     }).toList(),
                     onChanged: (value) async {
-
-                      final selectedCategory = master.expenseCategories.firstWhere(
-                            (category) => category['id'] == value,
-                      );
+                      final selectedCategory = master.expenseCategories
+                          .firstWhere((category) => category['id'] == value);
 
                       setState(() {
                         _selectedCategoryId = value;
-                        _selectedCategoryName = selectedCategory['category_name'];
+                        _selectedCategoryName =
+                            selectedCategory['category_name'];
 
                         _selectedSubcategoryId = null;
                       });
@@ -153,13 +152,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       );
                     }).toList(),
                     onChanged: (value) {
-                      final selectedSubCategory = master.subcategories.firstWhere(
+                      final selectedSubCategory = master.subcategories
+                          .firstWhere(
                             (subcategory) => subcategory['id'] == value,
-                      );
+                          );
 
                       setState(() {
                         _selectedSubcategoryId = value;
-                        _selectedSubCategoryName = selectedSubCategory['subcategory_name'];
+                        _selectedSubCategoryName =
+                            selectedSubCategory['subcategory_name'];
                       });
                     },
                   );
@@ -215,12 +216,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   );
 
                   if (isEditMode) {
-                    debugPrint( 'Update Expense called..');
+                    debugPrint('Update Expense called..');
                     await context.read<ExpenseProvider>().updateExpense(
                       expense,
                     );
                   } else {
-                    debugPrint( 'Add Expense called..');
+                    debugPrint('Add Expense called..');
                     await context.read<ExpenseProvider>().addExpense(expense);
                   }
 

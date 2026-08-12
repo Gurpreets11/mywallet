@@ -25,9 +25,7 @@ class MasterProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
   //
-
 
   List<Map<String, dynamic>> _incomeCategories = [];
 
@@ -45,7 +43,9 @@ class MasterProvider extends ChangeNotifier {
 
   Future<void> loadIncomeSubcategories(int categoryId) async {
     debugPrint("categoryId   ::  $categoryId");
-    _incomeSubcategories = await _repository.getSubcategoriesByCategory(categoryId);
+    _incomeSubcategories = await _repository.getSubcategoriesByCategory(
+      categoryId,
+    );
 
     debugPrint("_incomeSubcategories Size ::  ${_incomeSubcategories.length}");
     notifyListeners();

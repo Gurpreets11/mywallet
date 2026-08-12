@@ -1,19 +1,5 @@
-enum TransactionType {
-  expense,
-  income,
-  investment,
-  loan,
-}
+enum TransactionType { expense, income, investment, loan }
 
-enum PaymentMode {
-  cash,
-  card,
-  upi,
-  bankTransfer,
-}
+enum PaymentMode { cash, card, upi, bankTransfer }
 
-enum LoanStatus {
-  active,
-  completed,
-  overdue,
-}
+enum LoanStatus { active, completed, overdue }

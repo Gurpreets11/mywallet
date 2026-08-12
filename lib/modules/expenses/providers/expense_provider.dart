@@ -33,7 +33,7 @@ class ExpenseProvider extends ChangeNotifier {
   }
 
   Future<void> addExpense(ExpenseModel expense) async {
-    debugPrint( 'inser Expense called..');
+    debugPrint('inser Expense called..');
     await _repository.insertExpense(expense);
 
     await loadExpenses();

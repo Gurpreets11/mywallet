@@ -97,36 +97,22 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
                   status: isOverdue ? 'Overdue' : widget.loan.loanStatus,
                 ),
 
-
-                if (widget.loan.loanStatus ==
-                    'Closed')
-
+                if (widget.loan.loanStatus == 'Closed')
                   const Padding(
-
-                    padding:
-                    EdgeInsets.only(
-                      top: 12,
-                    ),
+                    padding: EdgeInsets.only(top: 12),
 
                     child: Row(
-
                       children: [
-
-                        Icon(
-                          Icons.check_circle,
-                          color: Colors.green,
-                        ),
+                        Icon(Icons.check_circle, color: Colors.green),
 
                         SizedBox(width: 8),
 
                         Text(
-
                           'Loan fully repaid',
 
                           style: TextStyle(
                             color: Colors.green,
-                            fontWeight:
-                            FontWeight.bold,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],

@@ -1,8 +1,5 @@
 class ValidatorUtils {
-  static String? validateRequired(
-      String? value,
-      String fieldName,
-      ) {
+  static String? validateRequired(String? value, String fieldName) {
     if (value == null || value.trim().isEmpty) {
       return '$fieldName is required';
     }
@@ -10,9 +7,7 @@ class ValidatorUtils {
     return null;
   }
 
-  static String? validateAmount(
-      String? value,
-      ) {
+  static String? validateAmount(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Amount is required';
     }
