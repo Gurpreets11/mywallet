@@ -27,14 +27,13 @@ class LoanDetailScreen extends StatefulWidget {
 class _LoanDetailScreenState extends State<LoanDetailScreen> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    Future.microtask(() {
-      context.read<LoanPaymentProvider>().loadPayments(widget.loan.id!);
+    final loanPaymentProvider = context.read<LoanPaymentProvider>();
+    final loanProvider = context.read<LoanProvider>();
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<LoanProvider>().loadLoanPayments(widget.loan.id!);
-      });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loanPaymentProvider.loadPayments(widget.loan.id!);
+      loanProvider.loadLoanPayments(widget.loan.id!);
     });
   }
 
@@ -300,7 +299,7 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
                                           await loanProvider.loadLoanPayments(
                                             widget.loan.id!,
                                           );
-
+                                          if (!context.mounted) return;
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(

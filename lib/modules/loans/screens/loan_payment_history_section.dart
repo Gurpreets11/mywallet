@@ -43,7 +43,7 @@ class LoanPaymentHistorySection extends StatelessWidget {
 
               itemCount: payments.length,
 
-              separatorBuilder: (_, __) => const Divider(),
+              separatorBuilder: (context, index) => const Divider(),
 
               itemBuilder: (context, index) {
                 final payment = payments[index];

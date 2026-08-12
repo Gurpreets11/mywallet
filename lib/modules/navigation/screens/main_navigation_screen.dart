@@ -5,8 +5,6 @@ import '../../dashboard/screens/dashboard_screen.dart';
 import '../../dashboard/screens/more_screen.dart';
 import '../../expenses/screens/expense_list_screen.dart';
 import '../../income/screens/income_list_screen.dart';
-import '../../investments/screens/investment_list_screen.dart';
-import '../../loans/screens/loan_list_screen.dart';
 import '../providers/navigation_provider.dart';
 
 class MainNavigationScreen extends StatelessWidget {

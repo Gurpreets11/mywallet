@@ -43,7 +43,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
 
   bool _isSip = false;
 
-  DateTime _investmentDate = DateTime.now();
+  final DateTime _investmentDate = DateTime.now();
 
   bool get isEditMode => widget.investment != null;
 
@@ -132,6 +132,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
       isEditMode ? 'Investment Updated' : 'Investment Added',
     );
     await context.read<DashboardProvider>().loadDashboardData();
+    if (!mounted) return;
     Navigator.pop(context);
   }
 
@@ -151,7 +152,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
           child: Column(
             children: [
               DropdownButtonFormField<String>(
-                value: _investmentType,
+                initialValue: _investmentType,
 
                 decoration: const InputDecoration(labelText: 'Investment Type'),
 
@@ -227,7 +228,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                 const SizedBox(height: 16),
 
                 DropdownButtonFormField<int>(
-                  value: _sipDate,
+                  initialValue: _sipDate,
 
                   decoration: const InputDecoration(labelText: 'SIP Date'),
 

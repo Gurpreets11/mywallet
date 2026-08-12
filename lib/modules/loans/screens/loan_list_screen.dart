@@ -21,8 +21,10 @@ class _LoanListScreenState extends State<LoanListScreen> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      context.read<LoanProvider>().loadLoans();
+    final loanProvider = context.read<LoanProvider>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loanProvider.loadLoans();
     });
   }
 

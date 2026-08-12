@@ -4,7 +4,6 @@ import 'package:sqflite/sqflite.dart';
 import '../../core/database/app_database.dart';
 import '../../core/services/backup/backup_service.dart';
 import '../../core/services/backup/restore_service.dart';
-import '../../core/utils/snackbar_utils.dart';
 import '../../core/widgets/common_button.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -24,15 +23,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final Database db = await AppDatabase.database;
     final backupService = BackupService(db); // pass your existing Database
     final path = await backupService.exportBackupToUserChosenLocation();
+    if (!mounted) return;
     if (path != null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Backup saved to $path')));
     }
 
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
 
     Navigator.pop(context);
   }
@@ -43,6 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final didRestore = await restoreService.pickAndRestore(
       mode: RestoreMode.replace,
     );
+    if (!mounted) return;
     if (didRestore) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Data restored successfully')),
@@ -50,9 +49,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       // you'll likely want to refresh any in-memory state / providers here
     }
 
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
 
     Navigator.pop(context);
   }

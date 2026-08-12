@@ -47,8 +47,10 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      context.read<MasterProvider>().loadIncomeCategories();
+    final masterProvider = context.read<MasterProvider>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      masterProvider.loadIncomeCategories();
     });
 
     if (isEditMode) {
@@ -71,10 +73,8 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
       _recurringType = income.recurringType ?? 'Monthly';
 
       if (_selectedCategoryId != null) {
-        Future.microtask(() {
-          context.read<MasterProvider>().loadIncomeSubcategories(
-            _selectedCategoryId!,
-          );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          masterProvider.loadIncomeSubcategories(_selectedCategoryId!);
         });
       }
     }
@@ -130,6 +130,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
       isEditMode ? 'Income Updated' : 'Income Added',
     );
     await context.read<DashboardProvider>().loadDashboardData();
+    if (!mounted) return;
     Navigator.pop(context);
   }
 
@@ -155,7 +156,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
               Consumer<MasterProvider>(
                 builder: (context, master, _) {
                   return DropdownButtonFormField<int>(
-                    value: _selectedCategoryId,
+                    initialValue: _selectedCategoryId,
                     decoration: const InputDecoration(labelText: 'Category'),
                     items: master.incomeCategories.map((category) {
                       return DropdownMenuItem<int>(
@@ -171,6 +172,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                         _selectedCategoryName =
                             selectedCategory['category_name'];
                         _selectedSubcategoryId = null;
+                        debugPrint(
+                          " _selectedCategoryName : $_selectedCategoryName",
+                        );
                       });
 
                       if (value != null) {
@@ -214,7 +218,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
               Consumer<MasterProvider>(
                 builder: (context, master, _) {
                   return DropdownButtonFormField<int>(
-                    value: _selectedSubcategoryId,
+                    initialValue: _selectedSubcategoryId,
                     decoration: const InputDecoration(labelText: 'Subcategory'),
                     items: master.incomeSubCategories.map((subcategory) {
                       return DropdownMenuItem<int>(
@@ -232,6 +236,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                         _selectedSubcategoryId = value;
                         _selectedSubCategoryName =
                             selectedSubCategory['subcategory_name'];
+                        debugPrint(
+                          " _selectedSubCategoryName : $_selectedSubCategoryName",
+                        );
                       });
                     },
                   );
@@ -241,7 +248,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
               const SizedBox(height: 10),
 
               DropdownButtonFormField<String>(
-                value: _paymentMode,
+                initialValue: _paymentMode,
                 decoration: const InputDecoration(labelText: 'Payment Mode'),
                 items: const [
                   DropdownMenuItem(value: 'Cash', child: Text('Cash')),
@@ -278,7 +285,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
 
               if (_isRecurring)
                 DropdownButtonFormField<String>(
-                  value: _recurringType,
+                  initialValue: _recurringType,
                   decoration: const InputDecoration(
                     labelText: 'Recurring Type',
                   ),

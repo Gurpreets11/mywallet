@@ -41,8 +41,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      context.read<MasterProvider>().loadExpenseCategories();
+    final masterProvider = context.read<MasterProvider>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      masterProvider.loadExpenseCategories();
     });
 
     if (isEditMode) {
@@ -51,10 +53,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _amountController.text = expense.amount.toString();
 
       if (_selectedCategoryId != null) {
-        Future.microtask(() {
-          context.read<MasterProvider>().loadSubcategories(
-            _selectedCategoryId!,
-          );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          masterProvider.loadSubcategories(_selectedCategoryId!);
         });
       }
 
@@ -103,7 +103,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               Consumer<MasterProvider>(
                 builder: (context, master, _) {
                   return DropdownButtonFormField<int>(
-                    value: _selectedCategoryId,
+                    initialValue: _selectedCategoryId,
                     decoration: const InputDecoration(labelText: 'Category'),
                     items: master.expenseCategories.map((category) {
                       return DropdownMenuItem<int>(
@@ -143,7 +143,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               Consumer<MasterProvider>(
                 builder: (context, master, _) {
                   return DropdownButtonFormField<int>(
-                    value: _selectedSubcategoryId,
+                    initialValue: _selectedSubcategoryId,
                     decoration: const InputDecoration(labelText: 'Subcategory'),
                     items: master.subcategories.map((subcategory) {
                       return DropdownMenuItem<int>(
@@ -172,7 +172,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               const SizedBox(height: 10),
 
               DropdownButtonFormField<String>(
-                value: _paymentMode,
+                initialValue: _paymentMode,
                 items: const [
                   DropdownMenuItem(value: 'Cash', child: Text('Cash')),
                   DropdownMenuItem(value: 'UPI', child: Text('UPI')),
@@ -225,11 +225,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     await context.read<ExpenseProvider>().addExpense(expense);
                   }
 
-                  if (!context.mounted) {
-                    return;
-                  }
+                  if (!context.mounted) return;
 
                   await context.read<DashboardProvider>().loadDashboardData();
+                  if (!context.mounted) return;
                   SnackbarUtils.showSnackbar(context, 'Expense Added');
 
                   Navigator.pop(context);

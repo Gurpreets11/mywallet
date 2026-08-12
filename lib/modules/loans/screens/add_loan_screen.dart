@@ -123,6 +123,7 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
       isEditMode ? 'Loan Updated' : 'Loan Added',
     );
     await context.read<DashboardProvider>().loadDashboardData();
+    if (!mounted) return;
     Navigator.pop(context);
   }
 
@@ -137,7 +138,7 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
           child: Column(
             children: [
               DropdownButtonFormField<String>(
-                value: _loanType,
+                initialValue: _loanType,
                 decoration: const InputDecoration(labelText: 'Loan Type'),
                 items: const [
                   DropdownMenuItem(value: 'BORROWED', child: Text('Borrowed')),
@@ -205,7 +206,7 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
               const SizedBox(height: 16),
 
               DropdownButtonFormField<String>(
-                value: _loanStatus,
+                initialValue: _loanStatus,
                 decoration: const InputDecoration(labelText: 'Loan Status'),
                 items: const [
                   DropdownMenuItem(value: 'ACTIVE', child: Text('Active')),

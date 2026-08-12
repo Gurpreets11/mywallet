@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -39,7 +40,7 @@ class DatabaseHelper {
       onCreate: Migrations.onCreate,
       onUpgrade: Migrations.onUpgrade,
       onOpen: (db) {
-        print('Database opened');
+        debugPrint('Database opened');
       },
     );
   }

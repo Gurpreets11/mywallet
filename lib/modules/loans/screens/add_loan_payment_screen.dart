@@ -59,15 +59,14 @@ class _AddLoanPaymentScreenState extends State<AddLoanPaymentScreen> {
       loanId: widget.loan.id!,
       paymentAmount: amount,
     );
-
+    if (!mounted) return;
     await context.read<LoanProvider>().loadLoans();
 
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
 
     SnackbarUtils.showSnackbar(context, 'EMI Payment Added');
     await context.read<DashboardProvider>().loadDashboardData();
+    if (!mounted) return;
     Navigator.pop(context);
   }
 
@@ -105,7 +104,7 @@ class _AddLoanPaymentScreenState extends State<AddLoanPaymentScreen> {
               const SizedBox(height: 16),
 
               DropdownButtonFormField<String>(
-                value: _paymentMode,
+                initialValue: _paymentMode,
                 decoration: const InputDecoration(labelText: 'Payment Mode'),
                 items: const [
                   DropdownMenuItem(value: 'Cash', child: Text('Cash')),

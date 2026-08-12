@@ -57,7 +57,7 @@ class _PayEmiBottomSheetState extends State<PayEmiBottomSheet> {
 
           /// PAYMENT MODE
           DropdownButtonFormField<String>(
-            value: _paymentMode,
+            initialValue: _paymentMode,
 
             decoration: const InputDecoration(labelText: 'Payment Mode'),
 

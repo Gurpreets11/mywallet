@@ -9,7 +9,6 @@ import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'data/services/master_seed_service.dart';
 import 'modules/dashboard/providers/dashboard_provider.dart';
-import 'modules/dashboard/screens/dashboard_screen.dart';
 import 'modules/expenses/providers/expense_provider.dart';
 import 'modules/income/providers/income_provider.dart';
 import 'modules/investments/providers/investment_provider.dart';

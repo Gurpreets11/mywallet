@@ -33,8 +33,8 @@ class IncomeCard extends StatelessWidget {
         onTap: onTap,
 
         leading: const CircleAvatar(
-          child: Icon(Icons.payments, size: 20),
           radius: 16,
+          child: Icon(Icons.payments, size: 20),
         ),
 
         title: Text(

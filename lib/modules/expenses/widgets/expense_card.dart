@@ -30,8 +30,8 @@ class ExpenseCard extends StatelessWidget {
         minTileHeight: 40,
         onTap: onTap,
         leading: const CircleAvatar(
-          child: Icon(Icons.money_off, size: 20),
           radius: 16,
+          child: Icon(Icons.money_off, size: 20),
         ),
         title: Text(
           CurrencyUtils.formatAmount(expense.amount),

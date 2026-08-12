@@ -23,8 +23,8 @@ class BackupService {
     return tables.map((row) => row['name'] as String).toList();
   }
 
-  /// Reads every row from every table into a Map<tableName, List<row>>,
-  /// wrapped with some metadata that restore will use later.
+  // Reads every row from every table into a Map<tableName, List<row>>,
+  // wrapped with some metadata that restore will use later.
   Future<Map<String, dynamic>> _exportAllTablesAsMap() async {
     final tableNames = await _getAllTableNames();
     final Map<String, dynamic> backupData = {};

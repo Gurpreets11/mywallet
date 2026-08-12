@@ -152,7 +152,7 @@ class InvestmentCard extends StatelessWidget {
     );
   }
 
-  IconData _getIcon() {
+  /*IconData _getIcon() {
     switch (investment.investmentType) {
       case 'MUTUAL_FUND':
         return Icons.pie_chart;
@@ -172,5 +172,5 @@ class InvestmentCard extends StatelessWidget {
       default:
         return Icons.wallet;
     }
-  }
+  }*/
 }

@@ -33,8 +33,10 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      context.read<InvestmentProvider>().loadInvestments();
+    final investmentProvider = context.read<InvestmentProvider>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      investmentProvider.loadInvestments();
     });
   }
 
@@ -91,7 +93,7 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: provider.selectedFilter,
+                          initialValue: provider.selectedFilter,
                           decoration: const InputDecoration(
                             labelText: 'Filter',
                           ),
@@ -132,7 +134,7 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
 
                       Expanded(
                         child: DropdownButtonFormField<InvestmentSortType>(
-                          value: provider.sortType,
+                          initialValue: provider.sortType,
 
                           decoration: const InputDecoration(labelText: 'Sort'),
 

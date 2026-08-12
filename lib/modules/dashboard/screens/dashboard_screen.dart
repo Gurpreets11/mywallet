@@ -34,8 +34,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      context.read<DashboardProvider>().loadDashboardData();
+    final dashboardProvider = context.read<DashboardProvider>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      dashboardProvider.loadDashboardData();
     });
   }
 

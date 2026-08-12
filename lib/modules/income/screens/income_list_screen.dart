@@ -21,8 +21,10 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      context.read<IncomeProvider>().loadIncomes();
+    final incomeProvider = context.read<IncomeProvider>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      incomeProvider.loadIncomes();
     });
   }
 

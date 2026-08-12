@@ -21,10 +21,11 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      context.read<ExpenseProvider>().loadExpenses();
+    final expenseProvider = context.read<ExpenseProvider>();
 
-      context.read<ExpenseProvider>().loadMonthlySummary();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      expenseProvider.loadExpenses();
+      expenseProvider.loadMonthlySummary();
     });
   }
 
@@ -58,7 +59,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
+            MaterialPageRoute(builder: (context) => const AddExpenseScreen()),
           );
         },
         child: const Icon(Icons.add),
@@ -67,71 +68,69 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           ? const LoadingView()
           : provider.filteredExpenses.isEmpty
           ? const EmptyView(message: 'No expenses found')
-          : Container(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('This Month Expense'),
-                              const SizedBox(height: 8),
-                              Text(
-                                CurrencyUtils.formatAmount(
-                                  provider.monthlyExpenseTotal,
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('This Month Expense'),
+                            const SizedBox(height: 8),
+                            Text(
+                              CurrencyUtils.formatAmount(
+                                provider.monthlyExpenseTotal,
                               ),
-                            ],
-                          ),
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: provider.filteredExpenses.length,
-                      itemBuilder: (context, index) {
-                        final expense = provider.expenses[index];
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: provider.filteredExpenses.length,
+                    itemBuilder: (context, index) {
+                      final expense = provider.expenses[index];
 
-                        return ExpenseCard(
-                          expense: expense,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    ExpenseDetailScreen(expense: expense),
-                              ),
-                            );
-                          },
-                          onDelete: () async {
-                            await provider.deleteExpense(expense.id!);
-                          },
-                          onEdit: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    AddExpenseScreen(expense: expense),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
+                      return ExpenseCard(
+                        expense: expense,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ExpenseDetailScreen(expense: expense),
+                            ),
+                          );
+                        },
+                        onDelete: () async {
+                          await provider.deleteExpense(expense.id!);
+                        },
+                        onEdit: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  AddExpenseScreen(expense: expense),
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
     );
   }
