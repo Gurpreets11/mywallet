@@ -31,16 +31,9 @@ jobs:
 
 
   build-release-apk:
-    # Runs only after analyze-and-test passes, and actually builds a real
-    # release APK. Catches things `flutter analyze`/`flutter test` can't:
-    # release-mode-only compilation issues (R8/ProGuard, tree-shaking,
-    # missing platform config). It would NOT have caught the
-    # AppExitGuard/AndroidManifest.xml issue specifically — a missing
-    # optional manifest attribute doesn't fail the build, it just changes
-    # runtime behavior. Catching that class of issue needs an actual
-    # instrumented/on-device test, which is a bigger addition than this.
     needs: analyze-and-test
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -52,20 +45,34 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Get app version
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Build release APK
         run: flutter build apk --release
+
+      - name: Rename APK
+        run: |
+          APK_NAME="MyWallet-v${{ steps.version.outputs.version }}-build-${{ github.run_number }}.apk"
+
+          mv build/app/outputs/flutter-apk/app-release.apk \
+             build/app/outputs/flutter-apk/$APK_NAME
+
+          echo "APK_NAME=$APK_NAME" >> $GITHUB_ENV
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: ${{ env.APK_NAME }}
+          path: build/app/outputs/flutter-apk/${{ env.APK_NAME }}
           retention-days: 7
 
   create-github-release:
     needs: build-release-apk
 
-    # Run this job only when code is pushed to master
     if: github.ref == 'refs/heads/master'
 
     runs-on: ubuntu-latest
@@ -74,20 +81,31 @@ jobs:
       contents: write
 
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Get app version
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Download Release APK
         uses: actions/download-artifact@v4
         with:
-          name: release-apk
           path: release
+
+      - name: Find APK
+        run: |
+          APK_PATH=$(find release -name "*.apk" | head -n 1)
+          echo "APK_PATH=$APK_PATH" >> $GITHUB_ENV
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          name: Release Build ${{ github.run_number }}
+          name: MyWallet v${{ steps.version.outputs.version }} - Build ${{ github.run_number }}
           generate_release_notes: true
-          files: release/app-release.apk
+          files: ${{ env.APK_PATH }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 
