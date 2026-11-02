@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/utils/validator_utils.dart';
-import '../../../core/widgets/common_button.dart';
-import '../../../core/widgets/common_text_field.dart';
+import '../../../core/widgets/app_responsive_content.dart';
 import '../../../data/providers/master_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/expense_model.dart';
@@ -13,231 +13,121 @@ import '../providers/expense_provider.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   final ExpenseModel? expense;
-
   const AddExpenseScreen({super.key, this.expense});
-
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
 }
 
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final _amountController = TextEditingController();
-
   final _notesController = TextEditingController();
-
   DateTime _selectedDate = DateTime.now();
-
   String _paymentMode = 'Cash';
-
   int? _selectedCategoryId;
-  String? _selectedCategoryName;
   int? _selectedSubcategoryId;
+  String? _selectedCategoryName;
   String? _selectedSubCategoryName;
+  bool _isSaving = false;
+  bool _isLoadingMaster = true;
   bool get isEditMode => widget.expense != null;
 
   @override
   void initState() {
     super.initState();
-
-    final masterProvider = context.read<MasterProvider>();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      masterProvider.loadExpenseCategories();
-    });
-
-    if (isEditMode) {
-      final expense = widget.expense!;
-
+    final expense = widget.expense;
+    if (expense != null) {
       _amountController.text = expense.amount.toString();
-
-      if (_selectedCategoryId != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          masterProvider.loadSubcategories(_selectedCategoryId!);
-        });
-      }
-
       _notesController.text = expense.notes ?? '';
       _paymentMode = expense.paymentMode;
-      _selectedDate = DateTime.parse(expense.date);
+      _selectedDate = DateTime.tryParse(expense.date) ?? DateTime.now();
       _selectedCategoryId = expense.categoryId;
       _selectedSubcategoryId = expense.subcategoryId;
+      _selectedCategoryName = expense.categoryName;
+      _selectedSubCategoryName = expense.subcategoryName;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadMasterData());
   }
 
-  Future<void> _pickDate() async {
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-    );
+  Future<void> _loadMasterData() async {
+    final master = context.read<MasterProvider>();
+    await master.loadExpenseCategories();
+    if (_selectedCategoryId != null) await master.loadSubcategories(_selectedCategoryId!);
+    if (!mounted) return;
+    setState(() => _isLoadingMaster = false);
+  }
 
-    if (pickedDate != null) {
-      setState(() {
-        _selectedDate = pickedDate;
-      });
+  @override
+  void dispose() { _amountController.dispose(); _notesController.dispose(); super.dispose(); }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(context: context, initialDate: _selectedDate, firstDate: DateTime(2000), lastDate: DateTime.now());
+    if (picked != null) setState(() => _selectedDate = picked);
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate() || _selectedCategoryId == null) return;
+    setState(() => _isSaving = true);
+    try {
+      final old = widget.expense;
+      final expense = ExpenseModel(
+        id: old?.id,
+        amount: double.parse(_amountController.text.trim()),
+        categoryId: _selectedCategoryId!,
+        categoryName: _selectedCategoryName,
+        subcategoryId: _selectedSubcategoryId,
+        subcategoryName: _selectedSubCategoryName,
+        date: _selectedDate.toIso8601String(),
+        paymentMode: _paymentMode,
+        notes: _notesController.text.trim(),
+        createdAt: old?.createdAt ?? AppDateUtils.getCurrentTimestamp(),
+      );
+      final provider = context.read<ExpenseProvider>();
+      if (isEditMode) { await provider.updateExpense(expense); } else { await provider.addExpense(expense); }
+      if (!mounted) return;
+      await context.read<DashboardProvider>().loadDashboardData();
+      if (!mounted) return;
+      SnackbarUtils.showSnackbar(context, isEditMode ? 'Expense updated' : 'Expense added');
+      Navigator.pop(context);
+    } catch (error) {
+      if (mounted) SnackbarUtils.showSnackbar(context, 'Unable to save expense. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Expense')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              CommonTextField(
-                controller: _amountController,
-                label: 'Amount',
-                keyboardType: TextInputType.number,
-                validator: ValidatorUtils.validateAmount,
-              ),
-
-              const SizedBox(height: 10),
-
-              Consumer<MasterProvider>(
-                builder: (context, master, _) {
-                  return DropdownButtonFormField<int>(
-                    initialValue: _selectedCategoryId,
-                    decoration: const InputDecoration(labelText: 'Category'),
-                    items: master.expenseCategories.map((category) {
-                      return DropdownMenuItem<int>(
-                        value: category['id'],
-                        child: Text(category['category_name']),
-                      );
-                    }).toList(),
-                    onChanged: (value) async {
-                      final selectedCategory = master.expenseCategories
-                          .firstWhere((category) => category['id'] == value);
-
-                      setState(() {
-                        _selectedCategoryId = value;
-                        _selectedCategoryName =
-                            selectedCategory['category_name'];
-
-                        _selectedSubcategoryId = null;
-                      });
-
-                      if (value != null) {
-                        await context.read<MasterProvider>().loadSubcategories(
-                          value,
-                        );
-                      }
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Select category';
-                      }
-
-                      return null;
-                    },
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-              Consumer<MasterProvider>(
-                builder: (context, master, _) {
-                  return DropdownButtonFormField<int>(
-                    initialValue: _selectedSubcategoryId,
-                    decoration: const InputDecoration(labelText: 'Subcategory'),
-                    items: master.subcategories.map((subcategory) {
-                      return DropdownMenuItem<int>(
-                        value: subcategory['id'],
-                        child: Text(subcategory['subcategory_name']),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      final selectedSubCategory = master.subcategories
-                          .firstWhere(
-                            (subcategory) => subcategory['id'] == value,
-                          );
-
-                      setState(() {
-                        _selectedSubcategoryId = value;
-                        _selectedSubCategoryName =
-                            selectedSubCategory['subcategory_name'];
-                      });
-                    },
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-              CommonTextField(controller: _notesController, label: 'Notes'),
-
-              const SizedBox(height: 10),
-
-              DropdownButtonFormField<String>(
-                initialValue: _paymentMode,
-                items: const [
-                  DropdownMenuItem(value: 'Cash', child: Text('Cash')),
-                  DropdownMenuItem(value: 'UPI', child: Text('UPI')),
-                  DropdownMenuItem(value: 'Card', child: Text('Card')),
-                  DropdownMenuItem(value: 'Bank', child: Text('Bank')),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _paymentMode = value!;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(AppDateUtils.formatDate(_selectedDate)),
-                trailing: IconButton(
-                  onPressed: _pickDate,
-                  icon: const Icon(Icons.calendar_month),
-                ),
-              ),
-              const SizedBox(height: 20),
-              CommonButton(
-                text: 'Save Expense',
-                onPressed: () async {
-                  if (!_formKey.currentState!.validate()) {
-                    return;
-                  }
-
-                  final expense = ExpenseModel(
-                    id: isEditMode ? widget.expense!.id : null,
-                    amount: double.parse(_amountController.text),
-                    categoryId: _selectedCategoryId ?? 1,
-                    categoryName: _selectedCategoryName,
-                    subcategoryId: _selectedSubcategoryId,
-                    subcategoryName: _selectedSubCategoryName,
-                    date: _selectedDate.toIso8601String(),
-                    paymentMode: _paymentMode,
-                    notes: _notesController.text,
-                    createdAt: AppDateUtils.getCurrentTimestamp(),
-                  );
-
-                  if (isEditMode) {
-                    debugPrint('Update Expense called..');
-                    await context.read<ExpenseProvider>().updateExpense(
-                      expense,
-                    );
-                  } else {
-                    debugPrint('Add Expense called..');
-                    await context.read<ExpenseProvider>().addExpense(expense);
-                  }
-
-                  if (!context.mounted) return;
-
-                  await context.read<DashboardProvider>().loadDashboardData();
-                  if (!context.mounted) return;
-                  SnackbarUtils.showSnackbar(context, 'Expense Added');
-
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+      appBar: AppBar(title: Text(isEditMode ? 'Edit expense' : 'Add expense')),
+      body: AppResponsiveContent(maxWidth: 680, padding: const EdgeInsets.all(20), child: _isLoadingMaster
+        ? const Center(child: CircularProgressIndicator())
+        : Form(key: _formKey, child: ListView(shrinkWrap: true, children: [
+          Card(child: Padding(padding: const EdgeInsets.all(18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(isEditMode ? 'Update transaction' : 'New transaction', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6), Text('Enter the details of your expense.', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+            const SizedBox(height: 20),
+            TextFormField(controller: _amountController, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Amount', prefixText: '₹ ', prefixIcon: Icon(Icons.currency_rupee)), validator: (value) { final amount = double.tryParse((value ?? '').trim()); if (amount == null || amount <= 0) return 'Enter a valid amount greater than zero'; return null; }),
+            const SizedBox(height: 16),
+            Consumer<MasterProvider>(builder: (context, master, _) => DropdownButtonFormField<int>(value: _selectedCategoryId, isExpanded: true, decoration: const InputDecoration(labelText: 'Category', prefixIcon: Icon(Icons.category_outlined)), items: master.expenseCategories.map((category) => DropdownMenuItem<int>(value: category['id'] as int, child: Text(category['category_name'].toString(), overflow: TextOverflow.ellipsis))).toList(), onChanged: (value) async {
+              final selected = master.expenseCategories.firstWhere((item) => item['id'] == value);
+              setState(() { _selectedCategoryId = value; _selectedCategoryName = selected['category_name'].toString(); _selectedSubcategoryId = null; _selectedSubCategoryName = null; });
+              if (value != null) await master.loadSubcategories(value);
+            }, validator: (value) => value == null ? 'Select a category' : null)),
+            const SizedBox(height: 16),
+            Consumer<MasterProvider>(builder: (context, master, _) => DropdownButtonFormField<int>(value: _selectedSubcategoryId, isExpanded: true, decoration: const InputDecoration(labelText: 'Subcategory (optional)', prefixIcon: Icon(Icons.subdirectory_arrow_right)), items: master.subcategories.map((item) => DropdownMenuItem<int>(value: item['id'] as int, child: Text(item['subcategory_name'].toString(), overflow: TextOverflow.ellipsis))).toList(), onChanged: (value) { final matches = master.subcategories.where((item) => item['id'] == value); setState(() { _selectedSubcategoryId = value; _selectedSubCategoryName = matches.isEmpty ? null : matches.first['subcategory_name'].toString(); }); })),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(value: _paymentMode, isExpanded: true, decoration: const InputDecoration(labelText: 'Payment mode', prefixIcon: Icon(Icons.account_balance_wallet_outlined)), items: const [DropdownMenuItem(value: 'Cash', child: Text('Cash')), DropdownMenuItem(value: 'UPI', child: Text('UPI')), DropdownMenuItem(value: 'Card', child: Text('Card')), DropdownMenuItem(value: 'Bank', child: Text('Bank'))], onChanged: (value) => setState(() => _paymentMode = value ?? 'Cash')),
+            const SizedBox(height: 16),
+            InkWell(onTap: _pickDate, borderRadius: BorderRadius.circular(12), child: InputDecorator(decoration: const InputDecoration(labelText: 'Expense date', prefixIcon: Icon(Icons.calendar_today_outlined)), child: Row(children: [Expanded(child: Text(AppDateUtils.formatDate(_selectedDate))), const Icon(Icons.edit_calendar_outlined)]))),
+            const SizedBox(height: 16),
+            TextFormField(controller: _notesController, minLines: 2, maxLines: 4, decoration: const InputDecoration(labelText: 'Notes (optional)', alignLabelWithHint: true, prefixIcon: Icon(Icons.notes))),
+          ]))),
+          const SizedBox(height: 18),
+          SizedBox(height: 52, child: FilledButton.icon(onPressed: _isSaving ? null : _save, icon: _isSaving ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.save_outlined), label: Text(_isSaving ? 'Saving...' : isEditMode ? 'Update expense' : 'Save expense'))),
+          if (isEditMode) Padding(padding: const EdgeInsets.only(top: 12), child: Text('Current amount: ${CurrencyUtils.formatAmount(widget.expense!.amount)}', textAlign: TextAlign.center, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant))),
+        ])),
+    ),);
   }
 }

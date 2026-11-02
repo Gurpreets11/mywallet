@@ -27,21 +27,16 @@ class EmptyView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
-            Icon(icon, size: 70, color: Colors.grey.shade400),
-
-            const SizedBox(height: 20),
-
+            Icon(icon, size: 60, color: Colors.grey.shade400),
+            const SizedBox(height: 10),
             Text(
               message,
-
               textAlign: TextAlign.center,
-
               style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             ),
 
             if (actionText != null) ...[
-              const SizedBox(height: 20),
-
+              const SizedBox(height: 16),
               ElevatedButton(onPressed: onAction, child: Text(actionText!)),
             ],
           ],

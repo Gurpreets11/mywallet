@@ -55,7 +55,7 @@ class FinanceManagerApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'My Wallet',
 
-        themeMode: ThemeMode.system,
+        themeMode: ThemeMode.light,
 
         theme: AppTheme.lightTheme,
 

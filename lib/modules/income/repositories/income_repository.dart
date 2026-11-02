@@ -50,8 +50,10 @@ class IncomeRepository {
     final Database db = await AppDatabase.database;
 
     final result = await db.rawQuery('''
-      SELECT SUM(amount) as total
+      SELECT COALESCE(SUM(amount), 0) as total
       FROM incomes
+      WHERE date(date) >= date('now', 'localtime', 'start of month')
+        AND date(date) < date('now', 'localtime', 'start of month', '+1 month')
     ''');
 
     return (result.first['total'] as num?)?.toDouble() ?? 0.0;

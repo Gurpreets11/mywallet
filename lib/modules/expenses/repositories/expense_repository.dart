@@ -32,7 +32,7 @@ class ExpenseRepository {
     ON e.category_id = c.id
   LEFT JOIN subcategories s
     ON e.subcategory_id = s.id
-  ORDER BY e.date DESC
+  ORDER BY e.date DESC, e.id DESC
 ''');
 
     return maps.map((e) => ExpenseModel.fromMap(e)).toList();
@@ -82,14 +82,14 @@ class ExpenseRepository {
 
     final startDate = DateTime(now.year, now.month, 1).toIso8601String();
 
-    final endDate = DateTime(now.year, now.month + 1, 0).toIso8601String();
+    final endDate = DateTime(now.year, now.month + 1, 1).toIso8601String();
     debugPrint("startDate : $startDate");
     debugPrint("endDate : $endDate");
     final result = await db.rawQuery(
       '''
     SELECT SUM(amount) as total
     FROM expenses
-    WHERE date BETWEEN ? AND ?
+    WHERE date >= ? AND date < ?
   ''',
       [startDate, endDate],
     );

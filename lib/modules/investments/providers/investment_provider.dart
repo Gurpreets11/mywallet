@@ -79,6 +79,7 @@ class InvestmentProvider extends ChangeNotifier {
 
       temp = temp.where((investment) {
         return investment.investmentName.toLowerCase().contains(query) ||
+            (investment.notes?.toLowerCase().contains(query) ?? false) ||
             investment.investmentType.toLowerCase().contains(query) ||
             (investment.investmentPlatform?.toLowerCase().contains(query) ??
                 false);
@@ -99,7 +100,7 @@ class InvestmentProvider extends ChangeNotifier {
 
     switch (_sortType) {
       case InvestmentSortType.latest:
-        temp.sort((a, b) => b.id!.compareTo(a.id!));
+        temp.sort((a, b) => (b.id ?? 0).compareTo(a.id ?? 0));
 
         break;
 

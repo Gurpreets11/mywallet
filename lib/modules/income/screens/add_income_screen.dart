@@ -6,6 +6,7 @@ import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/utils/validator_utils.dart';
 import '../../../core/widgets/common_button.dart';
 import '../../../core/widgets/common_text_field.dart';
+import '../../../core/widgets/app_responsive_content.dart';
 import '../../../data/providers/master_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/income_model.dart';
@@ -42,6 +43,13 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
   String? _selectedSubCategoryName;
 
   bool get isEditMode => widget.income != null;
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -110,7 +118,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
       notes: _notesController.text,
       isRecurring: _isRecurring,
       recurringType: _isRecurring ? _recurringType : null,
-      createdAt: AppDateUtils.getCurrentTimestamp(),
+      createdAt: isEditMode ? widget.income!.createdAt : AppDateUtils.getCurrentTimestamp(),
     );
 
     final provider = context.read<IncomeProvider>();
@@ -140,7 +148,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
       appBar: AppBar(title: Text(isEditMode ? 'Edit Income' : 'Add Income')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Form(
+        child: AppResponsiveContent(
+          maxWidth: 640,
+          child: Form(
           key: _formKey,
           child: Column(
             children: [
@@ -314,6 +324,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

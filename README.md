@@ -3,9 +3,12 @@
 A Flutter-based personal finance management application that helps you track expenses, income, investments, and loans — completely offline, using only local storage.
 
 ![Platform](https://img.shields.io/badge/platform-Android-blue)
-![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Status](https://img.shields.io/badge/status-in%20development-yellow)
+[![Flutter](https://img.shields.io/badge/Flutter-3.38.5-blue.svg)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.x-blue.svg)](https://dart.dev)
+[![CI](https://github.com/Gurpreets11/mywallet/actions/workflows/ci.yml/badge.svg)](https://github.com/Gurpreets11/mywallet/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/Gurpreets11/mywallet)](https://github.com/Gurpreets11/mywallet/releases)
+[![License](https://img.shields.io/github/license/Gurpreets11/mywallet)](LICENSE)
+![Status](https://img.shields.io/badge/status-active%20development-success)
 
 ---
 
@@ -206,6 +209,8 @@ See [ROADMAP.md](ROADMAP.md) for completed phases and what's planned next (budge
 - [SECURITY.md](SECURITY.md) — reporting vulnerabilities
 - [PRIVACY.md](PRIVACY.md) — what data is collected and how it's handled
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — community guidelines
+- [CI/CD Pipeline](docs/CI_CD.md)
+- [Release Process](docs/RELEASE_PROCESS.md)
 
 ---
 

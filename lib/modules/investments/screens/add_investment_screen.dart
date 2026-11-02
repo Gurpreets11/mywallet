@@ -43,7 +43,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
 
   bool _isSip = false;
 
-  final DateTime _investmentDate = DateTime.now();
+  late DateTime _investmentDate;
 
   bool get isEditMode => widget.investment != null;
 
@@ -54,10 +54,12 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
   @override
   void initState() {
     super.initState();
+    _investmentDate = DateTime.now();
 
     if (isEditMode) {
       final investment = widget.investment!;
 
+      _investmentDate = DateTime.tryParse(investment.investmentDate) ?? DateTime.now();
       _nameController.text = investment.investmentName;
 
       _platformController.text = investment.investmentPlatform ?? '';
@@ -78,7 +80,25 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _platformController.dispose();
+    _investedController.dispose();
+    _currentValueController.dispose();
+    _notesController.dispose();
+    _sipAmountController.dispose();
+    super.dispose();
+  }
+
+  String? _validateAmount(String? value) {
+    final amount = double.tryParse(value?.trim() ?? '');
+    if (amount == null || amount < 0) return 'Enter a valid amount';
+    return null;
+  }
+
   Future<void> _saveInvestment() async {
+    if (!_formKey.currentState!.validate()) return;
     final investment = InvestmentModel(
       id: isEditMode ? widget.investment!.id : null,
 
@@ -96,11 +116,17 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
 
       isSip: _isSip,
 
-      createdAt: AppDateUtils.getCurrentTimestamp(),
+      createdAt: isEditMode ? widget.investment!.createdAt : AppDateUtils.getCurrentTimestamp(),
+      notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
 
       sipAmount: _isSip ? double.tryParse(_sipAmountController.text) : null,
 
       sipDate: _isSip ? _sipDate : null,
+      quantity: isEditMode ? widget.investment!.quantity : null,
+      purchasePrice: isEditMode ? widget.investment!.purchasePrice : null,
+      currentPrice: isEditMode ? widget.investment!.currentPrice : null,
+      maturityDate: isEditMode ? widget.investment!.maturityDate : null,
+      interestRate: isEditMode ? widget.investment!.interestRate : null,
     );
 
     final provider = context.read<InvestmentProvider>();
@@ -175,6 +201,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
               CommonTextField(
                 controller: _nameController,
                 label: 'Investment Name',
+                validator: (value) => value == null || value.trim().isEmpty ? 'Please enter investment name' : null,
               ),
 
               const SizedBox(height: 16),
@@ -189,7 +216,8 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
               CommonTextField(
                 controller: _investedController,
                 label: 'Invested Amount',
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                validator: _validateAmount,
               ),
 
               const SizedBox(height: 16),
@@ -197,7 +225,8 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
               CommonTextField(
                 controller: _currentValueController,
                 label: 'Current Value',
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                validator: _validateAmount,
               ),
 
               const SizedBox(height: 16),
@@ -222,7 +251,8 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
 
                   label: 'SIP Amount',
 
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  validator: _isSip ? _validateAmount : null,
                 ),
 
                 const SizedBox(height: 16),
