@@ -273,7 +273,8 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
                     width: double.infinity,
 
                     child: ElevatedButton.icon(
-                      onPressed: widget.loan.loanStatus.toUpperCase() == 'CLOSED'
+                      onPressed:
+                          widget.loan.loanStatus.toUpperCase() == 'CLOSED'
                           ? null
                           : () {
                               showModalBottomSheet(

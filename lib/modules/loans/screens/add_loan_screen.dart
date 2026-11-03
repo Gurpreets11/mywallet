@@ -49,7 +49,9 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
       _tenureController.text = loan.tenureMonths.toString();
       _notesController.text = loan.notes ?? '';
       _loanType = loan.loanType;
-      _loanStatus = loan.loanStatus.toUpperCase() == 'CLOSED' ? 'CLOSED' : 'ACTIVE';
+      _loanStatus = loan.loanStatus.toUpperCase() == 'CLOSED'
+          ? 'CLOSED'
+          : 'ACTIVE';
       _startDate = DateTime.tryParse(loan.startDate) ?? DateTime.now();
       _nextEmiDate =
           DateTime.tryParse(loan.nextEmiDate ?? '') ?? DateTime.now();
@@ -134,7 +136,8 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
         startDate: _startDate.toIso8601String(),
         endDate: old?.endDate,
         totalPaid: old?.totalPaid ?? 0,
-        outstandingAmount: old?.outstandingAmount ??
+        outstandingAmount:
+            old?.outstandingAmount ??
             double.parse(_amountController.text.trim()),
         loanStatus: _loanStatus,
         notes: _notesController.text.trim().isEmpty
@@ -219,10 +222,11 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
                         ),
                         const SizedBox(height: 20),
                         DropdownButtonFormField<String>(
-                          value: _loanType,
+                          initialValue: _loanType,
                           isExpanded: true,
-                          decoration:
-                              const InputDecoration(labelText: 'Loan type'),
+                          decoration: const InputDecoration(
+                            labelText: 'Loan type',
+                          ),
                           items: const [
                             DropdownMenuItem(
                               value: 'BORROWED',
@@ -308,10 +312,11 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
                         ),
                         const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
-                          value: _loanStatus,
+                          initialValue: _loanStatus,
                           isExpanded: true,
-                          decoration:
-                              const InputDecoration(labelText: 'Loan status'),
+                          decoration: const InputDecoration(
+                            labelText: 'Loan status',
+                          ),
                           items: const [
                             DropdownMenuItem(
                               value: 'ACTIVE',
@@ -359,8 +364,8 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
                       _isSaving
                           ? 'Saving...'
                           : isEditMode
-                              ? 'Update loan'
-                              : 'Save loan',
+                          ? 'Update loan'
+                          : 'Save loan',
                     ),
                   ),
                 ),

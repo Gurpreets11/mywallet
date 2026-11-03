@@ -206,7 +206,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                         ),
                         const SizedBox(height: 20),
                         DropdownButtonFormField<String>(
-                          value: _investmentType,
+                          initialValue: _investmentType,
                           isExpanded: true,
                           decoration: const InputDecoration(
                             labelText: 'Investment type',
@@ -273,8 +273,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                           child: InputDecorator(
                             decoration: const InputDecoration(
                               labelText: 'Investment date',
-                              prefixIcon:
-                                  Icon(Icons.calendar_today_outlined),
+                              prefixIcon: Icon(Icons.calendar_today_outlined),
                             ),
                             child: Row(
                               children: [
@@ -293,15 +292,13 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                           contentPadding: EdgeInsets.zero,
                           value: _isSip,
                           title: const Text('This is a SIP'),
-                          onChanged: (value) =>
-                              setState(() => _isSip = value),
+                          onChanged: (value) => setState(() => _isSip = value),
                         ),
                         if (_isSip) ...[
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _sipAmountController,
-                            keyboardType:
-                                const TextInputType.numberWithOptions(
+                            keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
                             decoration: const InputDecoration(
@@ -312,7 +309,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                           ),
                           const SizedBox(height: 16),
                           DropdownButtonFormField<int>(
-                            value: _sipDate,
+                            initialValue: _sipDate,
                             isExpanded: true,
                             decoration: const InputDecoration(
                               labelText: 'SIP date of month',
@@ -362,8 +359,8 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                       _isSaving
                           ? 'Saving...'
                           : isEditMode
-                              ? 'Update investment'
-                              : 'Save investment',
+                          ? 'Update investment'
+                          : 'Save investment',
                     ),
                   ),
                 ),

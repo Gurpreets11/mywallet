@@ -72,16 +72,15 @@ class MainNavigationScreen extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final selectedIndex = navigation.currentIndex.clamp(0, _screens.length - 1).toInt();
+        final selectedIndex = navigation.currentIndex
+            .clamp(0, _screens.length - 1)
+            .toInt();
         final useRail = AppBreakpoints.useNavigationRail(width);
         final extendedRail = AppBreakpoints.useExtendedNavigationRail(width);
 
         if (!useRail) {
           return Scaffold(
-            body: IndexedStack(
-              index: selectedIndex,
-              children: _screens,
-            ),
+            body: IndexedStack(index: selectedIndex, children: _screens),
             bottomNavigationBar: NavigationBar(
               selectedIndex: selectedIndex,
               onDestinationSelected: navigation.changeIndex,
@@ -108,8 +107,11 @@ class MainNavigationScreen extends StatelessWidget {
                       ? const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.account_balance_wallet_rounded,
-                                color: AppColors.primary, size: 26),
+                            Icon(
+                              Icons.account_balance_wallet_rounded,
+                              color: AppColors.primary,
+                              size: 26,
+                            ),
                             SizedBox(width: 10),
                             Text(
                               'myWallet',
@@ -131,10 +133,7 @@ class MainNavigationScreen extends StatelessWidget {
               ),
               const VerticalDivider(width: 1, thickness: 1),
               Expanded(
-                child: IndexedStack(
-                  index: selectedIndex,
-                  children: _screens,
-                ),
+                child: IndexedStack(index: selectedIndex, children: _screens),
               ),
             ],
           ),

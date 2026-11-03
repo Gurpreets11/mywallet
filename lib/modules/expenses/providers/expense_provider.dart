@@ -12,7 +12,8 @@ class ExpenseProvider extends ChangeNotifier {
   String _searchKeyword = '';
 
   List<ExpenseModel> get expenses => List.unmodifiable(_expenses);
-  List<ExpenseModel> get filteredExpenses => List.unmodifiable(_filteredExpenses);
+  List<ExpenseModel> get filteredExpenses =>
+      List.unmodifiable(_filteredExpenses);
   bool get isLoading => _isLoading;
   double get monthlyExpenseTotal => _monthlyExpenseTotal;
 

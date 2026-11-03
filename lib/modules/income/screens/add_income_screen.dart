@@ -151,9 +151,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditMode ? 'Edit Income' : 'Add Income'),
-      ),
+      appBar: AppBar(title: Text(isEditMode ? 'Edit Income' : 'Add Income')),
       body: SingleChildScrollView(
         child: AppResponsiveContent(
           maxWidth: 680,
@@ -192,8 +190,8 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                 controller: _amountController,
                                 keyboardType:
                                     const TextInputType.numberWithOptions(
-                                  decimal: true,
-                                ),
+                                      decimal: true,
+                                    ),
                                 decoration: const InputDecoration(
                                   labelText: 'Amount',
                                   prefixText: '₹ ',
@@ -205,18 +203,19 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                               Consumer<MasterProvider>(
                                 builder: (context, master, _) {
                                   final categories = master.incomeCategories;
-                                  final selectedValue = categories.any(
-                                    (item) => item['id'] == _selectedCategoryId,
-                                  )
+                                  final selectedValue =
+                                      categories.any(
+                                        (item) =>
+                                            item['id'] == _selectedCategoryId,
+                                      )
                                       ? _selectedCategoryId
                                       : null;
                                   return DropdownButtonFormField<int>(
-                                    value: selectedValue,
+                                    initialValue: selectedValue,
                                     isExpanded: true,
                                     decoration: const InputDecoration(
                                       labelText: 'Category',
-                                      prefixIcon:
-                                          Icon(Icons.category_outlined),
+                                      prefixIcon: Icon(Icons.category_outlined),
                                     ),
                                     items: categories.map((category) {
                                       return DropdownMenuItem<int>(
@@ -255,14 +254,16 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                 builder: (context, master, _) {
                                   final subcategories =
                                       master.incomeSubCategories;
-                                  final selectedValue = subcategories.any(
-                                    (item) =>
-                                        item['id'] == _selectedSubcategoryId,
-                                  )
+                                  final selectedValue =
+                                      subcategories.any(
+                                        (item) =>
+                                            item['id'] ==
+                                            _selectedSubcategoryId,
+                                      )
                                       ? _selectedSubcategoryId
                                       : null;
                                   return DropdownButtonFormField<int>(
-                                    value: selectedValue,
+                                    initialValue: selectedValue,
                                     isExpanded: true,
                                     decoration: const InputDecoration(
                                       labelText: 'Subcategory (optional)',
@@ -287,10 +288,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                         _selectedSubcategoryId = value;
                                         _selectedSubCategoryName =
                                             matches.isEmpty
-                                                ? null
-                                                : matches.first[
-                                                        'subcategory_name']
-                                                    .toString();
+                                            ? null
+                                            : matches.first['subcategory_name']
+                                                  .toString();
                                       });
                                     },
                                   );
@@ -298,7 +298,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                               ),
                               const SizedBox(height: 16),
                               DropdownButtonFormField<String>(
-                                value: _paymentMode,
+                                initialValue: _paymentMode,
                                 isExpanded: true,
                                 decoration: const InputDecoration(
                                   labelText: 'Payment mode',
@@ -333,8 +333,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                 child: InputDecorator(
                                   decoration: const InputDecoration(
                                     labelText: 'Income date',
-                                    prefixIcon:
-                                        Icon(Icons.calendar_today_outlined),
+                                    prefixIcon: Icon(
+                                      Icons.calendar_today_outlined,
+                                    ),
                                   ),
                                   child: Row(
                                     children: [
@@ -361,7 +362,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                               if (_isRecurring) ...[
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
-                                  value: _recurringType,
+                                  initialValue: _recurringType,
                                   isExpanded: true,
                                   decoration: const InputDecoration(
                                     labelText: 'Recurring type',
@@ -386,9 +387,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                   ],
                                   onChanged: (value) {
                                     if (value != null) {
-                                      setState(
-                                        () => _recurringType = value,
-                                      );
+                                      setState(() => _recurringType = value);
                                     }
                                   },
                                 ),
@@ -426,8 +425,8 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                             _isSaving
                                 ? 'Saving...'
                                 : isEditMode
-                                    ? 'Update income'
-                                    : 'Save income',
+                                ? 'Update income'
+                                : 'Save income',
                           ),
                         ),
                       ),

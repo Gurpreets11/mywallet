@@ -19,8 +19,8 @@ class MoreScreen extends StatelessWidget {
           final crossAxisCount = width >= 1100
               ? 4
               : width >= 700
-                  ? 3
-                  : 2;
+              ? 3
+              : 2;
 
           return AppResponsiveContent(
             maxWidth: 1200,
@@ -35,8 +35,8 @@ class MoreScreen extends StatelessWidget {
                 mainAxisExtent: width < 400
                     ? 150
                     : width < 700
-                        ? 160
-                        : 170,
+                    ? 160
+                    : 170,
               ),
               children: [
                 _MoreMenuCard(
@@ -90,10 +90,7 @@ class _MoreMenuCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => screen),
-          );
+          Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
         },
         child: Padding(
           padding: const EdgeInsets.all(16),

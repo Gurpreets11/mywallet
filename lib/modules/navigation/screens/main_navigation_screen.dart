@@ -102,8 +102,9 @@ class MainNavigationScreen extends StatelessWidget {
         final width = constraints.maxWidth;
         final useRail = AppBreakpoints.useNavigationRail(width);
         final extendedRail = AppBreakpoints.useExtendedNavigationRail(width);
-        final requestedIndex =
-            navigation.currentIndex.clamp(0, _screens.length - 1).toInt();
+        final requestedIndex = navigation.currentIndex
+            .clamp(0, _screens.length - 1)
+            .toInt();
         // More is a mobile-only destination. If the window is resized while
         // More is selected, open Investments as the nearest wide-layout page.
         final currentIndex = requestedIndex == 3 ? 4 : requestedIndex;
@@ -131,8 +132,9 @@ class MainNavigationScreen extends StatelessWidget {
             children: [
               NavigationRail(
                 selectedIndex: selectedRailIndex,
-                onDestinationSelected: (index) =>
-                    navigation.changeIndex(_screenIndexForWideDestination(index)),
+                onDestinationSelected: (index) => navigation.changeIndex(
+                  _screenIndexForWideDestination(index),
+                ),
                 extended: extendedRail,
                 labelType: extendedRail
                     ? NavigationRailLabelType.none
@@ -171,10 +173,7 @@ class MainNavigationScreen extends StatelessWidget {
               ),
               const VerticalDivider(width: 1, thickness: 1),
               Expanded(
-                child: IndexedStack(
-                  index: currentIndex,
-                  children: _screens,
-                ),
+                child: IndexedStack(index: currentIndex, children: _screens),
               ),
             ],
           ),

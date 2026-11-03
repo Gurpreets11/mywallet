@@ -35,9 +35,12 @@ class IncomeProvider extends ChangeNotifier {
     } else {
       _filteredIncomes = _incomes.where((income) {
         final fields = [
-          income.amount.toString(), income.categoryName ?? '',
-          income.subcategoryName ?? '', income.paymentMode,
-          income.notes ?? '', income.recurringType ?? '',
+          income.amount.toString(),
+          income.categoryName ?? '',
+          income.subcategoryName ?? '',
+          income.paymentMode,
+          income.notes ?? '',
+          income.recurringType ?? '',
         ];
         return fields.any((field) => field.toLowerCase().contains(value));
       }).toList();
