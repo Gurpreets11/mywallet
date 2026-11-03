@@ -34,7 +34,7 @@ class LoanProvider extends ChangeNotifier {
     _totalOutstanding = await _repository.getTotalOutstandingLoan();
 
     for (final loan in _loans) {
-      if (loan.loanStatus != 'Closed') {
+      if (loan.loanStatus.toUpperCase() != 'CLOSED') {
         final isOverdue = LoanAnalyticsUtils.isLoanOverdue(loan.nextEmiDate!);
 
         if (isOverdue) {

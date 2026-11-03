@@ -43,7 +43,7 @@ class LoanRepository {
       SELECT SUM(outstanding_amount)
       AS total
       FROM loans
-      WHERE loan_status = 'ACTIVE'
+      WHERE UPPER(loan_status) = 'ACTIVE'
     ''');
 
     return (result.first['total'] as num?)?.toDouble() ?? 0.0;
@@ -95,7 +95,7 @@ class LoanRepository {
     final result = await db.rawQuery('''
     SELECT COUNT(*) as total
     FROM loans
-    WHERE loan_status = 'ACTIVE'
+    WHERE UPPER(loan_status) = 'ACTIVE'
   ''');
 
     return Sqflite.firstIntValue(result) ?? 0;
@@ -107,7 +107,7 @@ class LoanRepository {
     final result = await db.rawQuery('''
     SELECT COUNT(*) as total
     FROM loans
-    WHERE loan_status = 'CLOSED'
+    WHERE UPPER(loan_status) = 'CLOSED'
   ''');
 
     return Sqflite.firstIntValue(result) ?? 0;
@@ -131,7 +131,7 @@ class LoanRepository {
     final result = await db.rawQuery('''
     SELECT *
     FROM loans
-    WHERE loan_status = 'ACTIVE'
+    WHERE UPPER(loan_status) = 'ACTIVE'
     AND next_emi_date IS NOT NULL
     ORDER BY next_emi_date ASC
     LIMIT 1
@@ -203,7 +203,7 @@ class LoanRepository {
       currentNextEmiDate.day,
     );
 
-    final updatedStatus = updatedOutstanding <= 0 ? 'Closed' : 'Active';
+    final updatedStatus = updatedOutstanding <= 0 ? 'CLOSED' : 'ACTIVE';
 
     /// UPDATE LOAN
 

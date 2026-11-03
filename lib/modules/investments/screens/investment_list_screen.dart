@@ -33,7 +33,9 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
     final current = provider.investments.fold<double>(0, (sum, e) => sum + e.currentValue);
     return Scaffold(
       appBar: AppBar(title: const Text('Investments')),
-      floatingActionButton: FloatingActionButton.extended(onPressed: _addInvestment, icon: const Icon(Icons.add), label: const Text('Add')),
+      floatingActionButton: FloatingActionButton.extended(
+          heroTag: 'investment_fab',
+          onPressed: _addInvestment, icon: const Icon(Icons.add), label: const Text('Add')),
       body: provider.isLoading ? const LoadingView() : LayoutBuilder(builder: (context, constraints) {
         final wide = constraints.maxWidth >= 900;
         final contentWidth = constraints.maxWidth > 1200 ? 1120.0 : constraints.maxWidth;

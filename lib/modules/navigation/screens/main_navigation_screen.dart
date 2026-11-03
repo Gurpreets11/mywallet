@@ -7,19 +7,27 @@ import '../../dashboard/screens/dashboard_screen.dart';
 import '../../dashboard/screens/more_screen.dart';
 import '../../expenses/screens/expense_list_screen.dart';
 import '../../income/screens/income_list_screen.dart';
+import '../../investments/screens/investment_list_screen.dart';
+import '../../loans/screens/loan_list_screen.dart';
+import '../../settings/setting_screen.dart';
 import '../providers/navigation_provider.dart';
 
 class MainNavigationScreen extends StatelessWidget {
   const MainNavigationScreen({super.key});
 
+  // Screen indexes are stable across mobile, tablet and desktop.
+  // Index 3 is the mobile-only More screen.
   static const List<Widget> _screens = [
     DashboardScreen(),
     ExpenseListScreen(),
     IncomeListScreen(),
     MoreScreen(),
+    InvestmentListScreen(),
+    LoanListScreen(),
+    SettingsScreen(),
   ];
 
-  static const List<NavigationDestination> _destinations = [
+  static const List<NavigationDestination> _mobileDestinations = [
     NavigationDestination(
       icon: Icon(Icons.home_outlined),
       selectedIcon: Icon(Icons.home_rounded),
@@ -42,7 +50,7 @@ class MainNavigationScreen extends StatelessWidget {
     ),
   ];
 
-  static const List<NavigationRailDestination> _railDestinations = [
+  static const List<NavigationRailDestination> _wideDestinations = [
     NavigationRailDestination(
       icon: Icon(Icons.home_outlined),
       selectedIcon: Icon(Icons.home_rounded),
@@ -59,11 +67,31 @@ class MainNavigationScreen extends StatelessWidget {
       label: Text('Income'),
     ),
     NavigationRailDestination(
-      icon: Icon(Icons.grid_view_outlined),
-      selectedIcon: Icon(Icons.grid_view_rounded),
-      label: Text('More'),
+      icon: Icon(Icons.trending_up_outlined),
+      selectedIcon: Icon(Icons.trending_up_rounded),
+      label: Text('Investments'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.account_balance_outlined),
+      selectedIcon: Icon(Icons.account_balance_rounded),
+      label: Text('Loans'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.settings_outlined),
+      selectedIcon: Icon(Icons.settings_rounded),
+      label: Text('Settings'),
     ),
   ];
+
+  int _screenIndexForWideDestination(int destinationIndex) {
+    // Skip index 3, which is the mobile-only More screen.
+    return destinationIndex < 3 ? destinationIndex : destinationIndex + 1;
+  }
+
+  int _wideDestinationForScreen(int screenIndex) {
+    if (screenIndex <= 2) return screenIndex;
+    return (screenIndex - 1).clamp(0, 5);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,30 +100,39 @@ class MainNavigationScreen extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final selectedIndex = navigation.currentIndex.clamp(0, _screens.length - 1).toInt();
         final useRail = AppBreakpoints.useNavigationRail(width);
         final extendedRail = AppBreakpoints.useExtendedNavigationRail(width);
+        final requestedIndex =
+            navigation.currentIndex.clamp(0, _screens.length - 1).toInt();
+        // More is a mobile-only destination. If the window is resized while
+        // More is selected, open Investments as the nearest wide-layout page.
+        final currentIndex = requestedIndex == 3 ? 4 : requestedIndex;
 
         if (!useRail) {
+          // On mobile, Investments, Loans and Settings are reached through More.
+          final mobileIndex = currentIndex <= 2 ? currentIndex : 3;
           return Scaffold(
             body: IndexedStack(
-              index: selectedIndex,
-              children: _screens,
+              index: mobileIndex,
+              children: _screens.take(4).toList(),
             ),
             bottomNavigationBar: NavigationBar(
-              selectedIndex: selectedIndex,
+              selectedIndex: mobileIndex,
               onDestinationSelected: navigation.changeIndex,
-              destinations: _destinations,
+              destinations: _mobileDestinations,
             ),
           );
         }
+
+        final selectedRailIndex = _wideDestinationForScreen(currentIndex);
 
         return Scaffold(
           body: Row(
             children: [
               NavigationRail(
-                selectedIndex: selectedIndex,
-                onDestinationSelected: navigation.changeIndex,
+                selectedIndex: selectedRailIndex,
+                onDestinationSelected: (index) =>
+                    navigation.changeIndex(_screenIndexForWideDestination(index)),
                 extended: extendedRail,
                 labelType: extendedRail
                     ? NavigationRailLabelType.none
@@ -108,8 +145,11 @@ class MainNavigationScreen extends StatelessWidget {
                       ? const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.account_balance_wallet_rounded,
-                                color: AppColors.primary, size: 26),
+                            Icon(
+                              Icons.account_balance_wallet_rounded,
+                              color: AppColors.primary,
+                              size: 26,
+                            ),
                             SizedBox(width: 10),
                             Text(
                               'myWallet',
@@ -127,12 +167,12 @@ class MainNavigationScreen extends StatelessWidget {
                           size: 28,
                         ),
                 ),
-                destinations: _railDestinations,
+                destinations: _wideDestinations,
               ),
               const VerticalDivider(width: 1, thickness: 1),
               Expanded(
                 child: IndexedStack(
-                  index: selectedIndex,
+                  index: currentIndex,
                   children: _screens,
                 ),
               ),

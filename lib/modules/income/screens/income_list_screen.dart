@@ -97,7 +97,9 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
     final activeFilters = (_categoryId != null ? 1 : 0) + (_paymentMode != null ? 1 : 0) + (_dateRange != null ? 1 : 0);
     return Scaffold(
       appBar: AppBar(title: const Text('Income'), actions: [IconButton(tooltip: 'Filter income', onPressed: _openFilters, icon: Badge(isLabelVisible: activeFilters > 0, label: Text('$activeFilters'), child: const Icon(Icons.tune)))]),
-      floatingActionButton: FloatingActionButton.extended(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddIncomeScreen())), icon: const Icon(Icons.add), label: const Text('Add income')),
+      floatingActionButton: FloatingActionButton.extended(
+          heroTag: 'income_fab',
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddIncomeScreen())), icon: const Icon(Icons.add), label: const Text('Add income')),
       body: provider.isLoading ? const LoadingView() : AppResponsiveContent(maxWidth: 1050, padding: const EdgeInsets.fromLTRB(16, 8, 16, 88), child: Column(children: [
         TextField(controller: _searchController, onChanged: context.read<IncomeProvider>().searchIncome, decoration: InputDecoration(hintText: 'Search category, notes, payment mode or amount', prefixIcon: const Icon(Icons.search), suffixIcon: _searchController.text.isEmpty ? null : IconButton(onPressed: () { _searchController.clear(); context.read<IncomeProvider>().searchIncome(''); }, icon: const Icon(Icons.close)), filled: true)),
         const SizedBox(height: 12),

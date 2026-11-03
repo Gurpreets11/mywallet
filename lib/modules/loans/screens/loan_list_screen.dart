@@ -36,6 +36,7 @@ class _LoanListScreenState extends State<LoanListScreen> {
       appBar: AppBar(title: const Text('Loans')),
 
       floatingActionButton: FloatingActionButton(
+        heroTag: 'loans_fab',
         onPressed: () {
           Navigator.push(
             context,

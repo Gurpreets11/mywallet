@@ -14,7 +14,8 @@ class IncomeDetailScreen extends StatelessWidget {
     final date = DateTime.tryParse(income.date);
     return Scaffold(
       appBar: AppBar(title: const Text('Income details')),
-      body: AppResponsiveContent(maxWidth: 720, padding: const EdgeInsets.all(16), child: Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+      body: SingleChildScrollView(
+        child: AppResponsiveContent(maxWidth: 720, padding: const EdgeInsets.all(16), child: Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
         Center(child: Column(children: [CircleAvatar(radius: 28, backgroundColor: theme.colorScheme.primaryContainer, child: Icon(Icons.south_west_rounded, size: 28, color: theme.colorScheme.onPrimaryContainer)), const SizedBox(height: 12), Text(CurrencyUtils.formatAmount(income.amount), style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)), const SizedBox(height: 4), Text('Income received', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant))])),
         const SizedBox(height: 24), const Divider(),
         _detailRow(context, 'Category', income.categoryName ?? '-'),
@@ -25,6 +26,7 @@ class IncomeDetailScreen extends StatelessWidget {
         if (income.isRecurring) _detailRow(context, 'Recurring type', income.recurringType ?? '-'),
         _detailRow(context, 'Notes', (income.notes?.trim().isNotEmpty ?? false) ? income.notes! : '-'),
       ])))),
+      ),
     );
   }
 

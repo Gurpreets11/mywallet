@@ -96,7 +96,7 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
                   status: isOverdue ? 'Overdue' : widget.loan.loanStatus,
                 ),
 
-                if (widget.loan.loanStatus == 'Closed')
+                if (widget.loan.loanStatus.toUpperCase() == 'CLOSED')
                   const Padding(
                     padding: EdgeInsets.only(top: 12),
 
@@ -268,12 +268,12 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
                   },
                 ),
 
-                if (widget.loan.loanStatus != 'Closed')
+                if (widget.loan.loanStatus.toUpperCase() != 'CLOSED')
                   SizedBox(
                     width: double.infinity,
 
                     child: ElevatedButton.icon(
-                      onPressed: widget.loan.loanStatus == 'Closed'
+                      onPressed: widget.loan.loanStatus.toUpperCase() == 'CLOSED'
                           ? null
                           : () {
                               showModalBottomSheet(

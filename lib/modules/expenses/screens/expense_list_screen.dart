@@ -104,7 +104,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     final activeFilters = (_categoryId != null ? 1 : 0) + (_paymentMode != null ? 1 : 0) + (_dateRange != null ? 1 : 0);
     return Scaffold(
       appBar: AppBar(title: const Text('Expenses'), actions: [IconButton(tooltip: 'Filter expenses', onPressed: _openFilters, icon: Badge(isLabelVisible: activeFilters > 0, label: Text('$activeFilters'), child: const Icon(Icons.tune))) ]),
-      floatingActionButton: FloatingActionButton.extended(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddExpenseScreen())), icon: const Icon(Icons.add), label: const Text('Add expense')),
+      floatingActionButton: FloatingActionButton.extended(
+          heroTag: 'expenses_fab',
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddExpenseScreen())), icon: const Icon(Icons.add), label: const Text('Add expense')),
       body: AppResponsiveContent(maxWidth: 1050, padding: const EdgeInsets.fromLTRB(16, 8, 16, 88), child: Column(children: [
         TextField(controller: _searchController, onChanged: context.read<ExpenseProvider>().searchExpense, decoration: InputDecoration(hintText: 'Search category, notes, payment mode or amount', prefixIcon: const Icon(Icons.search), suffixIcon: _searchController.text.isEmpty ? null : IconButton(onPressed: () { _searchController.clear(); context.read<ExpenseProvider>().searchExpense(''); }, icon: const Icon(Icons.close)), filled: true)),
         const SizedBox(height: 12),

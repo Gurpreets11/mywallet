@@ -27,7 +27,12 @@ void main() async {
   // final database = AppDatabase();
   await NotificationService.instance.initialize();
   await NotificationService.instance.handleInitialNotification();
-  await NotificationService.instance.scheduleDailyReminder();
+  //await NotificationService.instance.scheduleDailyReminder();
+  try {
+    await NotificationService.instance.scheduleDailyReminder();
+  } catch (e) {
+    debugPrint('Daily reminder scheduling failed: $e');
+  }
 
   runApp(const FinanceManagerApp());
 }

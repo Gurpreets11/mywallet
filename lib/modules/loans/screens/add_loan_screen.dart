@@ -6,8 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
-import '../../../core/widgets/common_button.dart';
-import '../../../core/widgets/common_text_field.dart';
+import '../../../core/widgets/app_responsive_content.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/loan_model.dart';
 import '../providers/loan_provider.dart';
@@ -23,231 +22,376 @@ class AddLoanScreen extends StatefulWidget {
 
 class _AddLoanScreenState extends State<AddLoanScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final _personController = TextEditingController();
-
   final _amountController = TextEditingController();
-
   final _interestController = TextEditingController();
-
   final _emiController = TextEditingController();
-
   final _tenureController = TextEditingController();
-
   final _notesController = TextEditingController();
 
   String _loanType = 'BORROWED';
-
   String _loanStatus = 'ACTIVE';
-
   DateTime _startDate = DateTime.now();
+  DateTime _nextEmiDate = DateTime.now();
+  bool _isSaving = false;
 
   bool get isEditMode => widget.loan != null;
-  DateTime _nextEmiDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-
-    if (isEditMode) {
-      final loan = widget.loan!;
-
+    final loan = widget.loan;
+    if (loan != null) {
       _personController.text = loan.personName;
-
       _amountController.text = loan.principalAmount.toString();
-
       _interestController.text = loan.interestRate.toString();
-
       _emiController.text = loan.emiAmount.toString();
-
       _tenureController.text = loan.tenureMonths.toString();
-
       _notesController.text = loan.notes ?? '';
-
       _loanType = loan.loanType;
-
-      _loanStatus = loan.loanStatus;
-
-      _startDate = DateTime.parse(loan.startDate);
+      _loanStatus = loan.loanStatus.toUpperCase() == 'CLOSED' ? 'CLOSED' : 'ACTIVE';
+      _startDate = DateTime.tryParse(loan.startDate) ?? DateTime.now();
+      _nextEmiDate =
+          DateTime.tryParse(loan.nextEmiDate ?? '') ?? DateTime.now();
     }
   }
 
+  @override
+  void dispose() {
+    _personController.dispose();
+    _amountController.dispose();
+    _interestController.dispose();
+    _emiController.dispose();
+    _tenureController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  String? _validateRequired(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'This field is required';
+    }
+    return null;
+  }
+
+  String? _validatePositiveAmount(String? value) {
+    final amount = double.tryParse((value ?? '').trim());
+    if (amount == null || amount <= 0) {
+      return 'Enter a value greater than zero';
+    }
+    return null;
+  }
+
+  String? _validateInterest(String? value) {
+    final rate = double.tryParse((value ?? '').trim());
+    if (rate == null || rate < 0 || rate > 100) {
+      return 'Enter a valid rate between 0 and 100';
+    }
+    return null;
+  }
+
+  String? _validateTenure(String? value) {
+    final months = int.tryParse((value ?? '').trim());
+    if (months == null || months <= 0) {
+      return 'Enter tenure in months';
+    }
+    return null;
+  }
+
+  Future<void> _pickDate({required bool isNextEmiDate}) async {
+    final current = isNextEmiDate ? _nextEmiDate : _startDate;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: current,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now().add(const Duration(days: 3650)),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      if (isNextEmiDate) {
+        _nextEmiDate = picked;
+      } else {
+        _startDate = picked;
+      }
+    });
+  }
+
   Future<void> _saveLoan() async {
-    final amount = double.parse(_amountController.text);
+    if (_isSaving || !_formKey.currentState!.validate()) return;
+    setState(() => _isSaving = true);
 
-    final loan = LoanModel(
-      id: isEditMode ? widget.loan!.id : null,
-      loanType: _loanType,
-      personName: _personController.text,
-      principalAmount: amount,
-      interestRate: double.parse(_interestController.text),
-      emiAmount: double.parse(_emiController.text),
-      nextEmiDate: _nextEmiDate.toIso8601String(),
-      tenureMonths: int.parse(_tenureController.text),
-      startDate: _startDate.toIso8601String(),
-      endDate: null,
-      totalPaid: isEditMode ? widget.loan!.totalPaid : 0,
-      outstandingAmount: isEditMode ? widget.loan!.outstandingAmount : amount,
-      loanStatus: _loanStatus,
-      notes: _notesController.text,
-      createdAt: AppDateUtils.getCurrentTimestamp(),
-    );
+    try {
+      final old = widget.loan;
+      final loan = LoanModel(
+        id: old?.id,
+        loanType: _loanType,
+        personName: _personController.text.trim(),
+        principalAmount: double.parse(_amountController.text.trim()),
+        interestRate: double.parse(_interestController.text.trim()),
+        emiAmount: double.parse(_emiController.text.trim()),
+        nextEmiDate: _nextEmiDate.toIso8601String(),
+        tenureMonths: int.parse(_tenureController.text.trim()),
+        startDate: _startDate.toIso8601String(),
+        endDate: old?.endDate,
+        totalPaid: old?.totalPaid ?? 0,
+        outstandingAmount: old?.outstandingAmount ??
+            double.parse(_amountController.text.trim()),
+        loanStatus: _loanStatus,
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+        createdAt: old?.createdAt ?? AppDateUtils.getCurrentTimestamp(),
+      );
 
-    final provider = context.read<LoanProvider>();
+      final provider = context.read<LoanProvider>();
+      if (isEditMode) {
+        await provider.updateLoan(loan);
+      } else {
+        await provider.addLoan(loan);
+      }
 
-    if (isEditMode) {
-      await provider.updateLoan(loan);
-    } else {
-      await provider.addLoan(loan);
+      // Do not fail the loan save if Android notification permission is unavailable.
+      try {
+        await NotificationService.instance.scheduleNotification(
+          id: old?.id ?? DateTime.now().millisecondsSinceEpoch,
+          title: 'EMI Reminder',
+          body: 'EMI payment due for ${loan.personName}',
+          scheduledDate: _nextEmiDate.subtract(const Duration(days: 1)),
+          payload: jsonEncode({'type': 'loan', 'loanId': loan.id}),
+        );
+      } catch (error) {
+        debugPrint('Unable to schedule EMI reminder: $error');
+      }
+
+      if (!mounted) return;
+      await context.read<DashboardProvider>().loadDashboardData();
+      if (!mounted) return;
+      SnackbarUtils.showSnackbar(
+        context,
+        isEditMode ? 'Loan updated' : 'Loan added',
+      );
+      Navigator.pop(context);
+    } catch (error, stackTrace) {
+      debugPrint('Unable to save loan: $error\n$stackTrace');
+      if (mounted) {
+        SnackbarUtils.showSnackbar(
+          context,
+          'Unable to save loan. Please try again.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
-
-    await NotificationService.instance.scheduleNotification(
-      id: DateTime.now().millisecondsSinceEpoch,
-
-      title: 'EMI Reminder',
-
-      body:
-          'EMI payment due for '
-          '${loan.personName}',
-
-      scheduledDate: _nextEmiDate.subtract(const Duration(days: 1)),
-      payload: jsonEncode({'type': 'loan', 'loanId': loan.id}),
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    SnackbarUtils.showSnackbar(
-      context,
-      isEditMode ? 'Loan Updated' : 'Loan Added',
-    );
-    await context.read<DashboardProvider>().loadDashboardData();
-    if (!mounted) return;
-    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(isEditMode ? 'Edit Loan' : 'Add Loan')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              DropdownButtonFormField<String>(
-                initialValue: _loanType,
-                decoration: const InputDecoration(labelText: 'Loan Type'),
-                items: const [
-                  DropdownMenuItem(value: 'BORROWED', child: Text('Borrowed')),
-                  DropdownMenuItem(value: 'GIVEN', child: Text('Given')),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _loanType = value!;
-                  });
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              CommonTextField(
-                controller: _personController,
-                label: 'Person / Bank Name',
-              ),
-
-              const SizedBox(height: 16),
-
-              CommonTextField(
-                controller: _amountController,
-                label: 'Principal Amount',
-                keyboardType: TextInputType.number,
-              ),
-
-              const SizedBox(height: 16),
-
-              CommonTextField(
-                controller: _interestController,
-                label: 'Interest Rate',
-                keyboardType: TextInputType.number,
-              ),
-
-              const SizedBox(height: 16),
-
-              CommonTextField(
-                controller: _emiController,
-                label: 'EMI Amount',
-                keyboardType: TextInputType.number,
-              ),
-
-              const SizedBox(height: 16),
-
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  'Next EMI Date: '
-                  '${AppDateUtils.formatDate(_nextEmiDate)}',
+        child: AppResponsiveContent(
+          maxWidth: 680,
+          padding: const EdgeInsets.all(20),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isEditMode ? 'Update loan' : 'New loan',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Enter the loan and repayment details.',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        DropdownButtonFormField<String>(
+                          value: _loanType,
+                          isExpanded: true,
+                          decoration:
+                              const InputDecoration(labelText: 'Loan type'),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'BORROWED',
+                              child: Text('Borrowed'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'GIVEN',
+                              child: Text('Given'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => _loanType = value);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _personController,
+                          decoration: const InputDecoration(
+                            labelText: 'Person / Bank name',
+                            prefixIcon: Icon(Icons.person_outline),
+                          ),
+                          validator: _validateRequired,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _amountController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: 'Principal amount',
+                            prefixText: '₹ ',
+                          ),
+                          validator: _validatePositiveAmount,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _interestController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: 'Interest rate (%)',
+                            suffixText: '%',
+                          ),
+                          validator: _validateInterest,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _emiController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: 'EMI amount',
+                            prefixText: '₹ ',
+                          ),
+                          validator: _validatePositiveAmount,
+                        ),
+                        const SizedBox(height: 16),
+                        _dateField(
+                          label: 'Loan start date',
+                          date: _startDate,
+                          onTap: () => _pickDate(isNextEmiDate: false),
+                        ),
+                        const SizedBox(height: 12),
+                        _dateField(
+                          label: 'Next EMI date',
+                          date: _nextEmiDate,
+                          onTap: () => _pickDate(isNextEmiDate: true),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _tenureController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: 'Tenure (months)',
+                            prefixIcon: Icon(Icons.calendar_month_outlined),
+                          ),
+                          validator: _validateTenure,
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: _loanStatus,
+                          isExpanded: true,
+                          decoration:
+                              const InputDecoration(labelText: 'Loan status'),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'ACTIVE',
+                              child: Text('Active'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'CLOSED',
+                              child: Text('Closed'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => _loanStatus = value);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _notesController,
+                          minLines: 2,
+                          maxLines: 4,
+                          decoration: const InputDecoration(
+                            labelText: 'Notes (optional)',
+                            alignLabelWithHint: true,
+                            prefixIcon: Icon(Icons.notes),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                trailing: IconButton(
-                  onPressed: _pickNextEmiDate,
-                  icon: const Icon(Icons.calendar_month),
+                const SizedBox(height: 18),
+                SizedBox(
+                  height: 52,
+                  child: FilledButton.icon(
+                    onPressed: _isSaving ? null : _saveLoan,
+                    icon: _isSaving
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.save_outlined),
+                    label: Text(
+                      _isSaving
+                          ? 'Saving...'
+                          : isEditMode
+                              ? 'Update loan'
+                              : 'Save loan',
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-
-              CommonTextField(
-                controller: _tenureController,
-                label: 'Tenure (Months)',
-                keyboardType: TextInputType.number,
-              ),
-
-              const SizedBox(height: 16),
-
-              DropdownButtonFormField<String>(
-                initialValue: _loanStatus,
-                decoration: const InputDecoration(labelText: 'Loan Status'),
-                items: const [
-                  DropdownMenuItem(value: 'ACTIVE', child: Text('Active')),
-                  DropdownMenuItem(value: 'CLOSED', child: Text('Closed')),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _loanStatus = value!;
-                  });
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              CommonTextField(controller: _notesController, label: 'Notes'),
-
-              const SizedBox(height: 30),
-
-              CommonButton(
-                text: isEditMode ? 'Update Loan' : 'Save Loan',
-                onPressed: _saveLoan,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Future<void> _pickNextEmiDate() async {
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: _nextEmiDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 3650)),
+  Widget _dateField({
+    required String label,
+    required DateTime date,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: const Icon(Icons.calendar_today_outlined),
+        ),
+        child: Row(
+          children: [
+            Expanded(child: Text(AppDateUtils.formatDate(date))),
+            const Icon(Icons.edit_calendar_outlined),
+          ],
+        ),
+      ),
     );
-
-    if (pickedDate != null) {
-      setState(() {
-        _nextEmiDate = pickedDate;
-      });
-    }
   }
 }

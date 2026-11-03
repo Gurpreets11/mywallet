@@ -14,7 +14,7 @@ class LoanStatusBadge extends StatelessWidget {
         color = Colors.green;
         break;
 
-      case 'Overdue':
+      case 'OVERDUE':
         color = Colors.red;
         break;
 
