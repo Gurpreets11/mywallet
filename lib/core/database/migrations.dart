@@ -13,6 +13,8 @@ class Migrations {
     await _createInvestmentTable(db);
     await _createLoansTable(db);
     await _createLoanPaymentsTable(db);
+    await _createBudgetTable(db);
+    await _createAppMetadataTable(db);
   }
 
   static Future<void> onUpgrade(
@@ -42,6 +44,11 @@ class Migrations {
       await db.execute(
         'ALTER TABLE expenses ADD COLUMN type_id INTEGER REFERENCES transaction_types(id)',
       );
+    }
+
+    if (oldVersion < 11) {
+      await _createBudgetTable(db);
+      await _createAppMetadataTable(db);
     }
 
     // Bump `newVersion` in your openDatabase() call every time you add a block here
@@ -150,6 +157,31 @@ class Migrations {
       REFERENCES loans(id)
     )
   ''');
+  }
+
+  static Future<void> _createBudgetTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS budgets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category_id INTEGER NOT NULL,
+        category_name TEXT NOT NULL,
+        amount REAL NOT NULL,
+        month INTEGER NOT NULL,
+        year INTEGER NOT NULL,
+        alert_percentage INTEGER NOT NULL DEFAULT 80,
+        created_at TEXT NOT NULL,
+        UNIQUE(category_id, month, year)
+      )
+    ''');
+  }
+
+  static Future<void> _createAppMetadataTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS app_metadata (
+        meta_key TEXT PRIMARY KEY,
+        meta_value TEXT NOT NULL
+      )
+    ''');
   }
 
   static Future<void> _createTransactionTypeTable(Database db) async {

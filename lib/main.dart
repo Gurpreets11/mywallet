@@ -8,14 +8,16 @@ import 'core/services/navigation_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'data/services/master_seed_service.dart';
+import 'data/services/demo_data_seed_service.dart';
+import 'modules/budgets/providers/budget_provider.dart';
 import 'modules/dashboard/providers/dashboard_provider.dart';
 import 'modules/expenses/providers/expense_provider.dart';
 import 'modules/income/providers/income_provider.dart';
 import 'modules/investments/providers/investment_provider.dart';
 import 'modules/loans/providers/loan_payment_provider.dart';
 import 'modules/loans/providers/loan_provider.dart';
+import 'modules/navigation/providers/main_navigation_screen.dart';
 import 'modules/navigation/providers/navigation_provider.dart';
-import 'modules/navigation/screens/main_navigation_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +25,14 @@ void main() async {
   if (!kIsWeb) {
     await AppDatabase.database;
     await MasterSeedService.seedMasterData();
+    // Development preview data only. kDebugMode is false in production builds.
+    if (kDebugMode) {
+      try {
+        await DemoDataSeedService.seedIfDatabaseIsEmpty();
+      } catch (error) {
+        debugPrint('Demo data seeding failed: $error');
+      }
+    }
   }
   // final database = AppDatabase();
   await NotificationService.instance.initialize();
@@ -55,6 +65,7 @@ class FinanceManagerApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LoanPaymentProvider()),
 
         ChangeNotifierProvider(create: (_) => InvestmentProvider()),
+        ChangeNotifierProvider(create: (_) => BudgetProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

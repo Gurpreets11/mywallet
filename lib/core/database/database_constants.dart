@@ -1,6 +1,6 @@
 class DatabaseConstants {
   static const String databaseName = 'my_wallet.db';
-  static const int databaseVersion = 10;
+  static const int databaseVersion = 11;
 
   // Common Columns
   static const String colId = 'id';
@@ -47,6 +47,9 @@ class DatabaseConstants {
   static const String colLoanId = 'loan_id';
   static const String colAmountPaid = 'amount_paid';
   static const String colPaymentDate = 'payment_date';
+
+  // Monthly Budget Table
+  static const String tableBudgets = 'budgets';
 
   // Transaction Type Table
   static const String tableTransactionTypes = 'transaction_types';

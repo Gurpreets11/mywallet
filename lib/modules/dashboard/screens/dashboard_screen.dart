@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mywallet/core/widgets/vertical_spacing.dart';
 import 'package:mywallet/modules/expenses/screens/add_expense_screen.dart';
 import 'package:mywallet/modules/income/screens/add_income_screen.dart';
+import 'package:mywallet/modules/budgets/screens/budget_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -167,6 +168,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
 
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const BudgetScreen()),
+                    ),
+                    icon: const Icon(Icons.account_balance_wallet_outlined),
+                    label: const Text('Manage Monthly Budgets'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                  ),
+                ),
                 VerticalSpacing(height: 14),
 
                 //const SectionTitle(title: 'Loan Summary'),
