@@ -18,6 +18,8 @@ import 'modules/loans/providers/loan_payment_provider.dart';
 import 'modules/loans/providers/loan_provider.dart';
 import 'modules/navigation/providers/main_navigation_screen.dart';
 import 'modules/navigation/providers/navigation_provider.dart';
+import 'modules/recurring/providers/recurring_provider.dart';
+import 'modules/recurring/repositories/recurring_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +37,15 @@ void main() async {
     }
   }
   // final database = AppDatabase();
+  // Generate due recurring entries at app launch. Generation is idempotent.
+  if (!kIsWeb) {
+    try {
+      await RecurringRepository().generateDueTransactions();
+    } catch (error) {
+      debugPrint('Recurring transaction generation failed: $error');
+    }
+  }
+
   await NotificationService.instance.initialize();
   await NotificationService.instance.handleInitialNotification();
   //await NotificationService.instance.scheduleDailyReminder();
@@ -66,6 +77,7 @@ class FinanceManagerApp extends StatelessWidget {
 
         ChangeNotifierProvider(create: (_) => InvestmentProvider()),
         ChangeNotifierProvider(create: (_) => BudgetProvider()),
+        ChangeNotifierProvider(create: (_) => RecurringProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

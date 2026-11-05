@@ -74,6 +74,17 @@ class DemoDataSeedService {
         'created_at': createdAt,
       });
       await txn.insert('expenses', {
+        'amount': 640.0,
+        'category_id': food,
+        'subcategory_id': await _subcategoryId(txn, food, 'Dinner'),
+        'category_name': 'Food & Dining',
+        'subcategory_name': 'Dinner',
+        'date': dateInCurrentMonth(1),
+        'payment_mode': 'UPI',
+        'notes': 'Dinner with colleagues (sample)',
+        'created_at': createdAt,
+      });
+      await txn.insert('expenses', {
         'amount': 1800.0,
         'category_id': travel,
         'subcategory_id': await _subcategoryId(txn, travel!, 'Fuel'),
@@ -108,7 +119,7 @@ class DemoDataSeedService {
       });
 
       await txn.insert('incomes', {
-        'amount': 85000.0,
+        'amount': 128000.0,
         'category_id': salary,
         'subcategory_id': await _subcategoryId(txn, salary!, 'Monthly Salary'),
         'date': dateInCurrentMonth(2),
@@ -197,8 +208,8 @@ class DemoDataSeedService {
         'loan_type': 'Home Loan',
         'person_name': 'HDFC Bank',
         'principal_amount': 3200000.0,
-        'interest_rate': 7.2,
-        'emi_amount': 23000.0,
+        'interest_rate': 7.4,
+        'emi_amount': 26000.0,
         'next_emi_date': DateTime(
           now.year,
           now.month,
@@ -206,15 +217,15 @@ class DemoDataSeedService {
         ).add(const Duration(days: 5)).toIso8601String(),
         'tenure_months': 240,
         'start_date': DateTime(now.year - 2, now.month, 1).toIso8601String(),
-        'total_paid': 552000.0,
-        'outstanding_amount': 2648000.0,
+        'total_paid': 152000.0,
+        'outstanding_amount': 3048000.0,
         'loan_status': 'ACTIVE',
         'notes': 'Home loan sample record',
         'created_at': createdAt,
       });
       await txn.insert('loan_payments', {
         'loan_id': homeLoanId,
-        'payment_amount': 23000.0,
+        'payment_amount': 26000.0,
         'payment_date': dateInCurrentMonth(12),
         'payment_mode': 'Auto Debit',
         'remarks': 'Monthly EMI (sample)',

@@ -10,6 +10,7 @@ import '../../income/screens/income_list_screen.dart';
 import '../../investments/screens/investment_list_screen.dart';
 import '../../loans/screens/loan_list_screen.dart';
 import '../../settings/setting_screen.dart';
+import '../../recurring/screens/recurring_screen.dart';
 import '../providers/navigation_provider.dart';
 
 class MainNavigationScreen extends StatelessWidget {
@@ -25,6 +26,7 @@ class MainNavigationScreen extends StatelessWidget {
     InvestmentListScreen(),
     LoanListScreen(),
     SettingsScreen(),
+    RecurringScreen(),
   ];
 
   static const List<NavigationDestination> _mobileDestinations = [
@@ -81,6 +83,11 @@ class MainNavigationScreen extends StatelessWidget {
       selectedIcon: Icon(Icons.settings_rounded),
       label: Text('Settings'),
     ),
+    NavigationRailDestination(
+      icon: Icon(Icons.event_repeat_outlined),
+      selectedIcon: Icon(Icons.event_repeat_rounded),
+      label: Text('Recurring'),
+    ),
   ];
 
   int _screenIndexForWideDestination(int destinationIndex) {
@@ -90,7 +97,7 @@ class MainNavigationScreen extends StatelessWidget {
 
   int _wideDestinationForScreen(int screenIndex) {
     if (screenIndex <= 2) return screenIndex;
-    return (screenIndex - 1).clamp(0, 5);
+    return (screenIndex - 1).clamp(0, 6);
   }
 
   @override
