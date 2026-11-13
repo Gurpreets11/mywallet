@@ -7,11 +7,13 @@ import 'package:timezone/timezone.dart' as tz;
 import 'dart:convert';
 
 import '../../modules/expenses/screens/expense_list_screen.dart';
+import '../../modules/investments/repositories/investment_repository.dart';
 import '../../modules/income/screens/income_list_screen.dart';
 import '../../modules/loans/repositories/loan_repository.dart';
 import '../../modules/loans/screens/loan_detail_screen.dart';
 import '../../modules/navigation/screens/main_navigation_screen.dart';
 import 'navigation_service.dart';
+import 'settings/app_preferences.dart';
 
 class NotificationService {
   NotificationService._();
@@ -77,13 +79,31 @@ class NotificationService {
     await _notificationsPlugin.show(id, title, body, _notificationDetails());
   }
 
+  /// Reads the `type` field out of a notification payload (or null).
+  String? _payloadType(String? payload) {
+    if (payload == null) return null;
+    try {
+      final decoded = jsonDecode(payload);
+      return decoded is Map ? decoded['type']?.toString() : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> scheduleNotification({
     required int id,
     required String title,
     required String body,
     required DateTime scheduledDate,
     String? payload,
+    DateTimeComponents? repeat,
   }) async {
+    // Respect the reminder switches in Settings.
+    final type = _payloadType(payload);
+    final prefs = AppPreferences.instance;
+    if (type == 'loan' && !prefs.emiRemindersEnabled) return;
+    if (type == 'investment' && !prefs.sipRemindersEnabled) return;
+
     await _notificationsPlugin.zonedSchedule(
       id,
       title,
@@ -97,7 +117,20 @@ class NotificationService {
 
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
+
+      matchDateTimeComponents: repeat,
     );
+  }
+
+  /// Cancels every pending notification whose payload type is [type]
+  /// ('loan' or 'investment').
+  Future<void> cancelByType(String type) async {
+    final pending = await _notificationsPlugin.pendingNotificationRequests();
+    for (final request in pending) {
+      if (_payloadType(request.payload) == type) {
+        await _notificationsPlugin.cancel(request.id);
+      }
+    }
   }
 
   Future<void> cancelNotification(int id) async {
@@ -108,20 +141,88 @@ class NotificationService {
     await _notificationsPlugin.cancelAll();
   }
 
-  Future<void> scheduleDailyReminder() async {
-    final now = DateTime.now();
+  static const int _dailyReminderId = 999;
 
-    final scheduledDate = DateTime(now.year, now.month, now.day, 21, 0);
+  /// Schedules (or cancels) the daily "track your expenses" reminder using the
+  /// on/off switch and time chosen in Settings. Repeats every day.
+  Future<void> scheduleDailyReminder() async {
+    final prefs = AppPreferences.instance;
+    if (!prefs.dailyReminderEnabled) {
+      await cancelNotification(_dailyReminderId);
+      return;
+    }
+
+    final now = DateTime.now();
+    var scheduledDate = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      prefs.dailyReminderHour,
+      prefs.dailyReminderMinute,
+    );
+    if (!scheduledDate.isAfter(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
 
     await scheduleNotification(
-      id: 999,
+      id: _dailyReminderId,
 
       title: 'Track Your Expenses',
 
       body: 'Don’t forget to update today’s expenses',
 
       scheduledDate: scheduledDate,
+
+      repeat: DateTimeComponents.time,
     );
+  }
+
+  /// Rebuilds every reminder from the current database and preferences.
+  /// Use after a restore or reset, when the old reminders no longer match
+  /// the data. Loan reminders use the loan id and SIP reminders use
+  /// 1,000,000 + investment id as notification ids.
+  Future<void> rescheduleAll() async {
+    await _notificationsPlugin.cancelAll();
+    await scheduleDailyReminder();
+
+    final now = DateTime.now();
+
+    final loans = await _loanRepository.getAllLoans();
+    for (final loan in loans) {
+      final id = loan.id;
+      final next = loan.nextEmiDate == null
+          ? null
+          : DateTime.tryParse(loan.nextEmiDate!);
+      if (id == null || next == null) continue;
+      if (loan.loanStatus.toUpperCase() == 'CLOSED') continue;
+
+      final remindAt = next.subtract(const Duration(days: 1));
+      if (!remindAt.isAfter(now)) continue;
+
+      await scheduleNotification(
+        id: id,
+        title: 'EMI Reminder',
+        body: 'EMI payment due for ${loan.personName}',
+        scheduledDate: remindAt,
+        payload: jsonEncode({'type': 'loan', 'loanId': id}),
+      );
+    }
+
+    final investments = await InvestmentRepository().getAllInvestments();
+    for (final investment in investments) {
+      final id = investment.id;
+      final day = investment.sipDate;
+      final amount = investment.sipAmount;
+      if (id == null || !investment.isSip || day == null || amount == null) {
+        continue;
+      }
+      await scheduleSipReminder(
+        id: 1000000 + id,
+        investmentName: investment.investmentName,
+        amount: amount,
+        sipDate: day,
+      );
+    }
   }
 
   /*Future<void> _handleNotificationTap(String? payload) async {
