@@ -7,6 +7,7 @@ import '../../loans/screens/loan_list_screen.dart';
 import '../../settings/setting_screen.dart';
 import '../../budgets/screens/budget_screen.dart';
 import '../../recurring/screens/recurring_screen.dart';
+import '../../reports/screens/reports_screen.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -47,6 +48,13 @@ class MoreScreen extends StatelessWidget {
                   icon: Icons.account_balance_wallet_rounded,
                   iconColor: AppColors.primary,
                   screen: const BudgetScreen(),
+                ),
+                _MoreMenuCard(
+                  title: 'Reports',
+                  subtitle: 'Income, expenses and analytics',
+                  icon: Icons.analytics_rounded,
+                  iconColor: AppColors.primary,
+                  screen: const ReportsScreen(),
                 ),
                 _MoreMenuCard(
                   title: 'Recurring',

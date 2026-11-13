@@ -20,6 +20,7 @@ import 'modules/navigation/providers/main_navigation_screen.dart';
 import 'modules/navigation/providers/navigation_provider.dart';
 import 'modules/recurring/providers/recurring_provider.dart';
 import 'modules/recurring/repositories/recurring_repository.dart';
+import 'modules/reports/providers/report_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,6 +79,7 @@ class FinanceManagerApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => InvestmentProvider()),
         ChangeNotifierProvider(create: (_) => BudgetProvider()),
         ChangeNotifierProvider(create: (_) => RecurringProvider()),
+        ChangeNotifierProvider(create: (_) => ReportProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
