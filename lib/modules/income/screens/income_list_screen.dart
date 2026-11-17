@@ -4,6 +4,7 @@ import '../../../core/utils/currency_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/empty_view.dart';
 import '../../../core/widgets/loading_view.dart';
+import '../../../core/widgets/transaction_list_header.dart';
 import '../../../data/providers/master_provider.dart';
 import '../models/income_model.dart';
 import '../providers/income_provider.dart';
@@ -259,189 +260,115 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
         icon: const Icon(Icons.add),
         label: const Text('Add income'),
       ),
-      body: provider.isLoading
-          ? const LoadingView()
-          : AppResponsiveContent(
-              maxWidth: 1050,
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: _searchController,
-                    onChanged: context.read<IncomeProvider>().searchIncome,
-                    decoration: InputDecoration(
-                      hintText:
-                          'Search category, notes, payment mode or amount',
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _searchController.text.isEmpty
-                          ? null
-                          : IconButton(
-                              onPressed: () {
-                                _searchController.clear();
-                                context.read<IncomeProvider>().searchIncome('');
-                              },
-                              icon: const Icon(Icons.close),
-                            ),
-                      filled: true,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Received this month',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  CurrencyUtils.formatAmount(
-                                    provider.monthlyIncome,
-                                  ),
-                                  style: theme.textTheme.headlineSmall
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Icon(
-                              Icons.south_west_rounded,
-                              color: theme.colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Text(
-                        '${incomes.length} transactions',
-                        style: theme.textTheme.titleSmall,
-                      ),
-                      const Spacer(),
-                      DropdownButton<String>(
-                        value: _sort,
-                        underline: const SizedBox(),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'newest',
-                            child: Text('Newest'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'oldest',
-                            child: Text('Oldest'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'highest',
-                            child: Text('Highest amount'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'lowest',
-                            child: Text('Lowest amount'),
-                          ),
-                        ],
-                        onChanged: (v) => setState(() => _sort = v ?? 'newest'),
-                      ),
-                    ],
-                  ),
-                  if (incomes.isEmpty)
-                    Expanded(
-                      child: EmptyView(
-                        message: provider.incomes.isEmpty
-                            ? 'No income records yet'
-                            : 'No income matches your search or filters',
-                        icon: Icons.payments_outlined,
-                        actionText: provider.incomes.isEmpty
-                            ? 'Add income'
-                            : null,
-                        onAction: provider.incomes.isEmpty
-                            ? () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const AddIncomeScreen(),
-                                ),
-                              )
-                            : null,
-                      ),
-                    )
-                  else
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: incomes.length,
-                        itemBuilder: (context, index) {
-                          final income = incomes[index];
-                          final currentDate = DateTime.tryParse(income.date);
-                          final previousDate = index == 0
-                              ? null
-                              : DateTime.tryParse(incomes[index - 1].date);
-                          final showHeader =
-                              currentDate != null &&
-                              (previousDate == null ||
-                                  currentDate.year != previousDate.year ||
-                                  currentDate.month != previousDate.month ||
-                                  currentDate.day != previousDate.day);
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (showHeader)
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    4,
-                                    14,
-                                    4,
-                                    4,
-                                  ),
-                                  child: Text(
-                                    _dateLabel(currentDate),
-                                    style: theme.textTheme.labelLarge?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              IncomeCard(
-                                income: income,
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        IncomeDetailScreen(income: income),
-                                  ),
-                                ),
-                                onEdit: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        AddIncomeScreen(income: income),
-                                  ),
-                                ),
-                                onDelete: () => _deleteIncome(provider, income),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                ],
+      body: AppResponsiveContent(
+        maxWidth: 1050,
+        // Horizontal padding only: vertical padding outside a scroll view
+        // clips the list, so spacing is applied inside the scroll view.
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: TransactionListHeader(
+                searchController: _searchController,
+                onSearchChanged: context.read<IncomeProvider>().searchIncome,
+                onSearchCleared: () {
+                  _searchController.clear();
+                  context.read<IncomeProvider>().searchIncome('');
+                },
+                summaryLabel: 'Received this month',
+                summaryAmount: CurrencyUtils.formatAmount(provider.monthlyIncome),
+                summaryIcon: Icons.south_west_rounded,
+                summaryIconColor: theme.colorScheme.onPrimaryContainer,
+                summaryIconBackground: theme.colorScheme.primaryContainer,
+                countText: '${incomes.length} transactions',
+                sortValue: _sort,
+                onSortChanged: (v) => setState(() => _sort = v),
               ),
             ),
+            if (provider.isLoading)
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: LoadingView(),
+              )
+            else if (incomes.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: EmptyView(
+                  message: provider.incomes.isEmpty
+                      ? 'No income records yet'
+                      : 'No income matches your search or filters',
+                  icon: Icons.payments_outlined,
+                  actionText: provider.incomes.isEmpty ? 'Add income' : null,
+                  onAction: provider.incomes.isEmpty
+                      ? () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AddIncomeScreen(),
+                          ),
+                        )
+                      : null,
+                ),
+              )
+            else
+              SliverPadding(
+                // Room for the floating button under the last item.
+                padding: const EdgeInsets.only(bottom: 88),
+                sliver: SliverList.builder(
+                  itemCount: incomes.length,
+                  itemBuilder: (context, index) {
+                    final income = incomes[index];
+                    // Date headings only make sense when sorted by date.
+                    final groupByDate = _sort == 'newest' || _sort == 'oldest';
+                    final currentDate = DateTime.tryParse(income.date);
+                    final previousDate = index == 0
+                        ? null
+                        : DateTime.tryParse(incomes[index - 1].date);
+                    final showHeader =
+                        groupByDate &&
+                        currentDate != null &&
+                        (previousDate == null ||
+                            currentDate.year != previousDate.year ||
+                            currentDate.month != previousDate.month ||
+                            currentDate.day != previousDate.day);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (showHeader)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 10, 4, 2),
+                            child: Text(
+                              _dateLabel(currentDate!),
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        IncomeCard(
+                          income: income,
+                          showDate: !groupByDate,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => IncomeDetailScreen(income: income),
+                            ),
+                          ),
+                          onEdit: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AddIncomeScreen(income: income),
+                            ),
+                          ),
+                          onDelete: () => _deleteIncome(provider, income),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 

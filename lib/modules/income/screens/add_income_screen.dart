@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
+import '../../../core/widgets/compact_form_theme.dart';
 import '../../../data/providers/master_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/income_model.dart';
@@ -147,15 +148,56 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
     }
   }
 
+  /// Save button pinned to the bottom so it is always visible.
+  Widget _buildSaveBar(ThemeData theme) {
+    return Material(
+      color: theme.scaffoldBackgroundColor,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            8,
+            16,
+            12 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          child: SizedBox(
+            height: 50,
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: _isSaving ? null : _saveIncome,
+              icon: _isSaving
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save_outlined),
+              label: Text(
+                _isSaving
+                    ? 'Saving...'
+                    : isEditMode
+                    ? 'Update income'
+                    : 'Save income',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
+    return CompactFormTheme(
+      child: Scaffold(
       appBar: AppBar(title: Text(isEditMode ? 'Edit Income' : 'Add Income')),
+      bottomNavigationBar: _isLoadingCategories ? null : _buildSaveBar(theme),
       body: SingleChildScrollView(
         child: AppResponsiveContent(
           maxWidth: 680,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           child: _isLoadingCategories
               ? const Padding(
                   padding: EdgeInsets.all(40),
@@ -168,24 +210,10 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                     children: [
                       Card(
                         child: Padding(
-                          padding: const EdgeInsets.all(18),
+                          padding: const EdgeInsets.all(14),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                isEditMode ? 'Update income' : 'New income',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Enter the details of your income.',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
                               TextFormField(
                                 controller: _amountController,
                                 keyboardType:
@@ -199,7 +227,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                 ),
                                 validator: _validateAmount,
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
                               Consumer<MasterProvider>(
                                 builder: (context, master, _) {
                                   final categories = master.incomeCategories;
@@ -249,7 +277,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                   );
                                 },
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
                               Consumer<MasterProvider>(
                                 builder: (context, master, _) {
                                   final subcategories =
@@ -296,7 +324,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                   );
                                 },
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
                               DropdownButtonFormField<String>(
                                 initialValue: _paymentMode,
                                 isExpanded: true,
@@ -326,7 +354,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                   }
                                 },
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
                               InkWell(
                                 onTap: _pickDate,
                                 borderRadius: BorderRadius.circular(12),
@@ -354,6 +382,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                               const SizedBox(height: 8),
                               SwitchListTile(
                                 contentPadding: EdgeInsets.zero,
+                                dense: true,
                                 value: _isRecurring,
                                 title: const Text('Recurring income'),
                                 onChanged: (value) =>
@@ -392,7 +421,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                   },
                                 ),
                               ],
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
                               TextFormField(
                                 controller: _notesController,
                                 minLines: 2,
@@ -407,34 +436,11 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 18),
-                      SizedBox(
-                        height: 52,
-                        child: FilledButton.icon(
-                          onPressed: _isSaving ? null : _saveIncome,
-                          icon: _isSaving
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.save_outlined),
-                          label: Text(
-                            _isSaving
-                                ? 'Saving...'
-                                : isEditMode
-                                ? 'Update income'
-                                : 'Save income',
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
         ),
       ),
-    );
+    ));
   }
 }

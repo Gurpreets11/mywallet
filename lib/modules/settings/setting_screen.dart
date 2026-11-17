@@ -531,6 +531,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onChanged: _changeDateFormat,
                       ),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(
+                                Icons.format_size_rounded,
+                                color: AppColors.textSecondary,
+                              ),
+                              SizedBox(width: 16),
+                              Text(
+                                'Text size',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: SegmentedButton<AppFontSize>(
+                              showSelectedIcon: false,
+                              segments: [
+                                for (final option in AppFontSize.values)
+                                  ButtonSegment(
+                                    value: option,
+                                    label: Text(option.label),
+                                  ),
+                              ],
+                              selected: {_prefs.fontSize},
+                              onSelectionChanged: (s) async {
+                                await _prefs.setFontSize(s.first);
+                                if (mounted) setState(() {});
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Changes the text size across the whole app. '
+                            'It is added to your phone\'s own font-size setting.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              height: 1.4,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ]),
                   const SizedBox(height: 24),
 

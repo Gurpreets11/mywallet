@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:mywallet/modules/loans/screens/pay_emi_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../core/utils/snackbar_utils.dart';
+import '../../../core/widgets/app_responsive_content.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/loan_model.dart';
 import '../providers/loan_payment_provider.dart';
 import '../providers/loan_provider.dart';
 import '../utils/loan_analytics_utils.dart';
 import '../widgets/loan_analytics_card.dart';
-import '../widgets/loan_payment_card.dart';
 import '../widgets/loan_status_badge.dart';
 import '../widgets/loan_warning_banner.dart';
 import 'add_loan_payment_screen.dart';
 import 'loan_payment_history_section.dart';
+import 'pay_emi_bottom_sheet.dart';
 
 class LoanDetailScreen extends StatefulWidget {
   final LoanModel loan;
@@ -37,327 +39,393 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
     });
   }
 
+  /// The loan as it is NOW. The object passed to this screen goes stale after
+  /// a payment, so always prefer the provider's up-to-date copy.
+  LoanModel _currentLoan(LoanProvider provider) {
+    return provider.loans.firstWhere(
+      (l) => l.id == widget.loan.id,
+      orElse: () => widget.loan,
+    );
+  }
+
+  void _openPaySheet(LoanModel loan) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => PayEmiBottomSheet(
+        initialAmount: loan.emiAmount,
+        onSubmit:
+            ({
+              required double paymentAmount,
+              required String paymentMode,
+              String? remarks,
+            }) => _recordEmi(loan, paymentAmount, paymentMode, remarks),
+      ),
+    );
+  }
+
+  Future<void> _recordEmi(
+    LoanModel loan,
+    double amount,
+    String mode,
+    String? remarks,
+  ) async {
+    final loanProvider = context.read<LoanProvider>();
+    final payments = context.read<LoanPaymentProvider>();
+    final dashboard = context.read<DashboardProvider>();
+    try {
+      await loanProvider.payEmi(
+        loan: loan,
+        paymentAmount: amount,
+        paymentMode: mode,
+        remarks: (remarks == null || remarks.trim().isEmpty)
+            ? null
+            : remarks.trim(),
+      );
+      await payments.loadPayments(loan.id!);
+      await loanProvider.loadLoanPayments(loan.id!);
+      await dashboard.loadDashboardData();
+      if (!mounted) return;
+      SnackbarUtils.showSnackbar(context, 'EMI payment recorded successfully');
+    } catch (e) {
+      if (!mounted) return;
+      SnackbarUtils.showSnackbar(context, 'Could not record payment: $e');
+    }
+  }
+
+  Future<void> _openAddPayment(LoanModel loan) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => AddLoanPaymentScreen(loan: loan)),
+    );
+    if (!mounted) return;
+    context.read<LoanPaymentProvider>().loadPayments(loan.id!);
+    context.read<LoanProvider>().loadLoanPayments(loan.id!);
+  }
+
+  String _prettyType(String type) {
+    switch (type.toUpperCase()) {
+      case 'BORROWED':
+        return 'Borrowed loan';
+      case 'GIVEN':
+        return 'Given loan';
+      default:
+        return type;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final loanProvider = context.read<LoanProvider>();
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
+    final loan = _currentLoan(context.watch<LoanProvider>());
 
-    final completionPercentage =
+    final isClosed = loan.loanStatus.toUpperCase() == 'CLOSED';
+    final nextEmi = DateTime.tryParse(loan.nextEmiDate ?? '');
+    final isOverdue =
+        !isClosed &&
+        loan.nextEmiDate != null &&
+        LoanAnalyticsUtils.isLoanOverdue(loan.nextEmiDate!);
+
+    final completion =
         LoanAnalyticsUtils.calculateCompletionPercentage(
-          loanAmount: widget.loan.principalAmount,
-
-          outstandingAmount: widget.loan.outstandingAmount,
-        );
+          loanAmount: loan.principalAmount,
+          outstandingAmount: loan.outstandingAmount,
+        ).clamp(0.0, 100.0);
 
     final remainingEmis = LoanAnalyticsUtils.calculateRemainingEmiCount(
-      outstandingAmount: widget.loan.outstandingAmount,
-
-      emiAmount: widget.loan.emiAmount,
+      outstandingAmount: loan.outstandingAmount,
+      emiAmount: loan.emiAmount,
     );
 
-    final isOverdue = LoanAnalyticsUtils.isLoanOverdue(
-      widget.loan.nextEmiDate!,
-    );
+    final started = DateTime.tryParse(loan.startDate);
+    final hasNotes = (loan.notes ?? '').trim().isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Loan Detail')),
-
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AddLoanPaymentScreen(loan: widget.loan),
-            ),
-          );
-        },
-        label: const Text('Add EMI'),
-        icon: const Icon(Icons.payments),
-      ),
-
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.loan.personName,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                LoanStatusBadge(
-                  status: isOverdue ? 'Overdue' : widget.loan.loanStatus,
-                ),
-
-                if (widget.loan.loanStatus.toUpperCase() == 'CLOSED')
-                  const Padding(
-                    padding: EdgeInsets.only(top: 12),
-
-                    child: Row(
+      bottomNavigationBar: _buildActionBar(loan, isClosed),
+      body: AppResponsiveContent(
+        maxWidth: 800,
+        // Padding is applied inside the list so it never clips content.
+        padding: EdgeInsets.zero,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+          children: [
+            // ---- Header: name, status, outstanding, progress, next EMI ----
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.check_circle, color: Colors.green),
-
-                        SizedBox(width: 8),
-
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                loan.personName,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              Text(
+                                _prettyType(loan.loanType),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: muted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        LoanStatusBadge(
+                          status: isClosed
+                              ? 'CLOSED'
+                              : isOverdue
+                              ? 'OVERDUE'
+                              : 'ACTIVE',
+                        ),
+                      ],
+                    ),
+                    if (isOverdue) ...[
+                      const SizedBox(height: 12),
+                      const LoanWarningBanner(
+                        message: 'EMI overdue. Please pay immediately.',
+                      ),
+                    ],
+                    const SizedBox(height: 14),
+                    Text(
+                      'Outstanding',
+                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                    ),
+                    Text(
+                      CurrencyUtils.formatAmount(loan.outstandingAmount),
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(
+                        value: completion / 100,
+                        minHeight: 8,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
                         Text(
-                          'Loan fully repaid',
-
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.bold,
+                          '${completion.toStringAsFixed(1)}% repaid',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: muted,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'of ${CurrencyUtils.formatAmount(loan.principalAmount)}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: muted,
                           ),
                         ),
                       ],
                     ),
-                  ),
-
-                if (isOverdue) const SizedBox(height: 16),
-
-                if (isOverdue)
-                  const LoanWarningBanner(
-                    message:
-                        'EMI overdue. '
-                        'Please pay immediately.',
-                  ),
-
-                _buildRow('Loan Type', widget.loan.loanType),
-
-                _buildRow(
-                  'Principal',
-                  CurrencyUtils.formatAmount(widget.loan.principalAmount),
-                ),
-
-                _buildRow(
-                  'Outstanding',
-                  CurrencyUtils.formatAmount(widget.loan.outstandingAmount),
-                ),
-
-                _buildRow(
-                  'EMI',
-                  CurrencyUtils.formatAmount(widget.loan.emiAmount),
-                ),
-
-                _buildRow('Interest', '${widget.loan.interestRate}%'),
-
-                _buildRow('Tenure', '${widget.loan.tenureMonths} Months'),
-
-                _buildRow('Status', widget.loan.loanStatus),
-
-                _buildRow('Notes', widget.loan.notes ?? '-'),
-
-                const Text('Next EMI Date'),
-
-                const SizedBox(height: 6),
-
-                Text(
-                  AppDateUtils.formatDate(
-                    DateTime.parse(widget.loan.nextEmiDate!),
-                  ),
-
-                  style: TextStyle(
-                    color: isOverdue ? Colors.red : null,
-
-                    fontWeight: isOverdue ? FontWeight.bold : null,
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                LinearProgressIndicator(
-                  value: completionPercentage / 100,
-
-                  minHeight: 10,
-
-                  borderRadius: BorderRadius.circular(12),
-                ),
-
-                const SizedBox(height: 8),
-
-                Text('${completionPercentage.toStringAsFixed(1)}% completed'),
-
-                const SizedBox(height: 20),
-
-                SizedBox(
-                  height: 140,
-
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-
-                    children: [
-                      SizedBox(
-                        width: 200,
-
-                        child: LoanAnalyticsCard(
-                          title: 'Remaining EMIs',
-
-                          value: '$remainingEmis EMIs',
-
-                          icon: Icons.calendar_month,
-
-                          color: Colors.blue,
-                        ),
-                      ),
-
-                      SizedBox(
-                        width: 200,
-
-                        child: LoanAnalyticsCard(
-                          title: 'Outstanding',
-
-                          value: CurrencyUtils.formatAmount(
-                            widget.loan.outstandingAmount,
+                    const SizedBox(height: 10),
+                    const Divider(),
+                    const SizedBox(height: 10),
+                    if (isClosed)
+                      const Row(
+                        children: [
+                          Icon(Icons.check_circle, size: 20, color: Colors.green),
+                          SizedBox(width: 8),
+                          Text(
+                            'Loan fully repaid',
+                            style: TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-
-                          icon: Icons.account_balance_wallet,
-
-                          color: Colors.red,
-                        ),
-                      ),
-
-                      SizedBox(
-                        width: 200,
-
-                        child: LoanAnalyticsCard(
-                          title: 'EMI Amount',
-
-                          value: CurrencyUtils.formatAmount(
-                            widget.loan.emiAmount,
+                        ],
+                      )
+                    else
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.event_outlined,
+                            size: 20,
+                            color: isOverdue ? Colors.red : muted,
                           ),
-
-                          icon: Icons.payment,
-
-                          color: Colors.green,
-                        ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Next EMI',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: muted,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            nextEmi == null
+                                ? '-'
+                                : AppDateUtils.formatDate(nextEmi),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: isOverdue ? Colors.red : null,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // ---- Key numbers ----
+            Row(
+              children: [
+                Expanded(
+                  child: LoanAnalyticsCard(
+                    title: 'EMI amount',
+                    value: CurrencyUtils.formatAmount(loan.emiAmount),
+                    icon: Icons.payment,
+                    color: Colors.green,
                   ),
                 ),
-
-                const SizedBox(height: 24),
-
-                const Text(
-                  'Payment History',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 12),
-
-                Consumer<LoanPaymentProvider>(
-                  builder: (context, provider, _) {
-                    if (provider.payments.isEmpty) {
-                      return const Text('No payments found');
-                    }
-
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: provider.payments.length,
-                      itemBuilder: (context, index) {
-                        return LoanPaymentCard(
-                          payment: provider.payments[index],
-                        );
-                      },
-                    );
-                  },
-                ),
-
-                if (widget.loan.loanStatus.toUpperCase() != 'CLOSED')
-                  SizedBox(
-                    width: double.infinity,
-
-                    child: ElevatedButton.icon(
-                      onPressed:
-                          widget.loan.loanStatus.toUpperCase() == 'CLOSED'
-                          ? null
-                          : () {
-                              showModalBottomSheet(
-                                context: context,
-
-                                isScrollControlled: true,
-
-                                builder: (_) {
-                                  return PayEmiBottomSheet(
-                                    onSubmit:
-                                        ({
-                                          required paymentAmount,
-                                          required paymentMode,
-                                          remarks,
-                                        }) async {
-                                          await loanProvider.payEmi(
-                                            loan: widget.loan,
-                                            paymentAmount: paymentAmount,
-                                            paymentMode: paymentMode,
-                                            remarks: remarks,
-                                          );
-
-                                          await loanProvider.loadLoanPayments(
-                                            widget.loan.id!,
-                                          );
-                                          if (!context.mounted) return;
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'EMI payment recorded successfully',
-                                              ),
-
-                                              behavior:
-                                                  SnackBarBehavior.floating,
-
-                                              backgroundColor: Colors.green,
-                                            ),
-                                          );
-                                        },
-                                  );
-                                },
-                              );
-                            },
-
-                      icon: const Icon(Icons.payment),
-
-                      label: const Text('Pay EMI'),
-                    ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: LoanAnalyticsCard(
+                    title: 'Remaining EMIs',
+                    value: '$remainingEmis',
+                    icon: Icons.calendar_month,
+                    color: Colors.blue,
                   ),
-
-                const SizedBox(height: 20),
-
-                Consumer<LoanProvider>(
-                  builder: (context, provider, child) {
-                    return LoanPaymentHistorySection(
-                      payments: provider.loanPayments,
-                    );
-                  },
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: LoanAnalyticsCard(
+                    title: 'Interest rate',
+                    value: '${loan.interestRate}%',
+                    icon: Icons.percent,
+                    color: Colors.orange,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: LoanAnalyticsCard(
+                    title: 'Tenure',
+                    value: '${loan.tenureMonths} months',
+                    icon: Icons.timelapse,
+                    color: Colors.purple,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // ---- Other details ----
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Column(
+                  children: [
+                    _infoRow(
+                      'Started',
+                      started == null ? '-' : AppDateUtils.formatDate(started),
+                    ),
+                    if (hasNotes) ...[
+                      const Divider(),
+                      _infoRow('Notes', loan.notes!.trim()),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // ---- Payment history (single list) ----
+            Consumer<LoanPaymentProvider>(
+              builder: (context, provider, _) =>
+                  LoanPaymentHistorySection(payments: provider.payments),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Both payment actions pinned at the bottom (no floating button covering
+  /// the content).
+  Widget _buildActionBar(LoanModel loan, bool isClosed) {
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+          child: Row(
+            children: [
+              if (!isClosed) ...[
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: FilledButton.icon(
+                      onPressed: () => _openPaySheet(loan),
+                      icon: const Icon(Icons.payments_outlined),
+                      label: const Text('Pay EMI'),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+              ],
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _openAddPayment(loan),
+                    icon: const Icon(Icons.edit_calendar_outlined),
+                    label: const Text('Add payment'),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildRow(String title, String value) {
+  Widget _infoRow(String title, String value) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 130,
+            width: 90,
             child: Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
-
-          Expanded(child: Text(value)),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );

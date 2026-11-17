@@ -7,6 +7,7 @@ import '../../../core/services/notification_service.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
+import '../../../core/widgets/compact_form_theme.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/loan_model.dart';
 import '../providers/loan_provider.dart';
@@ -87,7 +88,7 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
   String? _validateInterest(String? value) {
     final rate = double.tryParse((value ?? '').trim());
     if (rate == null || rate < 0 || rate > 100) {
-      return 'Enter a valid rate between 0 and 100';
+      return 'Enter 0 to 100';
     }
     return null;
   }
@@ -95,7 +96,7 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
   String? _validateTenure(String? value) {
     final months = int.tryParse((value ?? '').trim());
     if (months == null || months <= 0) {
-      return 'Enter tenure in months';
+      return 'Enter months';
     }
     return null;
   }
@@ -187,40 +188,68 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
     }
   }
 
+  /// Save button pinned to the bottom so it is always visible.
+  Widget _buildSaveBar(ThemeData theme) {
+    return Material(
+      color: theme.scaffoldBackgroundColor,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            8,
+            16,
+            12 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          child: SizedBox(
+            height: 50,
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: _isSaving ? null : _saveLoan,
+              icon: _isSaving
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save_outlined),
+              label: Text(
+                _isSaving
+                    ? 'Saving...'
+                    : isEditMode
+                    ? 'Update loan'
+                    : 'Save loan',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(isEditMode ? 'Edit Loan' : 'Add Loan')),
-      body: SingleChildScrollView(
-        child: AppResponsiveContent(
+    const numberKeyboard = TextInputType.numberWithOptions(decimal: true);
+    return CompactFormTheme(
+      child: Scaffold(
+        appBar: AppBar(title: Text(isEditMode ? 'Edit Loan' : 'Add Loan')),
+        bottomNavigationBar: _buildSaveBar(theme),
+        body: AppResponsiveContent(
           maxWidth: 680,
-          padding: const EdgeInsets.all(20),
+          // Padding lives inside the scroll view so it never clips content.
+          padding: EdgeInsets.zero,
           child: Form(
             key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               children: [
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(18),
+                    padding: const EdgeInsets.all(14),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          isEditMode ? 'Update loan' : 'New loan',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Enter the loan and repayment details.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
                         DropdownButtonFormField<String>(
                           initialValue: _loanType,
                           isExpanded: true,
@@ -243,52 +272,66 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
                             }
                           },
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: _personController,
+                          textCapitalization: TextCapitalization.words,
                           decoration: const InputDecoration(
                             labelText: 'Person / Bank name',
                             prefixIcon: Icon(Icons.person_outline),
                           ),
                           validator: _validateRequired,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: _amountController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
+                          keyboardType: numberKeyboard,
                           decoration: const InputDecoration(
                             labelText: 'Principal amount',
                             prefixText: '₹ ',
                           ),
                           validator: _validatePositiveAmount,
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _interestController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: const InputDecoration(
-                            labelText: 'Interest rate (%)',
-                            suffixText: '%',
-                          ),
-                          validator: _validateInterest,
-                        ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: _emiController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
+                          keyboardType: numberKeyboard,
                           decoration: const InputDecoration(
                             labelText: 'EMI amount',
                             prefixText: '₹ ',
                           ),
                           validator: _validatePositiveAmount,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _interestController,
+                                keyboardType: numberKeyboard,
+                                decoration: const InputDecoration(
+                                  labelText: 'Interest',
+                                  suffixText: '%',
+                                ),
+                                validator: _validateInterest,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _tenureController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Tenure',
+                                  suffixText: 'months',
+                                ),
+                                validator: _validateTenure,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
                         _dateField(
                           label: 'Loan start date',
                           date: _startDate,
@@ -300,40 +343,32 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
                           date: _nextEmiDate,
                           onTap: () => _pickDate(isNextEmiDate: true),
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _tenureController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: 'Tenure (months)',
-                            prefixIcon: Icon(Icons.calendar_month_outlined),
-                          ),
-                          validator: _validateTenure,
-                        ),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          initialValue: _loanStatus,
-                          isExpanded: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Loan status',
-                          ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'ACTIVE',
-                              child: Text('Active'),
+                        if (isEditMode) ...[
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<String>(
+                            initialValue: _loanStatus,
+                            isExpanded: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Loan status',
                             ),
-                            DropdownMenuItem(
-                              value: 'CLOSED',
-                              child: Text('Closed'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() => _loanStatus = value);
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 16),
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'ACTIVE',
+                                child: Text('Active'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'CLOSED',
+                                child: Text('Closed'),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() => _loanStatus = value);
+                              }
+                            },
+                          ),
+                        ],
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: _notesController,
                           minLines: 2,
@@ -345,27 +380,6 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                SizedBox(
-                  height: 52,
-                  child: FilledButton.icon(
-                    onPressed: _isSaving ? null : _saveLoan,
-                    icon: _isSaving
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.save_outlined),
-                    label: Text(
-                      _isSaving
-                          ? 'Saving...'
-                          : isEditMode
-                          ? 'Update loan'
-                          : 'Save loan',
                     ),
                   ),
                 ),

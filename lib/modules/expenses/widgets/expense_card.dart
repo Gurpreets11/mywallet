@@ -10,132 +10,127 @@ class ExpenseCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onEdit;
 
+  /// Show the date on the card. The list hides it when transactions are
+  /// already grouped under date headings.
+  final bool showDate;
+
   const ExpenseCard({
     super.key,
     required this.expense,
     required this.onDelete,
     required this.onTap,
     required this.onEdit,
+    this.showDate = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
+
+    final meta = <String>[
+      if ((expense.subcategoryName ?? '').isNotEmpty) expense.subcategoryName!,
+      if (expense.paymentMode.isNotEmpty) expense.paymentMode,
+      if (showDate) _formatDate(expense.date),
+    ].join(' • ');
+
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 5),
+      margin: const EdgeInsets.symmetric(vertical: 3),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
           child: Row(
             children: [
               CircleAvatar(
-                radius: 22,
+                radius: 18,
                 backgroundColor: theme.colorScheme.errorContainer.withValues(
                   alpha: .55,
                 ),
                 child: Icon(
                   Icons.receipt_long_outlined,
+                  size: 18,
                   color: theme.colorScheme.error,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      expense.categoryName?.isNotEmpty == true
-                          ? expense.categoryName!
-                          : 'Expense',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            expense.categoryName?.isNotEmpty == true
+                                ? expense.categoryName!
+                                : 'Expense',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          CurrencyUtils.formatAmount(expense.amount),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      [
-                        if ((expense.subcategoryName ?? '').isNotEmpty)
-                          expense.subcategoryName!,
-                        expense.paymentMode,
-                      ].join(' • '),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    if ((expense.notes ?? '').trim().isNotEmpty) ...[
-                      const SizedBox(height: 3),
+                    if (meta.isNotEmpty) ...[
+                      const SizedBox(height: 2),
                       Text(
-                        expense.notes!,
+                        meta,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                      ),
+                    ],
+                    if ((expense.notes ?? '').trim().isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        expense.notes!.trim(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: muted,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                     ],
-                    const SizedBox(height: 3),
-                    Text(
-                      _formatDate(expense.date),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    CurrencyUtils.formatAmount(expense.amount),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+              PopupMenuButton<String>(
+                tooltip: 'More actions',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                icon: Icon(Icons.more_vert, size: 20, color: muted),
+                onSelected: (value) {
+                  if (value == 'edit') onEdit();
+                  if (value == 'delete') onDelete();
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: ListTile(
+                      dense: true,
+                      leading: Icon(Icons.edit_outlined),
+                      title: Text('Edit'),
                     ),
                   ),
-                  PopupMenuButton<String>(
-                    tooltip: 'More actions',
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 32,
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: ListTile(
+                      dense: true,
+                      leading: Icon(Icons.delete_outline, color: Colors.red),
+                      title: Text('Delete'),
                     ),
-                    icon: Icon(
-                      Icons.more_horiz,
-                      size: 21,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    onSelected: (value) {
-                      if (value == 'edit') onEdit();
-                      if (value == 'delete') onDelete();
-                    },
-                    itemBuilder: (_) => const [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: ListTile(
-                          dense: true,
-                          leading: Icon(Icons.edit_outlined),
-                          title: Text('Edit'),
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: ListTile(
-                          dense: true,
-                          leading: Icon(
-                            Icons.delete_outline,
-                            color: Colors.red,
-                          ),
-                          title: Text('Delete'),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -148,6 +143,6 @@ class ExpenseCard extends StatelessWidget {
 
   String _formatDate(String value) {
     final date = DateTime.tryParse(value);
-    return date == null ? value : AppDateUtils.formatDateTime(date);
+    return date == null ? value : AppDateUtils.formatDate(date);
   }
 }

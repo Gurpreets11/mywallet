@@ -36,6 +36,8 @@ class _AppLockGateState extends State<AppLockGate>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Safety net: normally main() already loaded the lock state.
+    _lock.ensureLoaded();
   }
 
   @override
@@ -75,7 +77,13 @@ class _AppLockGateState extends State<AppLockGate>
         return Stack(
           children: [
             widget.child,
-            if (_lock.isLocked) const Positioned.fill(child: _LockScreen()),
+            // Until the lock state is known, cover the app (no content flash).
+            if (!_lock.isLoaded)
+              const Positioned.fill(
+                child: ColoredBox(color: AppColors.background),
+              )
+            else if (_lock.isLocked)
+              const Positioned.fill(child: _LockScreen()),
           ],
         );
       },

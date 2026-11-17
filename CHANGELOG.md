@@ -5,6 +5,86 @@ All notable changes to **My Wallet** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# myWallet Phase 9 - Settings
+
+
+# myWallet Phase 8 - Reports & Analytics
+
+## Features Included:
+- Year selector with annual income, expense and net-savings totals.
+- Monthly income-versus-expense bar chart.
+- Category-wise expense pie chart and category totals.
+- Monthly financial breakdown table.
+- PDF report export.
+- Excel-compatible CSV export.
+- Reports entry in wide navigation and the mobile More screen.
+
+## Files changed/new files only:
+- lib/modules/reports/models/report_models.dart
+- lib/modules/reports/repositories/report_repository.dart
+- lib/modules/reports/providers/report_provider.dart
+- lib/modules/reports/services/report_export_service.dart
+- lib/modules/reports/screens/reports_screen.dart
+- lib/main.dart
+- lib/modules/navigation/screens/main_navigation_screen.dart
+- lib/modules/dashboard/screens/more_screen.dart
+
+## Integration:
+1. Extract this ZIP into the Flutter project root and allow the files to merge.
+2. No database migration is required.
+3. No new pubspec dependencies are introduced. This implementation uses the existing fl_chart and file_picker packages already referenced by the supplied lib source.
+4. Run:
+   flutter pub get
+   dart format lib
+   flutter analyze
+   flutter test
+
+## Notes:
+- Reports include only income and expense transactions recorded in the selected calendar year.
+- Investments, loan principal/payments and transfers are not included in income/expense totals.
+- CSV opens in Excel and other spreadsheet applications.
+- PDF uses a built-in minimal PDF writer to avoid adding a PDF package. Non-ASCII characters in category labels are replaced in the PDF; the CSV retains UTF-8 text.
+- Please test file saving on each target platform (Android/iOS/Web/Desktop), as file-picker save dialogs are platform-dependent.
+
+# myWallet - Phase 7: Recurring transactions
+
+This ZIP contains only new/modified files. Copy the contents of the ZIP into
+your Flutter project root, preserving the folder structure.
+
+## Included:
+- New recurring transaction model, repository, provider and screen.
+- SQLite schema migration from database version 11 to 12.
+- Recurring menu item in mobile More and direct wide navigation.
+- Due recurring entries generated at app startup and when the Recurring
+  screen is refreshed/opened.
+
+## How it works:
+1. Add a recurring Expense or Income.
+2. Select a category, amount, frequency, interval and start date.
+3. Due occurrences are inserted into the existing expenses/incomes tables.
+4. The occurrence table has a unique schedule/date constraint, preventing
+   duplicate transaction generation if the app starts more than once.
+5. Pausing stops future generation. Resuming continues from next_due_date.
+6. Deleting a schedule does NOT delete already generated expense/income rows.
+
+## Important behavior / limitations in this phase:
+- Generation runs when the app launches and when the Recurring screen loads.
+  It does not run in the background while the app is closed.
+- Reminder days-before and local notification scheduling are not included
+  in this implementation.
+- The first version supports Daily, Weekly, Monthly and Yearly schedules.
+- The first version supports creating, viewing, pausing, resuming and deleting
+  schedules. Editing an existing schedule is not included.
+- Generated entries use the selected category and payment mode. Subcategory
+  selection is not included in recurring setup.
+- Existing expense/income history remains unchanged.
+
+## Database:
+- databaseVersion changes from 11 to 12.
+- Existing databases are upgraded using onUpgrade; no manual DB deletion is
+  required. Do not uninstall the app or clear app data to apply the migration.
+
+
 # MyWallet – Phase 6
 
 ## Monthly Budget Management

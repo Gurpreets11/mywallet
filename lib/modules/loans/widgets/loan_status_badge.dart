@@ -7,34 +7,37 @@ class LoanStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color color;
+    final upper = status.toUpperCase();
 
-    switch (status) {
-      case 'Closed':
+    final Color color;
+    final String label;
+    switch (upper) {
+      case 'CLOSED':
         color = Colors.green;
+        label = 'Closed';
         break;
-
       case 'OVERDUE':
         color = Colors.red;
+        label = 'Overdue';
         break;
-
       default:
-        color = Colors.orange;
+        color = Theme.of(context).colorScheme.primary;
+        label = 'Active';
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
       ),
-
       child: Text(
-        status,
-
-        style: TextStyle(color: color, fontWeight: FontWeight.bold),
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

@@ -32,8 +32,17 @@ class LoanAnalyticsUtils {
   /// OVERDUE CHECK
 
   static bool isLoanOverdue(String nextEmiDate) {
-    final emiDate = DateTime.parse(nextEmiDate);
+    final emiDate = DateTime.tryParse(nextEmiDate);
 
-    return emiDate.isBefore(DateTime.now());
+    if (emiDate == null) {
+      return false;
+    }
+
+    // Compare calendar days: an EMI due today is not overdue yet.
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dueDay = DateTime(emiDate.year, emiDate.month, emiDate.day);
+
+    return dueDay.isBefore(today);
   }
 }

@@ -6,7 +6,10 @@ import 'package:provider/provider.dart';
 import 'core/database/app_database.dart';
 import 'core/services/navigation_service.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/security/app_lock_service.dart';
+import 'core/services/settings/app_preferences.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/app_lock_gate.dart';
 import 'data/services/master_seed_service.dart';
 import 'data/services/demo_data_seed_service.dart';
 import 'modules/budgets/providers/budget_provider.dart';
@@ -28,6 +31,9 @@ void main() async {
   if (!kIsWeb) {
     await AppDatabase.database;
     await MasterSeedService.seedMasterData();
+    // User preferences and app-lock state live in the database.
+    await AppPreferences.instance.load();
+    await AppLockService.instance.load();
     // Development preview data only. kDebugMode is false in production builds.
     if (kDebugMode) {
       try {
@@ -90,6 +96,20 @@ class FinanceManagerApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
 
         darkTheme: AppTheme.darkTheme,
+        // App-wide text size (Settings > Preferences) + PIN lock overlay.
+        builder: (context, child) => ListenableBuilder(
+          listenable: AppPreferences.instance,
+          builder: (context, _) {
+            final media = MediaQuery.of(context);
+            // Multiply the user's choice with the phone's own text setting.
+            final scale =
+                media.textScaler.scale(1.0) * AppPreferences.instance.fontScale;
+            return MediaQuery(
+              data: media.copyWith(textScaler: TextScaler.linear(scale)),
+              child: AppLockGate(child: child ?? const SizedBox.shrink()),
+            );
+          },
+        ),
         home: const MainNavigationScreen(),
         navigatorKey: NavigationService.instance.navigatorKey,
       ),

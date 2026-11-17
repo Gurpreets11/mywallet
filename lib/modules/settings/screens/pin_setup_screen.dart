@@ -88,7 +88,14 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
         }
         if (widget.flow == PinFlow.disable) {
           setState(() => _busy = true);
-          await _lock.disable();
+          try {
+            await _lock.disable();
+          } catch (e) {
+            if (!mounted) return;
+            setState(() => _busy = false);
+            _fail('Could not turn off the lock: $e');
+            return;
+          }
           if (mounted) Navigator.pop(context, true);
           return;
         }
@@ -116,7 +123,18 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
           return;
         }
         setState(() => _busy = true);
-        await _lock.setPin(_pin);
+        try {
+          await _lock.setPin(_pin);
+        } catch (e) {
+          if (!mounted) return;
+          setState(() {
+            _busy = false;
+            _firstEntry = '';
+            _step = _Step.enterNew;
+          });
+          _fail('$e');
+          return;
+        }
         if (mounted) Navigator.pop(context, true);
         break;
     }

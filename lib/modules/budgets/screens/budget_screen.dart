@@ -207,11 +207,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
         heroTag: 'budget_add_fab',
         onPressed: () => _showBudgetForm(),
         icon: const Icon(Icons.add),
-        label: const Text('Add budget'),
+        label: const Text('Add'),
       ),
       body: AppResponsiveContent(
         maxWidth: 900,
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 90),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         child: provider.isLoading
             ? const Center(child: CircularProgressIndicator())
             : Column(

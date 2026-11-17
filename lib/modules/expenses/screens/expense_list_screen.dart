@@ -5,6 +5,7 @@ import '../../../core/utils/currency_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/empty_view.dart';
 import '../../../core/widgets/loading_view.dart';
+import '../../../core/widgets/transaction_list_header.dart';
 import '../../../data/providers/master_provider.dart';
 import '../models/expense_model.dart';
 import '../providers/expense_provider.dart';
@@ -265,102 +266,37 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       ),
       body: AppResponsiveContent(
         maxWidth: 1050,
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
-        child: Column(
-          children: [
-            TextField(
-              controller: _searchController,
-              onChanged: context.read<ExpenseProvider>().searchExpense,
-              decoration: InputDecoration(
-                hintText: 'Search category, notes, payment mode or amount',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isEmpty
-                    ? null
-                    : IconButton(
-                        onPressed: () {
-                          _searchController.clear();
-                          context.read<ExpenseProvider>().searchExpense('');
-                        },
-                        icon: const Icon(Icons.close),
-                      ),
-                filled: true,
+        // Horizontal padding only: vertical padding outside a scroll view
+        // clips the list, so spacing is applied inside the scroll view.
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: TransactionListHeader(
+                searchController: _searchController,
+                onSearchChanged: context.read<ExpenseProvider>().searchExpense,
+                onSearchCleared: () {
+                  _searchController.clear();
+                  context.read<ExpenseProvider>().searchExpense('');
+                },
+                summaryLabel: 'Spent this month',
+                summaryAmount: CurrencyUtils.formatAmount(provider.monthlyExpenseTotal),
+                summaryIcon: Icons.trending_up,
+                summaryIconColor: theme.colorScheme.error,
+                summaryIconBackground: theme.colorScheme.errorContainer,
+                countText: '${expenses.length} transactions',
+                sortValue: _sort,
+                onSortChanged: (v) => setState(() => _sort = v),
               ),
-            ),
-            const SizedBox(height: 12),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Spent this month',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            CurrencyUtils.formatAmount(
-                              provider.monthlyExpenseTotal,
-                            ),
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.errorContainer,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        Icons.trending_up,
-                        color: theme.colorScheme.error,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text(
-                  '${expenses.length} transactions',
-                  style: theme.textTheme.titleSmall,
-                ),
-                const Spacer(),
-                DropdownButton<String>(
-                  value: _sort,
-                  underline: const SizedBox(),
-                  items: const [
-                    DropdownMenuItem(value: 'newest', child: Text('Newest')),
-                    DropdownMenuItem(value: 'oldest', child: Text('Oldest')),
-                    DropdownMenuItem(
-                      value: 'highest',
-                      child: Text('Highest amount'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'lowest',
-                      child: Text('Lowest amount'),
-                    ),
-                  ],
-                  onChanged: (v) => setState(() => _sort = v ?? 'newest'),
-                ),
-              ],
             ),
             if (provider.isLoading)
-              const Expanded(child: LoadingView())
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: LoadingView(),
+              )
             else if (expenses.isEmpty)
-              Expanded(
+              SliverFillRemaining(
+                hasScrollBody: false,
                 child: EmptyView(
                   message: provider.expenses.isEmpty
                       ? 'No expenses yet'
@@ -378,32 +314,34 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                 ),
               )
             else
-              Expanded(
-                child: ListView.builder(
+              SliverPadding(
+                // Room for the floating button under the last item.
+                padding: const EdgeInsets.only(bottom: 88),
+                sliver: SliverList.builder(
                   itemCount: expenses.length,
                   itemBuilder: (context, index) {
                     final expense = expenses[index];
+                    // Date headings only make sense when sorted by date.
+                    final groupByDate = _sort == 'newest' || _sort == 'oldest';
                     final currentDate = DateTime.tryParse(expense.date);
                     final previousDate = index == 0
                         ? null
                         : DateTime.tryParse(expenses[index - 1].date);
                     final showHeader =
+                        groupByDate &&
                         currentDate != null &&
                         (previousDate == null ||
                             currentDate.year != previousDate.year ||
                             currentDate.month != previousDate.month ||
                             currentDate.day != previousDate.day);
-                    final label = currentDate == null
-                        ? ''
-                        : _dateLabel(currentDate);
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (showHeader)
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 14, 4, 4),
+                            padding: const EdgeInsets.fromLTRB(4, 10, 4, 2),
                             child: Text(
-                              label,
+                              _dateLabel(currentDate!),
                               style: theme.textTheme.labelLarge?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w700,
@@ -412,18 +350,17 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                           ),
                         ExpenseCard(
                           expense: expense,
+                          showDate: !groupByDate,
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  ExpenseDetailScreen(expense: expense),
+                              builder: (_) => ExpenseDetailScreen(expense: expense),
                             ),
                           ),
                           onEdit: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  AddExpenseScreen(expense: expense),
+                              builder: (_) => AddExpenseScreen(expense: expense),
                             ),
                           ),
                           onDelete: () => _deleteExpense(provider, expense),

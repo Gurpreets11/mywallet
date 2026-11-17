@@ -53,30 +53,41 @@ class _RecurringScreenState extends State<RecurringScreen> {
             categoryName = '';
           }
           return AlertDialog(
-            title: const Text('Add recurring transaction'),
+            title:   Text('Add recurring transaction',
+              style: Theme.of(context).textTheme.titleMedium,),
             content: SizedBox(
-              width: 440,
+              width: 480,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextField(
+                    TextFormField(
                       controller: titleController,
                       decoration: const InputDecoration(labelText: 'Title'),
                     ),
                     const SizedBox(height: 10),
-                    TextField(
+                    TextFormField(
                       controller: amountController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       decoration: const InputDecoration(labelText: 'Amount'),
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       initialValue: type,
-                      decoration: const InputDecoration(labelText: 'Transaction type'),
+                      decoration: const InputDecoration(
+                        labelText: 'Transaction type',
+                      ),
                       items: const [
-                        DropdownMenuItem(value: 'EXPENSE', child: Text('Expense')),
-                        DropdownMenuItem(value: 'INCOME', child: Text('Income')),
+                        DropdownMenuItem(
+                          value: 'EXPENSE',
+                          child: Text('Expense'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'INCOME',
+                          child: Text('Income'),
+                        ),
                       ],
                       onChanged: (value) => setDialogState(() {
                         type = value!;
@@ -108,32 +119,55 @@ class _RecurringScreenState extends State<RecurringScreen> {
                       decoration: const InputDecoration(labelText: 'Repeat'),
                       items: const [
                         DropdownMenuItem(value: 'DAILY', child: Text('Daily')),
-                        DropdownMenuItem(value: 'WEEKLY', child: Text('Weekly')),
-                        DropdownMenuItem(value: 'MONTHLY', child: Text('Monthly')),
-                        DropdownMenuItem(value: 'YEARLY', child: Text('Yearly')),
+                        DropdownMenuItem(
+                          value: 'WEEKLY',
+                          child: Text('Weekly'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'MONTHLY',
+                          child: Text('Monthly'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'YEARLY',
+                          child: Text('Yearly'),
+                        ),
                       ],
-                      onChanged: (value) => setDialogState(() => frequency = value!),
+                      onChanged: (value) =>
+                          setDialogState(() => frequency = value!),
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<int>(
                       initialValue: interval,
                       decoration: const InputDecoration(labelText: 'Every'),
                       items: List.generate(12, (index) => index + 1)
-                          .map((value) => DropdownMenuItem(
-                                value: value,
-                                child: Text('$value ${frequency.toLowerCase()} interval(s)'),
-                              ))
+                          .map(
+                            (value) => DropdownMenuItem(
+                              value: value,
+                              child: Text(
+                                '$value ${frequency.toLowerCase()} interval(s)',
+                              ),
+                            ),
+                          )
                           .toList(),
-                      onChanged: (value) => setDialogState(() => interval = value!),
+                      onChanged: (value) =>
+                          setDialogState(() => interval = value!),
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       initialValue: paymentMode,
-                      decoration: const InputDecoration(labelText: 'Payment mode'),
+                      decoration: const InputDecoration(
+                        labelText: 'Payment mode',
+                      ),
                       items: const ['Cash', 'Card', 'UPI', 'Bank Transfer']
-                          .map((value) => DropdownMenuItem(value: value, child: Text(value)))
+                          .map(
+                            (value) => DropdownMenuItem(
+                              value: value,
+                              child: Text(value),
+                            ),
+                          )
                           .toList(),
-                      onChanged: (value) => setDialogState(() => paymentMode = value!),
+                      onChanged: (value) =>
+                          setDialogState(() => paymentMode = value!),
                     ),
                     const SizedBox(height: 10),
                     ListTile(
@@ -148,13 +182,16 @@ class _RecurringScreenState extends State<RecurringScreen> {
                           firstDate: DateTime(2000),
                           lastDate: DateTime(2100),
                         );
-                        if (picked != null) setDialogState(() => start = picked);
+                        if (picked != null)
+                          setDialogState(() => start = picked);
                       },
                     ),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: const Text('End date (optional)'),
-                      subtitle: Text(end == null ? 'No end date' : _formatDate(end!)),
+                      subtitle: Text(
+                        end == null ? 'No end date' : _formatDate(end!),
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -179,7 +216,9 @@ class _RecurringScreenState extends State<RecurringScreen> {
                     ),
                     TextField(
                       controller: notesController,
-                      decoration: const InputDecoration(labelText: 'Notes (optional)'),
+                      decoration: const InputDecoration(
+                        labelText: 'Notes (optional)',
+                      ),
                       maxLines: 2,
                     ),
                   ],
@@ -195,37 +234,50 @@ class _RecurringScreenState extends State<RecurringScreen> {
                 onPressed: () async {
                   final title = titleController.text.trim();
                   final amount = double.tryParse(amountController.text.trim());
-                  if (title.isEmpty || amount == null || amount <= 0 ||
-                      categoryId == null || categoryName.isEmpty) {
+                  if (title.isEmpty ||
+                      amount == null ||
+                      amount <= 0 ||
+                      categoryId == null ||
+                      categoryName.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Enter title, valid amount and category.')),
+                      const SnackBar(
+                        content: Text(
+                          'Enter title, valid amount and category.',
+                        ),
+                      ),
                     );
                     return;
                   }
                   if (end != null && end!.isBefore(start)) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('End date must be on or after start date.')),
+                      const SnackBar(
+                        content: Text(
+                          'End date must be on or after start date.',
+                        ),
+                      ),
                     );
                     return;
                   }
                   final now = DateTime.now().toIso8601String();
-                  await provider.add(RecurringTransactionModel(
-                    title: title,
-                    transactionType: type,
-                    amount: amount,
-                    categoryId: categoryId!,
-                    categoryName: categoryName,
-                    paymentMode: paymentMode,
-                    notes: notesController.text.trim().isEmpty
-                        ? null
-                        : notesController.text.trim(),
-                    frequency: frequency,
-                    intervalValue: interval,
-                    startDate: _dateOnly(start),
-                    endDate: end == null ? null : _dateOnly(end!),
-                    nextDueDate: _dateOnly(start),
-                    createdAt: now,
-                  ));
+                  await provider.add(
+                    RecurringTransactionModel(
+                      title: title,
+                      transactionType: type,
+                      amount: amount,
+                      categoryId: categoryId!,
+                      categoryName: categoryName,
+                      paymentMode: paymentMode,
+                      notes: notesController.text.trim().isEmpty
+                          ? null
+                          : notesController.text.trim(),
+                      frequency: frequency,
+                      intervalValue: interval,
+                      startDate: _dateOnly(start),
+                      endDate: end == null ? null : _dateOnly(end!),
+                      nextDueDate: _dateOnly(start),
+                      createdAt: now,
+                    ),
+                  );
                   if (dialogContext.mounted) Navigator.pop(dialogContext);
                 },
                 child: const Text('Save'),
@@ -264,26 +316,37 @@ class _RecurringScreenState extends State<RecurringScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           return AppResponsiveContent(
-            maxWidth: 900,
+            maxWidth: 1050,
             child: provider.items.isEmpty
                 ? const Center(
                     child: Padding(
-                      padding: EdgeInsets.all(28),
+                      padding:   EdgeInsets.symmetric(horizontal: 12),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.event_repeat, size: 52, color: AppColors.textSecondary),
+                          Icon(
+                            Icons.event_repeat,
+                            size: 52,
+                            color: AppColors.textSecondary,
+                          ),
                           SizedBox(height: 12),
-                          Text('No recurring transactions yet',
-                              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                          Text(
+                            'No recurring transactions yet',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                           SizedBox(height: 6),
-                          Text('Add a schedule for bills, salary or regular savings.'),
+                          Text(
+                            'Add a schedule for bills, salary or regular savings.',
+                          ),
                         ],
                       ),
                     ),
                   )
                 : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                    padding:   EdgeInsets.symmetric(horizontal: 5),
                     itemCount: provider.items.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
@@ -292,15 +355,24 @@ class _RecurringScreenState extends State<RecurringScreen> {
                       return Card(
                         child: ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: (isExpense ? AppColors.expense : AppColors.income)
-                                .withValues(alpha: 0.12),
+                            backgroundColor:
+                                (isExpense
+                                        ? AppColors.expense
+                                        : AppColors.income)
+                                    .withValues(alpha: 0.12),
                             child: Icon(
-                              isExpense ? Icons.arrow_upward : Icons.arrow_downward,
-                              color: isExpense ? AppColors.expense : AppColors.income,
+                              isExpense
+                                  ? Icons.arrow_upward
+                                  : Icons.arrow_downward,
+                              color: isExpense
+                                  ? AppColors.expense
+                                  : AppColors.income,
                             ),
                           ),
-                          title: Text(item.title,
-                              style: const TextStyle(fontWeight: FontWeight.w700)),
+                          title: Text(
+                            item.title,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
                           subtitle: Padding(
                             padding: const EdgeInsets.only(top: 5),
                             child: Text(
@@ -313,7 +385,8 @@ class _RecurringScreenState extends State<RecurringScreen> {
                           trailing: PopupMenuButton<String>(
                             onSelected: (value) async {
                               if (value == 'pause') await provider.pause(item);
-                              if (value == 'resume') await provider.resume(item);
+                              if (value == 'resume')
+                                await provider.resume(item);
                               if (value == 'delete') {
                                 final confirmed = await showDialog<bool>(
                                   context: context,
@@ -324,25 +397,37 @@ class _RecurringScreenState extends State<RecurringScreen> {
                                     ),
                                     actions: [
                                       TextButton(
-                                        onPressed: () => Navigator.pop(dialogContext, false),
+                                        onPressed: () =>
+                                            Navigator.pop(dialogContext, false),
                                         child: const Text('Cancel'),
                                       ),
                                       FilledButton(
-                                        onPressed: () => Navigator.pop(dialogContext, true),
+                                        onPressed: () =>
+                                            Navigator.pop(dialogContext, true),
                                         child: const Text('Delete'),
                                       ),
                                     ],
                                   ),
                                 );
-                                if (confirmed == true) await provider.delete(item);
+                                if (confirmed == true)
+                                  await provider.delete(item);
                               }
                             },
                             itemBuilder: (_) => [
                               if (item.status == 'ACTIVE')
-                                const PopupMenuItem(value: 'pause', child: Text('Pause')),
+                                const PopupMenuItem(
+                                  value: 'pause',
+                                  child: Text('Pause'),
+                                ),
                               if (item.status == 'PAUSED')
-                                const PopupMenuItem(value: 'resume', child: Text('Resume')),
-                              const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                                const PopupMenuItem(
+                                  value: 'resume',
+                                  child: Text('Resume'),
+                                ),
+                              const PopupMenuItem(
+                                value: 'delete',
+                                child: Text('Delete'),
+                              ),
                             ],
                           ),
                           onTap: () => showDialog<void>(
@@ -377,8 +462,11 @@ class _RecurringScreenState extends State<RecurringScreen> {
     );
   }
 
-  static String _dateOnly(DateTime date) =>
-      DateTime(date.year, date.month, date.day).toIso8601String().substring(0, 10);
+  static String _dateOnly(DateTime date) => DateTime(
+    date.year,
+    date.month,
+    date.day,
+  ).toIso8601String().substring(0, 10);
 
   static String _formatDate(DateTime date) =>
       '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';

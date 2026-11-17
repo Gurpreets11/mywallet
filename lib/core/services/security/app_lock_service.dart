@@ -48,35 +48,57 @@ class AppLockService extends ChangeNotifier {
     return left.isNegative ? null : left;
   }
 
+  bool _loaded = false;
+
+  /// True once the saved lock state has been read from the database.
+  bool get isLoaded => _loaded;
+
+  Future<({bool enabled, String? salt, String? hash})> _readStored() async {
+    final Database db = await AppDatabase.database;
+    final rows = await db.query(
+      _table,
+      where: 'meta_key IN (?, ?, ?)',
+      whereArgs: [
+        BackupMetaKeys.appLockEnabled,
+        BackupMetaKeys.appLockSalt,
+        BackupMetaKeys.appLockHash,
+      ],
+    );
+    final values = {
+      for (final r in rows) r['meta_key'].toString(): r['meta_value'].toString(),
+    };
+    final salt = values[BackupMetaKeys.appLockSalt];
+    final hash = values[BackupMetaKeys.appLockHash];
+    final enabled =
+        values[BackupMetaKeys.appLockEnabled] == '1' &&
+        salt != null &&
+        hash != null;
+    return (enabled: enabled, salt: salt, hash: hash);
+  }
+
   /// Reads the saved lock state. Call once at start-up (and after a reset).
   Future<void> load() async {
     try {
-      final Database db = await AppDatabase.database;
-      final rows = await db.query(
-        _table,
-        where: 'meta_key IN (?, ?, ?)',
-        whereArgs: [
-          BackupMetaKeys.appLockEnabled,
-          BackupMetaKeys.appLockSalt,
-          BackupMetaKeys.appLockHash,
-        ],
-      );
-      final values = {
-        for (final r in rows) r['meta_key'] as String: r['meta_value'] as String,
-      };
-      _salt = values[BackupMetaKeys.appLockSalt];
-      _hash = values[BackupMetaKeys.appLockHash];
-      _enabled =
-          values[BackupMetaKeys.appLockEnabled] == '1' &&
-          _salt != null &&
-          _hash != null;
-    } catch (_) {
+      final stored = await _readStored();
+      _salt = stored.salt;
+      _hash = stored.hash;
+      _enabled = stored.enabled;
+      debugPrint('AppLock: loaded, enabled=$_enabled');
+    } catch (e, st) {
+      // Do not hide this: a failing read means the lock silently turns off.
+      debugPrint('AppLock: LOAD FAILED -> lock is OFF. $e\n$st');
       _enabled = false;
     }
+    _loaded = true;
     _locked = _enabled; // cold start: locked whenever the lock is on
     _failedAttempts = 0;
     _lockedOutUntil = null;
     notifyListeners();
+  }
+
+  /// Loads the lock state if nothing loaded it yet (safety net for the gate).
+  Future<void> ensureLoaded() async {
+    if (!_loaded) await load();
   }
 
   Future<void> _put(String key, String value) async {
@@ -108,6 +130,15 @@ class AppLockService extends ChangeNotifier {
     await _put(BackupMetaKeys.appLockSalt, salt);
     await _put(BackupMetaKeys.appLockHash, hash);
     await _put(BackupMetaKeys.appLockEnabled, '1');
+
+    // Read it back: if the PIN did not reach the database, fail loudly now
+    // instead of silently losing the lock at the next app start.
+    final stored = await _readStored();
+    if (!stored.enabled || stored.hash != hash) {
+      throw StateError('The PIN could not be saved. Please try again.');
+    }
+
+    _loaded = true;
     _salt = salt;
     _hash = hash;
     _enabled = true;
