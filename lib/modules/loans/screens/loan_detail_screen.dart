@@ -128,11 +128,10 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
         loan.nextEmiDate != null &&
         LoanAnalyticsUtils.isLoanOverdue(loan.nextEmiDate!);
 
-    final completion =
-        LoanAnalyticsUtils.calculateCompletionPercentage(
-          loanAmount: loan.principalAmount,
-          outstandingAmount: loan.outstandingAmount,
-        ).clamp(0.0, 100.0);
+    final completion = LoanAnalyticsUtils.calculateCompletionPercentage(
+      loanAmount: loan.principalAmount,
+      outstandingAmount: loan.outstandingAmount,
+    ).clamp(0.0, 100.0);
 
     final remainingEmis = LoanAnalyticsUtils.calculateRemainingEmiCount(
       outstandingAmount: loan.outstandingAmount,
@@ -239,7 +238,11 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
                     if (isClosed)
                       const Row(
                         children: [
-                          Icon(Icons.check_circle, size: 20, color: Colors.green),
+                          Icon(
+                            Icons.check_circle,
+                            size: 20,
+                            color: Colors.green,
+                          ),
                           SizedBox(width: 8),
                           Text(
                             'Loan fully repaid',

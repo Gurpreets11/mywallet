@@ -276,7 +276,9 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                   context.read<IncomeProvider>().searchIncome('');
                 },
                 summaryLabel: 'Received this month',
-                summaryAmount: CurrencyUtils.formatAmount(provider.monthlyIncome),
+                summaryAmount: CurrencyUtils.formatAmount(
+                  provider.monthlyIncome,
+                ),
                 summaryIcon: Icons.south_west_rounded,
                 summaryIconColor: theme.colorScheme.onPrimaryContainer,
                 summaryIconBackground: theme.colorScheme.primaryContainer,
@@ -337,7 +339,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(4, 10, 4, 2),
                             child: Text(
-                              _dateLabel(currentDate!),
+                              _dateLabel(currentDate),
                               style: theme.textTheme.labelLarge?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w700,
@@ -350,7 +352,8 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => IncomeDetailScreen(income: income),
+                              builder: (_) =>
+                                  IncomeDetailScreen(income: income),
                             ),
                           ),
                           onEdit: () => Navigator.push(

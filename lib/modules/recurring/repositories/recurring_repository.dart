@@ -1,4 +1,3 @@
-
 import '../../../core/database/app_database.dart';
 import '../models/recurring_transaction_model.dart';
 
@@ -8,7 +7,10 @@ class RecurringRepository {
 
   Future<List<RecurringTransactionModel>> getAll() async {
     final db = await AppDatabase.database;
-    final rows = await db.query(_table, orderBy: "status ASC, next_due_date ASC");
+    final rows = await db.query(
+      _table,
+      orderBy: "status ASC, next_due_date ASC",
+    );
     return rows.map(RecurringTransactionModel.fromMap).toList();
   }
 
@@ -30,14 +32,22 @@ class RecurringRepository {
 
   Future<void> setStatus(int id, String status) async {
     final db = await AppDatabase.database;
-    await db.update(_table, {'status': status}, where: 'id = ?', whereArgs: [id]);
+    await db.update(
+      _table,
+      {'status': status},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   Future<void> delete(int id) async {
     final db = await AppDatabase.database;
     await db.transaction((txn) async {
-      await txn.delete(_occurrences,
-          where: 'recurring_transaction_id = ?', whereArgs: [id]);
+      await txn.delete(
+        _occurrences,
+        where: 'recurring_transaction_id = ?',
+        whereArgs: [id],
+      );
       await txn.delete(_table, where: 'id = ?', whereArgs: [id]);
     });
   }
@@ -54,11 +64,7 @@ class RecurringRepository {
     );*/
     final nowDate = now ?? DateTime.now();
 
-    final today = DateTime(
-      nowDate.year,
-      nowDate.month,
-      nowDate.day,
-    );
+    final today = DateTime(nowDate.year, nowDate.month, nowDate.day);
 
     final todayString = _dateOnly(today);
     var generated = 0;
@@ -77,10 +83,7 @@ class RecurringRepository {
             ? null
             : DateTime.parse(schedule.endDate!);
 
-        while (
-        !due.isAfter(today) &&
-            (end == null || !due.isAfter(end))
-        ) {
+        while (!due.isAfter(today) && (end == null || !due.isAfter(end))) {
           final occurrenceDate = _dateOnly(due);
           final alreadyGenerated = await txn.query(
             _occurrences,
@@ -128,7 +131,9 @@ class RecurringRepository {
           due = _nextDate(due, schedule.frequency, schedule.intervalValue);
         }
 
-        final newStatus = end != null && due.isAfter(end) ? 'COMPLETED' : 'ACTIVE';
+        final newStatus = end != null && due.isAfter(end)
+            ? 'COMPLETED'
+            : 'ACTIVE';
         await txn.update(
           _table,
           {'next_due_date': _dateOnly(due), 'status': newStatus},
@@ -152,11 +157,16 @@ class RecurringRepository {
 
   static String _generatedNote(RecurringTransactionModel model) {
     final note = (model.notes ?? '').trim();
-    return note.isEmpty ? 'Recurring: ${model.title}' : 'Recurring: ${model.title} - $note';
+    return note.isEmpty
+        ? 'Recurring: ${model.title}'
+        : 'Recurring: ${model.title} - $note';
   }
 
-  static String _dateOnly(DateTime date) =>
-      DateTime(date.year, date.month, date.day).toIso8601String().substring(0, 10);
+  static String _dateOnly(DateTime date) => DateTime(
+    date.year,
+    date.month,
+    date.day,
+  ).toIso8601String().substring(0, 10);
 
   static DateTime _nextDate(DateTime date, String frequency, int interval) {
     switch (frequency) {
@@ -165,8 +175,11 @@ class RecurringRepository {
       case 'WEEKLY':
         return date.add(Duration(days: 7 * interval));
       case 'YEARLY':
-        return DateTime(date.year + interval, date.month,
-            _safeDay(date.year + interval, date.month, date.day));
+        return DateTime(
+          date.year + interval,
+          date.month,
+          _safeDay(date.year + interval, date.month, date.day),
+        );
       case 'MONTHLY':
       default:
         final monthIndex = date.month - 1 + interval;

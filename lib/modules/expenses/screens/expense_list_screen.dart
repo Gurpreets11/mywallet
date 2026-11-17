@@ -280,7 +280,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                   context.read<ExpenseProvider>().searchExpense('');
                 },
                 summaryLabel: 'Spent this month',
-                summaryAmount: CurrencyUtils.formatAmount(provider.monthlyExpenseTotal),
+                summaryAmount: CurrencyUtils.formatAmount(
+                  provider.monthlyExpenseTotal,
+                ),
                 summaryIcon: Icons.trending_up,
                 summaryIconColor: theme.colorScheme.error,
                 summaryIconBackground: theme.colorScheme.errorContainer,
@@ -341,7 +343,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(4, 10, 4, 2),
                             child: Text(
-                              _dateLabel(currentDate!),
+                              _dateLabel(currentDate),
                               style: theme.textTheme.labelLarge?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w700,
@@ -354,13 +356,15 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => ExpenseDetailScreen(expense: expense),
+                              builder: (_) =>
+                                  ExpenseDetailScreen(expense: expense),
                             ),
                           ),
                           onEdit: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => AddExpenseScreen(expense: expense),
+                              builder: (_) =>
+                                  AddExpenseScreen(expense: expense),
                             ),
                           ),
                           onDelete: () => _deleteExpense(provider, expense),

@@ -65,6 +65,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
       ),
       body: AppResponsiveContent(
         maxWidth: 1100,
+        padding: EdgeInsets.zero,
         child: p.isLoading && report == null
             ? const Center(child: CircularProgressIndicator())
             : p.error != null && report == null
@@ -79,7 +80,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             : RefreshIndicator(
                 onRefresh: () => p.load(),
                 child: ListView(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
                   children: [
                     Row(
                       children: [
@@ -105,23 +106,23 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     _summaryCards(report),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 14),
                     _sectionTitle('Income vs Expenses'),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     _monthlyChart(report),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 14),
                     _sectionTitle('Category-wise Expenses'),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     _categoryChart(report),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 14),
                     _sectionTitle('Monthly Breakdown'),
                     const SizedBox(height: 8),
                     _monthlyTable(report),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 14),
                     _sectionTitle('Export Report'),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(
@@ -143,7 +144,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 14),
                   ],
                 ),
               ),
@@ -175,7 +176,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   .map(
                     (w) => Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(right: 10),
+                        padding: const EdgeInsets.only(right: 8),
                         child: w,
                       ),
                     ),
@@ -186,7 +187,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               children: cards
                   .map(
                     (w) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.only(bottom: 8),
                       child: w,
                     ),
                   )
@@ -198,7 +199,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _summary(String title, double amount, Color color, IconData icon) =>
       Card(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: Row(
             children: [
               CircleAvatar(
@@ -246,7 +247,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     if (maxValue == 0) return const _EmptyChart();
     return Card(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 20, 16, 12),
+        padding: const EdgeInsets.fromLTRB(10, 14, 12, 10),
         child: SizedBox(
           height: 230,
           child: BarChart(
@@ -336,7 +337,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     ];
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           children: [
             SizedBox(
@@ -366,7 +367,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             ...r.categories
                 .take(8)
                 .toList()
@@ -437,6 +438,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
+          horizontalMargin: 12,
+          columnSpacing: 18,
+          dataRowMinHeight: 42,
+          dataRowMaxHeight: 48,
+          headingRowHeight: 42,
           columns: const [
             DataColumn(label: Text('Month')),
             DataColumn(label: Text('Income'), numeric: true),

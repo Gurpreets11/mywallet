@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/common_delete_dialog.dart';
 import '../../../core/widgets/empty_view.dart';
 import '../../../core/widgets/loading_view.dart';
@@ -52,173 +53,168 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
           : LayoutBuilder(
               builder: (context, constraints) {
                 final wide = constraints.maxWidth >= 900;
-                final contentWidth = constraints.maxWidth > 1200
-                    ? 1120.0
-                    : constraints.maxWidth;
-                return Center(
-                  child: SizedBox(
-                    width: contentWidth,
-                    child: RefreshIndicator(
-                      onRefresh: provider.loadInvestments,
-                      child: ListView(
-                        padding: EdgeInsets.fromLTRB(
-                          wide ? 24 : 16,
-                          16,
-                          wide ? 24 : 16,
-                          100,
-                        ),
-                        children: [
-                          InvestmentSummaryCard(
-                            investedAmount: invested,
-                            currentValue: current,
-                          ),
-                          const SizedBox(height: 18),
-                          _allocationSection(provider.investments),
-                          const SizedBox(height: 18),
-                          TextField(
-                            onChanged: provider.updateSearchQuery,
-                            decoration: const InputDecoration(
-                              hintText: 'Search name or platform',
-                              prefixIcon: Icon(Icons.search),
-                              isDense: true,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Wrap(
-                            spacing: 10,
-                            runSpacing: 8,
-                            children: [
-                              SizedBox(
-                                width: wide
-                                    ? 220
-                                    : (constraints.maxWidth - 42) / 2,
-                                child: DropdownButtonFormField<String>(
-                                  initialValue: provider.selectedFilter,
-                                  isExpanded: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Investment type',
-                                    isDense: true,
-                                  ),
-                                  items: const [
-                                    DropdownMenuItem(
-                                      value: 'All',
-                                      child: Text('All types'),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: InvestmentConstants.mutualFund,
-                                      child: Text('Mutual Fund'),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: InvestmentConstants.stock,
-                                      child: Text('Stock'),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: InvestmentConstants.gold,
-                                      child: Text('Gold'),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: InvestmentConstants.fd,
-                                      child: Text('Fixed Deposit'),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: InvestmentConstants.crypto,
-                                      child: Text('Crypto'),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: 'SIP',
-                                      child: Text('SIP only'),
-                                    ),
-                                  ],
-                                  onChanged: (v) {
-                                    if (v != null) provider.updateFilter(v);
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                width: wide
-                                    ? 220
-                                    : (constraints.maxWidth - 42) / 2,
-                                child:
-                                    DropdownButtonFormField<InvestmentSortType>(
-                                      initialValue: provider.sortType,
-                                      isExpanded: true,
-                                      decoration: const InputDecoration(
-                                        labelText: 'Sort by',
-                                        isDense: true,
-                                      ),
-                                      items: const [
-                                        DropdownMenuItem(
-                                          value: InvestmentSortType.latest,
-                                          child: Text('Latest'),
-                                        ),
-                                        DropdownMenuItem(
-                                          value: InvestmentSortType
-                                              .highestInvestment,
-                                          child: Text('Highest invested'),
-                                        ),
-                                        DropdownMenuItem(
-                                          value:
-                                              InvestmentSortType.highestProfit,
-                                          child: Text('Highest profit'),
-                                        ),
-                                        DropdownMenuItem(
-                                          value: InvestmentSortType.highestRoi,
-                                          child: Text('Highest ROI'),
-                                        ),
-                                      ],
-                                      onChanged: (v) {
-                                        if (v != null) {
-                                          provider.updateSortType(v);
-                                        }
-                                      },
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 18),
-                          Row(
-                            children: [
-                              Text(
-                                'Your investments',
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.w700),
-                              ),
-                              const Spacer(),
-                              Text(
-                                '${provider.filteredInvestments.length} records',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          if (provider.filteredInvestments.isEmpty)
-                            SizedBox(
-                              height: 260,
-                              child: EmptyView(
-                                icon: Icons.trending_up,
-                                message:
-                                    provider.searchQuery.isNotEmpty ||
-                                        provider.selectedFilter != 'All'
-                                    ? 'No matching investments found'
-                                    : 'No investments added yet.',
-                                actionText: 'Add Investment',
-                                onAction: _addInvestment,
-                              ),
-                            )
-                          else if (wide)
-                            _wideList(provider.filteredInvestments, provider)
-                          else
-                            ...provider.filteredInvestments.map(
-                              (investment) => InvestmentCard(
-                                investment: investment,
-                                onTap: () => _openDetails(investment),
-                                onEdit: () => _editInvestment(investment),
-                                onDelete: () =>
-                                    _deleteInvestment(investment, provider),
-                              ),
-                            ),
-                        ],
+                return AppResponsiveContent(
+                  maxWidth: 1120,
+                  padding: EdgeInsets.zero,
+                  child: RefreshIndicator(
+                    onRefresh: provider.loadInvestments,
+                    child: ListView(
+                      padding: EdgeInsets.fromLTRB(
+                        wide ? 16 : 12,
+                        8,
+                        wide ? 16 : 12,
+                        88,
                       ),
+                      children: [
+                        InvestmentSummaryCard(
+                          investedAmount: invested,
+                          currentValue: current,
+                        ),
+                        const SizedBox(height: 12),
+                        _allocationSection(provider.investments),
+                        const SizedBox(height: 12),
+                        TextField(
+                          onChanged: provider.updateSearchQuery,
+                          decoration: const InputDecoration(
+                            hintText: 'Search name or platform',
+                            prefixIcon: Icon(Icons.search),
+                            isDense: true,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 8,
+                          children: [
+                            SizedBox(
+                              width: wide
+                                  ? 220
+                                  : (constraints.maxWidth - 42) / 2,
+                              child: DropdownButtonFormField<String>(
+                                initialValue: provider.selectedFilter,
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'Investment type',
+                                  isDense: true,
+                                ),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'All',
+                                    child: Text('All types'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: InvestmentConstants.mutualFund,
+                                    child: Text('Mutual Fund'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: InvestmentConstants.stock,
+                                    child: Text('Stock'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: InvestmentConstants.gold,
+                                    child: Text('Gold'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: InvestmentConstants.fd,
+                                    child: Text('Fixed Deposit'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: InvestmentConstants.crypto,
+                                    child: Text('Crypto'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'SIP',
+                                    child: Text('SIP only'),
+                                  ),
+                                ],
+                                onChanged: (v) {
+                                  if (v != null) provider.updateFilter(v);
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              width: wide
+                                  ? 220
+                                  : (constraints.maxWidth - 42) / 2,
+                              child:
+                                  DropdownButtonFormField<InvestmentSortType>(
+                                    initialValue: provider.sortType,
+                                    isExpanded: true,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Sort by',
+                                      isDense: true,
+                                    ),
+                                    items: const [
+                                      DropdownMenuItem(
+                                        value: InvestmentSortType.latest,
+                                        child: Text('Latest'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: InvestmentSortType
+                                            .highestInvestment,
+                                        child: Text('Highest invested'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: InvestmentSortType.highestProfit,
+                                        child: Text('Highest profit'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: InvestmentSortType.highestRoi,
+                                        child: Text('Highest ROI'),
+                                      ),
+                                    ],
+                                    onChanged: (v) {
+                                      if (v != null) {
+                                        provider.updateSortType(v);
+                                      }
+                                    },
+                                  ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Text(
+                              'Your investments',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            const Spacer(),
+                            Text(
+                              '${provider.filteredInvestments.length} records',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        if (provider.filteredInvestments.isEmpty)
+                          SizedBox(
+                            height: 260,
+                            child: EmptyView(
+                              icon: Icons.trending_up,
+                              message:
+                                  provider.searchQuery.isNotEmpty ||
+                                      provider.selectedFilter != 'All'
+                                  ? 'No matching investments found'
+                                  : 'No investments added yet.',
+                              actionText: 'Add Investment',
+                              onAction: _addInvestment,
+                            ),
+                          )
+                        else if (wide)
+                          _wideList(provider.filteredInvestments, provider)
+                        else
+                          ...provider.filteredInvestments.map(
+                            (investment) => InvestmentCard(
+                              investment: investment,
+                              onTap: () => _openDetails(investment),
+                              onEdit: () => _editInvestment(investment),
+                              onDelete: () =>
+                                  _deleteInvestment(investment, provider),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 );
@@ -240,7 +236,7 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -310,8 +306,8 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 460,
           mainAxisExtent: 190,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 4,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 2,
         ),
         itemBuilder: (_, i) {
           final item = items[i];

@@ -65,7 +65,8 @@ class AppLockService extends ChangeNotifier {
       ],
     );
     final values = {
-      for (final r in rows) r['meta_key'].toString(): r['meta_value'].toString(),
+      for (final r in rows)
+        r['meta_key'].toString(): r['meta_value'].toString(),
     };
     final salt = values[BackupMetaKeys.appLockSalt];
     final hash = values[BackupMetaKeys.appLockHash];

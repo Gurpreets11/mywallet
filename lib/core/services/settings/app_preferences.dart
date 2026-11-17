@@ -73,12 +73,10 @@ class AppPreferences extends ChangeNotifier {
 
     try {
       final Database db = await AppDatabase.database;
-      final rows = await db.query(
-        _table,
-        where: "meta_key LIKE 'pref_%'",
-      );
+      final rows = await db.query(_table, where: "meta_key LIKE 'pref_%'");
       final values = {
-        for (final r in rows) r['meta_key'] as String: r['meta_value'] as String,
+        for (final r in rows)
+          r['meta_key'] as String: r['meta_value'] as String,
       };
 
       final format = values[_kDateFormat];

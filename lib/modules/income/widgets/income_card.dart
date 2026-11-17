@@ -28,9 +28,10 @@ class IncomeCard extends StatelessWidget {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
 
-    final title = [income.categoryName, income.subcategoryName]
-        .where((e) => e != null && e.trim().isNotEmpty)
-        .join(' • ');
+    final title = [
+      income.categoryName,
+      income.subcategoryName,
+    ].where((e) => e != null && e.trim().isNotEmpty).join(' • ');
 
     final date = DateTime.tryParse(income.date);
     final meta = <String>[

@@ -146,7 +146,9 @@ class BackupService {
     final jsonString = await _buildJson();
 
     final dir = await _safetyDir(create: true);
-    final file = File('${dir.path}/${_buildFileName('mywallet_before_$reason')}');
+    final file = File(
+      '${dir.path}/${_buildFileName('mywallet_before_$reason')}',
+    );
     await file.writeAsString(jsonString, flush: true);
 
     // Prune old safety copies (newest first, keep a handful).
@@ -170,13 +172,14 @@ class BackupService {
   Future<List<File>> listSafetyBackups() async {
     final dir = await _safetyDir();
     if (!await dir.exists()) return [];
-    final files = dir
-        .listSync()
-        .whereType<File>()
-        .where((f) => f.path.contains('mywallet_before_'))
-        .toList()
-      // Sort by the timestamp at the end of the name (the reason part differs).
-      ..sort((a, b) => _stampOf(b).compareTo(_stampOf(a)));
+    final files =
+        dir
+            .listSync()
+            .whereType<File>()
+            .where((f) => f.path.contains('mywallet_before_'))
+            .toList()
+          // Sort by the timestamp at the end of the name (the reason part differs).
+          ..sort((a, b) => _stampOf(b).compareTo(_stampOf(a)));
     return files;
   }
 

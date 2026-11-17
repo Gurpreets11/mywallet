@@ -164,203 +164,214 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     final theme = Theme.of(context);
     return CompactFormTheme(
       child: Scaffold(
-      appBar: AppBar(title: Text(isEditMode ? 'Edit expense' : 'Add expense')),
-      bottomNavigationBar: _isLoadingMaster ? null : _buildSaveBar(theme),
-      body: AppResponsiveContent(
-        maxWidth: 680,
-        // Padding lives inside the scroll view (below), otherwise it clips
-        // the content at the edges.
-        padding: EdgeInsets.zero,
-        child: _isLoadingMaster
-            ? const Center(child: CircularProgressIndicator())
-            : Form(
-                key: _formKey,
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                  children: [
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(14),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextFormField(
-                              controller: _amountController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              decoration: const InputDecoration(
-                                labelText: 'Amount',
-                                prefixText: '₹ ',
-                                prefixIcon: Icon(Icons.currency_rupee),
-                              ),
-                              validator: (value) {
-                                final amount = double.tryParse(
-                                  (value ?? '').trim(),
-                                );
-                                if (amount == null || amount <= 0) {
-                                  return 'Enter a valid amount greater than zero';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 12),
-                            Consumer<MasterProvider>(
-                              builder: (context, master, _) =>
-                                  DropdownButtonFormField<int>(
-                                    initialValue: _selectedCategoryId,
-                                    isExpanded: true,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Category',
-                                      prefixIcon: Icon(Icons.category_outlined),
+        appBar: AppBar(
+          title: Text(isEditMode ? 'Edit expense' : 'Add expense'),
+        ),
+        bottomNavigationBar: _isLoadingMaster ? null : _buildSaveBar(theme),
+        body: AppResponsiveContent(
+          maxWidth: 680,
+          // Padding lives inside the scroll view (below), otherwise it clips
+          // the content at the edges.
+          padding: EdgeInsets.zero,
+          child: _isLoadingMaster
+              ? const Center(child: CircularProgressIndicator())
+              : Form(
+                  key: _formKey,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                    children: [
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextFormField(
+                                controller: _amountController,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
                                     ),
-                                    items: master.expenseCategories
-                                        .map(
-                                          (category) => DropdownMenuItem<int>(
-                                            value: category['id'] as int,
-                                            child: Text(
-                                              category['category_name']
-                                                  .toString(),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                    onChanged: (value) async {
-                                      final selected = master.expenseCategories
-                                          .firstWhere(
-                                            (item) => item['id'] == value,
-                                          );
-                                      setState(() {
-                                        _selectedCategoryId = value;
-                                        _selectedCategoryName =
-                                            selected['category_name']
-                                                .toString();
-                                        _selectedSubcategoryId = null;
-                                        _selectedSubCategoryName = null;
-                                      });
-                                      if (value != null) {
-                                        await master.loadSubcategories(value);
-                                      }
-                                    },
-                                    validator: (value) => value == null
-                                        ? 'Select a category'
-                                        : null,
-                                  ),
-                            ),
-                            const SizedBox(height: 12),
-                            Consumer<MasterProvider>(
-                              builder: (context, master, _) =>
-                                  DropdownButtonFormField<int>(
-                                    initialValue: _selectedSubcategoryId,
-                                    isExpanded: true,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Subcategory (optional)',
-                                      prefixIcon: Icon(
-                                        Icons.subdirectory_arrow_right,
-                                      ),
-                                    ),
-                                    items: master.subcategories
-                                        .map(
-                                          (item) => DropdownMenuItem<int>(
-                                            value: item['id'] as int,
-                                            child: Text(
-                                              item['subcategory_name']
-                                                  .toString(),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                    onChanged: (value) {
-                                      final matches = master.subcategories
-                                          .where((item) => item['id'] == value);
-                                      setState(() {
-                                        _selectedSubcategoryId = value;
-                                        _selectedSubCategoryName =
-                                            matches.isEmpty
-                                            ? null
-                                            : matches.first['subcategory_name']
-                                                  .toString();
-                                      });
-                                    },
-                                  ),
-                            ),
-                            const SizedBox(height: 12),
-                            DropdownButtonFormField<String>(
-                              initialValue: _paymentMode,
-                              isExpanded: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Payment mode',
-                                prefixIcon: Icon(
-                                  Icons.account_balance_wallet_outlined,
-                                ),
-                              ),
-                              items: const [
-                                DropdownMenuItem(
-                                  value: 'Cash',
-                                  child: Text('Cash'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'UPI',
-                                  child: Text('UPI'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'Card',
-                                  child: Text('Card'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'Bank',
-                                  child: Text('Bank'),
-                                ),
-                              ],
-                              onChanged: (value) => setState(
-                                () => _paymentMode = value ?? 'Cash',
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            InkWell(
-                              onTap: _pickDate,
-                              borderRadius: BorderRadius.circular(12),
-                              child: InputDecorator(
                                 decoration: const InputDecoration(
-                                  labelText: 'Expense date',
+                                  labelText: 'Amount',
+                                  prefixText: '₹ ',
+                                  prefixIcon: Icon(Icons.currency_rupee),
+                                ),
+                                validator: (value) {
+                                  final amount = double.tryParse(
+                                    (value ?? '').trim(),
+                                  );
+                                  if (amount == null || amount <= 0) {
+                                    return 'Enter a valid amount greater than zero';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              Consumer<MasterProvider>(
+                                builder: (context, master, _) =>
+                                    DropdownButtonFormField<int>(
+                                      initialValue: _selectedCategoryId,
+                                      isExpanded: true,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Category',
+                                        prefixIcon: Icon(
+                                          Icons.category_outlined,
+                                        ),
+                                      ),
+                                      items: master.expenseCategories
+                                          .map(
+                                            (category) => DropdownMenuItem<int>(
+                                              value: category['id'] as int,
+                                              child: Text(
+                                                category['category_name']
+                                                    .toString(),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (value) async {
+                                        final selected = master
+                                            .expenseCategories
+                                            .firstWhere(
+                                              (item) => item['id'] == value,
+                                            );
+                                        setState(() {
+                                          _selectedCategoryId = value;
+                                          _selectedCategoryName =
+                                              selected['category_name']
+                                                  .toString();
+                                          _selectedSubcategoryId = null;
+                                          _selectedSubCategoryName = null;
+                                        });
+                                        if (value != null) {
+                                          await master.loadSubcategories(value);
+                                        }
+                                      },
+                                      validator: (value) => value == null
+                                          ? 'Select a category'
+                                          : null,
+                                    ),
+                              ),
+                              const SizedBox(height: 12),
+                              Consumer<MasterProvider>(
+                                builder: (context, master, _) =>
+                                    DropdownButtonFormField<int>(
+                                      initialValue: _selectedSubcategoryId,
+                                      isExpanded: true,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Subcategory (optional)',
+                                        prefixIcon: Icon(
+                                          Icons.subdirectory_arrow_right,
+                                        ),
+                                      ),
+                                      items: master.subcategories
+                                          .map(
+                                            (item) => DropdownMenuItem<int>(
+                                              value: item['id'] as int,
+                                              child: Text(
+                                                item['subcategory_name']
+                                                    .toString(),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (value) {
+                                        final matches = master.subcategories
+                                            .where(
+                                              (item) => item['id'] == value,
+                                            );
+                                        setState(() {
+                                          _selectedSubcategoryId = value;
+                                          _selectedSubCategoryName =
+                                              matches.isEmpty
+                                              ? null
+                                              : matches
+                                                    .first['subcategory_name']
+                                                    .toString();
+                                        });
+                                      },
+                                    ),
+                              ),
+                              const SizedBox(height: 12),
+                              DropdownButtonFormField<String>(
+                                initialValue: _paymentMode,
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'Payment mode',
                                   prefixIcon: Icon(
-                                    Icons.calendar_today_outlined,
+                                    Icons.account_balance_wallet_outlined,
                                   ),
                                 ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        AppDateUtils.formatDate(_selectedDate),
-                                      ),
-                                    ),
-                                    const Icon(Icons.edit_calendar_outlined),
-                                  ],
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'Cash',
+                                    child: Text('Cash'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'UPI',
+                                    child: Text('UPI'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'Card',
+                                    child: Text('Card'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'Bank',
+                                    child: Text('Bank'),
+                                  ),
+                                ],
+                                onChanged: (value) => setState(
+                                  () => _paymentMode = value ?? 'Cash',
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _notesController,
-                              minLines: 2,
-                              maxLines: 4,
-                              decoration: const InputDecoration(
-                                labelText: 'Notes (optional)',
-                                alignLabelWithHint: true,
-                                prefixIcon: Icon(Icons.notes),
+                              const SizedBox(height: 12),
+                              InkWell(
+                                onTap: _pickDate,
+                                borderRadius: BorderRadius.circular(12),
+                                child: InputDecorator(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Expense date',
+                                    prefixIcon: Icon(
+                                      Icons.calendar_today_outlined,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          AppDateUtils.formatDate(
+                                            _selectedDate,
+                                          ),
+                                        ),
+                                      ),
+                                      const Icon(Icons.edit_calendar_outlined),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _notesController,
+                                minLines: 2,
+                                maxLines: 4,
+                                decoration: const InputDecoration(
+                                  labelText: 'Notes (optional)',
+                                  alignLabelWithHint: true,
+                                  prefixIcon: Icon(Icons.notes),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+        ),
       ),
-    ));
+    );
   }
 }

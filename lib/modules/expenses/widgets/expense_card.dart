@@ -88,7 +88,9 @@ class ExpenseCard extends StatelessWidget {
                         meta,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: muted,
+                        ),
                       ),
                     ],
                     if ((expense.notes ?? '').trim().isNotEmpty) ...[

@@ -39,7 +39,9 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
   @override
   void initState() {
     super.initState();
-    _step = widget.flow == PinFlow.enable ? _Step.enterNew : _Step.verifyCurrent;
+    _step = widget.flow == PinFlow.enable
+        ? _Step.enterNew
+        : _Step.verifyCurrent;
   }
 
   String get _title => switch (widget.flow) {

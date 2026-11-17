@@ -388,7 +388,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await action();
     } catch (e) {
       debugPrint('Reminder update failed: $e');
-      _snack('Saved, but reminders could not be updated. Check notification permission.');
+      _snack(
+        'Saved, but reminders could not be updated. Check notification permission.',
+      );
     }
   }
 
@@ -543,10 +545,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 color: AppColors.textSecondary,
                               ),
                               SizedBox(width: 16),
-                              Text(
-                                'Text size',
-                                style: TextStyle(fontSize: 16),
-                              ),
+                              Text('Text size', style: TextStyle(fontSize: 16)),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -618,7 +617,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     SwitchListTile(
                       secondary: const Icon(Icons.trending_up_rounded),
                       title: const Text('SIP reminders'),
-                      subtitle: const Text('On the SIP date of each investment'),
+                      subtitle: const Text(
+                        'On the SIP date of each investment',
+                      ),
                       value: _prefs.sipRemindersEnabled,
                       onChanged: _toggleSipReminders,
                     ),

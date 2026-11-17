@@ -149,9 +149,11 @@ class _ExportOptionsSheetState extends State<ExportOptionsSheet> {
               children: [
                 for (final entry in _periodLabels.entries)
                   ChoiceChip(
-                    label: Text(entry.key == _Period.custom && _custom != null
-                        ? '${_fmt.format(_custom!.start)} – ${_fmt.format(_custom!.end)}'
-                        : entry.value),
+                    label: Text(
+                      entry.key == _Period.custom && _custom != null
+                          ? '${_fmt.format(_custom!.start)} – ${_fmt.format(_custom!.end)}'
+                          : entry.value,
+                    ),
                     selected: _period == entry.key,
                     onSelected: (_) => _selectPeriod(entry.key),
                   ),

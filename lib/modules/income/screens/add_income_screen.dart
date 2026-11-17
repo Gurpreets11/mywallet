@@ -192,255 +192,262 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
     final theme = Theme.of(context);
     return CompactFormTheme(
       child: Scaffold(
-      appBar: AppBar(title: Text(isEditMode ? 'Edit Income' : 'Add Income')),
-      bottomNavigationBar: _isLoadingCategories ? null : _buildSaveBar(theme),
-      body: SingleChildScrollView(
-        child: AppResponsiveContent(
-          maxWidth: 680,
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-          child: _isLoadingCategories
-              ? const Padding(
-                  padding: EdgeInsets.all(40),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              : Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(14),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              TextFormField(
-                                controller: _amountController,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                decoration: const InputDecoration(
-                                  labelText: 'Amount',
-                                  prefixText: '₹ ',
-                                  prefixIcon: Icon(Icons.currency_rupee),
-                                ),
-                                validator: _validateAmount,
-                              ),
-                              const SizedBox(height: 12),
-                              Consumer<MasterProvider>(
-                                builder: (context, master, _) {
-                                  final categories = master.incomeCategories;
-                                  final selectedValue =
-                                      categories.any(
-                                        (item) =>
-                                            item['id'] == _selectedCategoryId,
-                                      )
-                                      ? _selectedCategoryId
-                                      : null;
-                                  return DropdownButtonFormField<int>(
-                                    initialValue: selectedValue,
-                                    isExpanded: true,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Category',
-                                      prefixIcon: Icon(Icons.category_outlined),
-                                    ),
-                                    items: categories.map((category) {
-                                      return DropdownMenuItem<int>(
-                                        value: category['id'] as int,
-                                        child: Text(
-                                          category['category_name'].toString(),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) async {
-                                      if (value == null) return;
-                                      final selected = categories.firstWhere(
-                                        (item) => item['id'] == value,
-                                      );
-                                      setState(() {
-                                        _selectedCategoryId = value;
-                                        _selectedCategoryName =
-                                            selected['category_name']
-                                                .toString();
-                                        _selectedSubcategoryId = null;
-                                        _selectedSubCategoryName = null;
-                                      });
-                                      await master.loadIncomeSubcategories(
-                                        value,
-                                      );
-                                    },
-                                    validator: (value) => value == null
-                                        ? 'Select a category'
-                                        : null,
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 12),
-                              Consumer<MasterProvider>(
-                                builder: (context, master, _) {
-                                  final subcategories =
-                                      master.incomeSubCategories;
-                                  final selectedValue =
-                                      subcategories.any(
-                                        (item) =>
-                                            item['id'] ==
-                                            _selectedSubcategoryId,
-                                      )
-                                      ? _selectedSubcategoryId
-                                      : null;
-                                  return DropdownButtonFormField<int>(
-                                    initialValue: selectedValue,
-                                    isExpanded: true,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Subcategory (optional)',
-                                      prefixIcon: Icon(
-                                        Icons.subdirectory_arrow_right,
+        appBar: AppBar(title: Text(isEditMode ? 'Edit Income' : 'Add Income')),
+        bottomNavigationBar: _isLoadingCategories ? null : _buildSaveBar(theme),
+        body: SingleChildScrollView(
+          child: AppResponsiveContent(
+            maxWidth: 680,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            child: _isLoadingCategories
+                ? const Padding(
+                    padding: EdgeInsets.all(40),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextFormField(
+                                  controller: _amountController,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
                                       ),
-                                    ),
-                                    items: subcategories.map((item) {
-                                      return DropdownMenuItem<int>(
-                                        value: item['id'] as int,
-                                        child: Text(
-                                          item['subcategory_name'].toString(),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      final matches = subcategories.where(
-                                        (item) => item['id'] == value,
-                                      );
-                                      setState(() {
-                                        _selectedSubcategoryId = value;
-                                        _selectedSubCategoryName =
-                                            matches.isEmpty
-                                            ? null
-                                            : matches.first['subcategory_name']
-                                                  .toString();
-                                      });
-                                    },
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 12),
-                              DropdownButtonFormField<String>(
-                                initialValue: _paymentMode,
-                                isExpanded: true,
-                                decoration: const InputDecoration(
-                                  labelText: 'Payment mode',
-                                  prefixIcon: Icon(
-                                    Icons.account_balance_wallet_outlined,
-                                  ),
-                                ),
-                                items: const [
-                                  DropdownMenuItem(
-                                    value: 'Cash',
-                                    child: Text('Cash'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'UPI',
-                                    child: Text('UPI'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'Bank',
-                                    child: Text('Bank'),
-                                  ),
-                                ],
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() => _paymentMode = value);
-                                  }
-                                },
-                              ),
-                              const SizedBox(height: 12),
-                              InkWell(
-                                onTap: _pickDate,
-                                borderRadius: BorderRadius.circular(12),
-                                child: InputDecorator(
                                   decoration: const InputDecoration(
-                                    labelText: 'Income date',
-                                    prefixIcon: Icon(
-                                      Icons.calendar_today_outlined,
-                                    ),
+                                    labelText: 'Amount',
+                                    prefixText: '₹ ',
+                                    prefixIcon: Icon(Icons.currency_rupee),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          AppDateUtils.formatDate(
-                                            _selectedDate,
-                                          ),
+                                  validator: _validateAmount,
+                                ),
+                                const SizedBox(height: 12),
+                                Consumer<MasterProvider>(
+                                  builder: (context, master, _) {
+                                    final categories = master.incomeCategories;
+                                    final selectedValue =
+                                        categories.any(
+                                          (item) =>
+                                              item['id'] == _selectedCategoryId,
+                                        )
+                                        ? _selectedCategoryId
+                                        : null;
+                                    return DropdownButtonFormField<int>(
+                                      initialValue: selectedValue,
+                                      isExpanded: true,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Category',
+                                        prefixIcon: Icon(
+                                          Icons.category_outlined,
                                         ),
                                       ),
-                                      const Icon(Icons.edit_calendar_outlined),
-                                    ],
-                                  ),
+                                      items: categories.map((category) {
+                                        return DropdownMenuItem<int>(
+                                          value: category['id'] as int,
+                                          child: Text(
+                                            category['category_name']
+                                                .toString(),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) async {
+                                        if (value == null) return;
+                                        final selected = categories.firstWhere(
+                                          (item) => item['id'] == value,
+                                        );
+                                        setState(() {
+                                          _selectedCategoryId = value;
+                                          _selectedCategoryName =
+                                              selected['category_name']
+                                                  .toString();
+                                          _selectedSubcategoryId = null;
+                                          _selectedSubCategoryName = null;
+                                        });
+                                        await master.loadIncomeSubcategories(
+                                          value,
+                                        );
+                                      },
+                                      validator: (value) => value == null
+                                          ? 'Select a category'
+                                          : null,
+                                    );
+                                  },
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              SwitchListTile(
-                                contentPadding: EdgeInsets.zero,
-                                dense: true,
-                                value: _isRecurring,
-                                title: const Text('Recurring income'),
-                                onChanged: (value) =>
-                                    setState(() => _isRecurring = value),
-                              ),
-                              if (_isRecurring) ...[
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 12),
+                                Consumer<MasterProvider>(
+                                  builder: (context, master, _) {
+                                    final subcategories =
+                                        master.incomeSubCategories;
+                                    final selectedValue =
+                                        subcategories.any(
+                                          (item) =>
+                                              item['id'] ==
+                                              _selectedSubcategoryId,
+                                        )
+                                        ? _selectedSubcategoryId
+                                        : null;
+                                    return DropdownButtonFormField<int>(
+                                      initialValue: selectedValue,
+                                      isExpanded: true,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Subcategory (optional)',
+                                        prefixIcon: Icon(
+                                          Icons.subdirectory_arrow_right,
+                                        ),
+                                      ),
+                                      items: subcategories.map((item) {
+                                        return DropdownMenuItem<int>(
+                                          value: item['id'] as int,
+                                          child: Text(
+                                            item['subcategory_name'].toString(),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        final matches = subcategories.where(
+                                          (item) => item['id'] == value,
+                                        );
+                                        setState(() {
+                                          _selectedSubcategoryId = value;
+                                          _selectedSubCategoryName =
+                                              matches.isEmpty
+                                              ? null
+                                              : matches
+                                                    .first['subcategory_name']
+                                                    .toString();
+                                        });
+                                      },
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 12),
                                 DropdownButtonFormField<String>(
-                                  initialValue: _recurringType,
+                                  initialValue: _paymentMode,
                                   isExpanded: true,
                                   decoration: const InputDecoration(
-                                    labelText: 'Recurring type',
+                                    labelText: 'Payment mode',
+                                    prefixIcon: Icon(
+                                      Icons.account_balance_wallet_outlined,
+                                    ),
                                   ),
                                   items: const [
                                     DropdownMenuItem(
-                                      value: 'Daily',
-                                      child: Text('Daily'),
+                                      value: 'Cash',
+                                      child: Text('Cash'),
                                     ),
                                     DropdownMenuItem(
-                                      value: 'Weekly',
-                                      child: Text('Weekly'),
+                                      value: 'UPI',
+                                      child: Text('UPI'),
                                     ),
                                     DropdownMenuItem(
-                                      value: 'Monthly',
-                                      child: Text('Monthly'),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: 'Yearly',
-                                      child: Text('Yearly'),
+                                      value: 'Bank',
+                                      child: Text('Bank'),
                                     ),
                                   ],
                                   onChanged: (value) {
                                     if (value != null) {
-                                      setState(() => _recurringType = value);
+                                      setState(() => _paymentMode = value);
                                     }
                                   },
                                 ),
-                              ],
-                              const SizedBox(height: 12),
-                              TextFormField(
-                                controller: _notesController,
-                                minLines: 2,
-                                maxLines: 4,
-                                decoration: const InputDecoration(
-                                  labelText: 'Notes (optional)',
-                                  alignLabelWithHint: true,
-                                  prefixIcon: Icon(Icons.notes),
+                                const SizedBox(height: 12),
+                                InkWell(
+                                  onTap: _pickDate,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: InputDecorator(
+                                    decoration: const InputDecoration(
+                                      labelText: 'Income date',
+                                      prefixIcon: Icon(
+                                        Icons.calendar_today_outlined,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            AppDateUtils.formatDate(
+                                              _selectedDate,
+                                            ),
+                                          ),
+                                        ),
+                                        const Icon(
+                                          Icons.edit_calendar_outlined,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 8),
+                                SwitchListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  dense: true,
+                                  value: _isRecurring,
+                                  title: const Text('Recurring income'),
+                                  onChanged: (value) =>
+                                      setState(() => _isRecurring = value),
+                                ),
+                                if (_isRecurring) ...[
+                                  const SizedBox(height: 8),
+                                  DropdownButtonFormField<String>(
+                                    initialValue: _recurringType,
+                                    isExpanded: true,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Recurring type',
+                                    ),
+                                    items: const [
+                                      DropdownMenuItem(
+                                        value: 'Daily',
+                                        child: Text('Daily'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'Weekly',
+                                        child: Text('Weekly'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'Monthly',
+                                        child: Text('Monthly'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'Yearly',
+                                        child: Text('Yearly'),
+                                      ),
+                                    ],
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        setState(() => _recurringType = value);
+                                      }
+                                    },
+                                  ),
+                                ],
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: _notesController,
+                                  minLines: 2,
+                                  maxLines: 4,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Notes (optional)',
+                                    alignLabelWithHint: true,
+                                    prefixIcon: Icon(Icons.notes),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+          ),
         ),
       ),
-    ));
+    );
   }
 }

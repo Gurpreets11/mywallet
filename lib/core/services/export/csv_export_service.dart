@@ -47,7 +47,15 @@ class CsvExportService {
 
     final buffer = StringBuffer('﻿'); // BOM so Excel reads UTF-8 properly
     buffer.writeln(
-      _line(['Date', 'Type', 'Category', 'Subcategory', 'Amount', 'Payment mode', 'Notes']),
+      _line([
+        'Date',
+        'Type',
+        'Category',
+        'Subcategory',
+        'Amount',
+        'Payment mode',
+        'Notes',
+      ]),
     );
     for (final row in rows) {
       buffer.writeln(_line(row));

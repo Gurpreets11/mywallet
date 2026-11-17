@@ -5,6 +5,7 @@ import '../../../core/services/notification_service.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
+import '../../../core/widgets/compact_form_theme.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../constant/investment_constants.dart';
 import '../models/investment_model.dart';
@@ -169,42 +170,81 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
     }
   }
 
+  Widget _buildSaveBar(ThemeData theme) {
+    return Material(
+      color: theme.scaffoldBackgroundColor,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            8,
+            16,
+            12 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          child: SizedBox(
+            height: 50,
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: _isSaving ? null : _saveInvestment,
+              icon: _isSaving
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save_outlined),
+              label: Text(
+                _isSaving
+                    ? 'Saving...'
+                    : isEditMode
+                    ? 'Update investment'
+                    : 'Save investment',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditMode ? 'Edit Investment' : 'Add Investment'),
-      ),
-      body: SingleChildScrollView(
-        child: AppResponsiveContent(
+    return CompactFormTheme(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(isEditMode ? 'Edit Investment' : 'Add Investment'),
+        ),
+        bottomNavigationBar: _buildSaveBar(theme),
+        body: AppResponsiveContent(
           maxWidth: 680,
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.zero,
           child: Form(
             key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               children: [
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(18),
+                    padding: const EdgeInsets.all(14),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           isEditMode ? 'Update investment' : 'New investment',
-                          style: theme.textTheme.titleLarge?.copyWith(
+                          style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         Text(
                           'Enter your investment details and current valuation.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
+                          style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 14),
                         DropdownButtonFormField<String>(
                           initialValue: _investmentType,
                           isExpanded: true,
@@ -225,7 +265,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                             }
                           },
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: _nameController,
                           decoration: const InputDecoration(
@@ -234,7 +274,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                           ),
                           validator: _validateRequired,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: _platformController,
                           decoration: const InputDecoration(
@@ -242,7 +282,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                             prefixIcon: Icon(Icons.business_outlined),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: _investedController,
                           keyboardType: const TextInputType.numberWithOptions(
@@ -254,7 +294,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                           ),
                           validator: _validateAmount,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: _currentValueController,
                           keyboardType: const TextInputType.numberWithOptions(
@@ -266,7 +306,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                           ),
                           validator: _validateAmount,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         InkWell(
                           onTap: _pickDate,
                           borderRadius: BorderRadius.circular(12),
@@ -287,9 +327,11 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
                           value: _isSip,
                           title: const Text('This is a SIP'),
                           onChanged: (value) => setState(() => _isSip = value),
@@ -307,7 +349,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                             ),
                             validator: _isSip ? _validateAmount : null,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           DropdownButtonFormField<int>(
                             initialValue: _sipDate,
                             isExpanded: true,
@@ -328,7 +370,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                             },
                           ),
                         ],
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: _notesController,
                           minLines: 2,
@@ -340,27 +382,6 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                SizedBox(
-                  height: 52,
-                  child: FilledButton.icon(
-                    onPressed: _isSaving ? null : _saveInvestment,
-                    icon: _isSaving
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.save_outlined),
-                    label: Text(
-                      _isSaving
-                          ? 'Saving...'
-                          : isEditMode
-                          ? 'Update investment'
-                          : 'Save investment',
                     ),
                   ),
                 ),
