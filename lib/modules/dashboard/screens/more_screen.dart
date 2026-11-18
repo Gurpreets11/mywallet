@@ -4,8 +4,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../../investments/screens/investment_list_screen.dart';
 import '../../loans/screens/loan_list_screen.dart';
-import '../../settings/setting_screen.dart';
+import '../../settings/screens/setting_screen.dart';
 import '../../accounts/screens/accounts_screen.dart';
+import '../../goals/screens/savings_goals_screen.dart';
 import '../../budgets/screens/budget_screen.dart';
 import '../../recurring/screens/recurring_screen.dart';
 import '../../reports/screens/reports_screen.dart';
@@ -51,6 +52,13 @@ class MoreScreen extends StatelessWidget {
                   screen: const AccountsScreen(),
                 ),
                 _MoreMenuCard(
+                  title: 'Savings Goals',
+                  subtitle: 'Targets and progress',
+                  icon: Icons.flag_outlined,
+                  iconColor: AppColors.success,
+                  screen: const SavingsGoalsScreen(),
+                ),
+                _MoreMenuCard(
                   title: 'Budgets',
                   subtitle: 'Monthly spending limits',
                   icon: Icons.account_balance_wallet_rounded,
@@ -89,7 +97,7 @@ class MoreScreen extends StatelessWidget {
                   title: 'Settings',
                   subtitle: 'App preferences and backup',
                   icon: Icons.settings_rounded,
-                  iconColor: AppColors.textSecondary,
+                  iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
                   screen: const SettingsScreen(),
                 ),
               ],
@@ -144,10 +152,10 @@ class _MoreMenuCard extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 4),
@@ -155,9 +163,9 @@ class _MoreMenuCard extends StatelessWidget {
                 subtitle,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

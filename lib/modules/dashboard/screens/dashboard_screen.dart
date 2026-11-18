@@ -10,6 +10,8 @@ import '../../../core/utils/greeting_utils.dart';
 import '../../../core/widgets/empty_view.dart';
 import '../providers/dashboard_provider.dart';
 import '../../accounts/screens/accounts_screen.dart';
+import '../../goals/screens/savings_goals_screen.dart';
+import '../widgets/goals_summary_card.dart';
 import 'all_transactions_screen.dart';
 import '../widgets/accounts_summary_card.dart';
 import '../widgets/analytics_card.dart';
@@ -86,6 +88,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     ),
 
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.search),
+                          tooltip: 'Search transactions',
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AllTransactionsScreen(
+                                autofocusSearch: true,
+                              ),
+                            ),
+                          ),
+                        ),
                     IconButton(
                       icon: const Icon(Icons.refresh),
                       tooltip: 'Refresh',
@@ -105,6 +122,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           );
                         }
                       },
+                    ),
+                      ],
                     ),
                   ],
                 ),
@@ -148,6 +167,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 AccountsSummaryCard(
                   accounts: provider.accountBalances,
                   total: provider.totalAccountBalance,
+                ),
+
+                VerticalSpacing(height: 14),
+
+                SectionTitle(
+                  title: 'Savings Goals',
+                  onViewAll: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SavingsGoalsScreen(),
+                    ),
+                  ),
+                ),
+
+                VerticalSpacing(height: 10),
+
+                GoalsSummaryCard(
+                  goals: provider.goalProgress,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SavingsGoalsScreen(),
+                    ),
+                  ),
                 ),
 
                 VerticalSpacing(height: 14),

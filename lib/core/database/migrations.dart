@@ -16,6 +16,7 @@ class Migrations {
     await _createAppMetadataTable(db);
     await _createRecurringTables(db);
     await _applyAccountsSchema(db);
+    await _applyV14Schema(db);
   }
 
   static Future<void> onUpgrade(
@@ -50,6 +51,44 @@ class Migrations {
     if (oldVersion < 13) {
       await _applyAccountsSchema(db);
     }
+    if (oldVersion < 14) {
+      await _applyV14Schema(db);
+    }
+  }
+
+  /// Savings goals, budget-alert state and the account on recurring items.
+  /// Safe to run more than once.
+  static Future<void> _applyV14Schema(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS savings_goals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        target_amount REAL NOT NULL,
+        target_date TEXT,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS savings_goal_contributions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        goal_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        date TEXT NOT NULL,
+        notes TEXT,
+        created_at TEXT NOT NULL
+      )
+    ''');
+
+    Future<void> addColumn(String table, String column, String type) async {
+      final info = await db.rawQuery('PRAGMA table_info($table)');
+      if (info.isNotEmpty && !info.any((c) => c['name'] == column)) {
+        await db.execute('ALTER TABLE $table ADD COLUMN $column $type');
+      }
+    }
+
+    // 0 = no alert sent yet, 1 = "near limit" sent, 2 = "limit reached" sent
+    await addColumn('budgets', 'last_alert_level', 'INTEGER NOT NULL DEFAULT 0');
+    await addColumn('recurring_transactions', 'account_id', 'INTEGER');
   }
 
   /// Accounts / wallets. Safe to run more than once.

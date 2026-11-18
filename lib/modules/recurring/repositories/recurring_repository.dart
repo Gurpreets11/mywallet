@@ -40,6 +40,33 @@ class RecurringRepository {
     );
   }
 
+  /// Skips the next occurrence: nothing is created for it and the schedule
+  /// moves on to the following date (e.g. a bill you will not pay this month).
+  Future<void> skipNext(int id) async {
+    final db = await AppDatabase.database;
+    final rows = await db.query(_table, where: 'id = ?', whereArgs: [id]);
+    if (rows.isEmpty) return;
+    final schedule = RecurringTransactionModel.fromMap(rows.first);
+    final due = DateTime.tryParse(schedule.nextDueDate);
+    if (due == null) return;
+
+    final next = _nextDate(due, schedule.frequency, schedule.intervalValue);
+    final end = schedule.endDate == null
+        ? null
+        : DateTime.tryParse(schedule.endDate!);
+    final finished = end != null && next.isAfter(end);
+
+    await db.update(
+      _table,
+      {
+        'next_due_date': _dateOnly(next),
+        if (finished) 'status': 'COMPLETED',
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> delete(int id) async {
     final db = await AppDatabase.database;
     await db.transaction((txn) async {
@@ -103,6 +130,7 @@ class RecurringRepository {
                     'subcategory_name': null,
                     'date': occurrenceDate,
                     'payment_mode': schedule.paymentMode,
+                    'account_id': schedule.accountId,
                     'notes': _generatedNote(schedule),
                     'created_at': DateTime.now().toIso8601String(),
                   })
@@ -112,6 +140,7 @@ class RecurringRepository {
                     'subcategory_id': null,
                     'date': occurrenceDate,
                     'payment_mode': schedule.paymentMode,
+                    'account_id': schedule.accountId,
                     'notes': _generatedNote(schedule),
                     'is_recurring': 1,
                     'recurring_type': schedule.frequency,

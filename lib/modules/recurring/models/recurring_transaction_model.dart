@@ -15,6 +15,9 @@ class RecurringTransactionModel {
   final String status; // ACTIVE, PAUSED, COMPLETED
   final String createdAt;
 
+  /// Account the generated entries go to (null = default account).
+  final int? accountId;
+
   const RecurringTransactionModel({
     this.id,
     required this.title,
@@ -31,6 +34,7 @@ class RecurringTransactionModel {
     required this.nextDueDate,
     this.status = 'ACTIVE',
     required this.createdAt,
+    this.accountId,
   });
 
   Map<String, dynamic> toMap() => {
@@ -49,6 +53,7 @@ class RecurringTransactionModel {
     'next_due_date': nextDueDate,
     'status': status,
     'created_at': createdAt,
+    'account_id': accountId,
   };
 
   factory RecurringTransactionModel.fromMap(Map<String, dynamic> map) {
@@ -68,6 +73,7 @@ class RecurringTransactionModel {
       nextDueDate: map['next_due_date'] as String,
       status: map['status'] as String,
       createdAt: map['created_at'] as String,
+      accountId: map['account_id'] as int?,
     );
   }
 }

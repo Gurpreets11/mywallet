@@ -37,7 +37,7 @@ class WealthSummaryCard extends StatelessWidget {
         VerticalSpacing(height: 10),
 
         Card(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
             child: Column(

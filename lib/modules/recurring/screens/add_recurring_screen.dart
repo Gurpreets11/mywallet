@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../accounts/widgets/account_dropdown.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/compact_form_theme.dart';
 import '../../../data/providers/master_provider.dart';
@@ -23,6 +24,7 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
   String _type = 'EXPENSE';
   String _frequency = 'MONTHLY';
   String _paymentMode = 'Cash';
+  int? _accountId;
   int _interval = 1;
   int? _categoryId;
   String _categoryName = '';
@@ -111,6 +113,7 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
           categoryId: _categoryId!,
           categoryName: _categoryName,
           paymentMode: _paymentMode,
+          accountId: _accountId,
           notes: _notesController.text.trim().isEmpty
               ? null
               : _notesController.text.trim(),
@@ -377,6 +380,10 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
                           },
                         ),
                         const SizedBox(height: 12),
+                        AccountDropdown(
+                          value: _accountId,
+                          onChanged: (v) => _accountId = v,
+                        ),
                         DropdownButtonFormField<String>(
                           initialValue: _paymentMode,
                           isExpanded: true,

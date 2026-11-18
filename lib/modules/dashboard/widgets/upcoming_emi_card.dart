@@ -36,7 +36,7 @@ class UpcomingEmiCard extends StatelessWidget {
           ),
           VerticalSpacing(height: 10),
           Card(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(10),

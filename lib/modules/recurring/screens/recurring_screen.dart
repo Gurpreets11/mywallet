@@ -39,6 +39,28 @@ class _RecurringScreenState extends State<RecurringScreen> {
       await provider.pause(item);
     } else if (action == 'resume') {
       await provider.resume(item);
+    } else if (action == 'skip') {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Skip next occurrence?'),
+          content: Text(
+            'Nothing will be added for ${_displayDate(item.nextDueDate)}. '
+            'The schedule continues from the following date.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Skip'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed == true) await provider.skipNext(item);
     } else if (action == 'delete') {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -122,10 +144,10 @@ class _RecurringScreenState extends State<RecurringScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.event_repeat,
                             size: 48,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(height: 10),
                           const Text(
@@ -215,6 +237,11 @@ class _RecurringScreenState extends State<RecurringScreen> {
                                     const PopupMenuItem(
                                       value: 'pause',
                                       child: Text('Pause'),
+                                    ),
+                                  if (item.status == 'ACTIVE')
+                                    const PopupMenuItem(
+                                      value: 'skip',
+                                      child: Text('Skip next'),
                                     ),
                                   if (item.status == 'PAUSED')
                                     const PopupMenuItem(

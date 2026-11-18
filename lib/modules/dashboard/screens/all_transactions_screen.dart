@@ -12,7 +12,10 @@ import '../widgets/recent_transaction_card.dart';
 /// Every transaction (expenses, income, loan EMIs, investments) grouped by
 /// day, newest first, with a type filter.
 class AllTransactionsScreen extends StatefulWidget {
-  const AllTransactionsScreen({super.key});
+  /// Opens with the search box focused (used by the search button on home).
+  final bool autofocusSearch;
+
+  const AllTransactionsScreen({super.key, this.autofocusSearch = false});
 
   @override
   State<AllTransactionsScreen> createState() => _AllTransactionsScreenState();
@@ -28,6 +31,8 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
   final _repository = TransactionFeedRepository();
 
   List<DashboardTransactionModel> _all = [];
+  final _searchController = TextEditingController();
+  String _query = '';
   TransactionKind? _filter; // null = all
   bool _loading = true;
   String? _error;
@@ -36,6 +41,30 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  /// True when every word typed appears in the title, details, notes or
+  /// amount of the transaction.
+  bool _matches(DashboardTransactionModel t) {
+    if (_query.isEmpty) return true;
+    final haystack = [
+      t.title,
+      t.subtitle,
+      t.extra,
+      t.amount.toString(),
+      t.amount.toStringAsFixed(0),
+      CurrencyUtils.formatAmount(t.amount),
+    ].join(' ').toLowerCase();
+    return _query
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .every(haystack.contains);
   }
 
   Future<void> _load() async {
@@ -95,9 +124,10 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final filtered = _filter == null
-        ? _all
-        : _all.where((t) => t.kind == _filter).toList();
+    final filtered = _all
+        .where((t) => _filter == null || t.kind == _filter)
+        .where(_matches)
+        .toList();
     final items = _buildItems(filtered);
 
     var moneyIn = 0.0;
@@ -117,14 +147,35 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
         padding: EdgeInsets.zero,
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: TextField(
+                controller: _searchController,
+                autofocus: widget.autofocusSearch,
+                textInputAction: TextInputAction.search,
+                onChanged: (v) =>
+                    setState(() => _query = v.trim().toLowerCase()),
+                decoration: InputDecoration(
+                  hintText: 'Search category, note, person, amount...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _query.isEmpty
+                      ? null
+                      : IconButton(
+                          tooltip: 'Clear',
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _query = '');
+                          },
+                        ),
+                ),
+              ),
+            ),
             SizedBox(
               height: 48,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 itemCount: _filters.length,
                 separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (_, i) {
@@ -189,9 +240,11 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
       );
     }
     if (empty) {
-      return const EmptyView(
+      return EmptyView(
         icon: Icons.receipt_long,
-        message: 'No transactions found',
+        message: _query.isEmpty
+            ? 'No transactions found'
+            : 'Nothing matches "$_query"',
       );
     }
 

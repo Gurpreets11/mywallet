@@ -213,8 +213,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 13,
                       ),
                     ),
@@ -403,12 +403,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   ),
                 ),
             if (r.categories.length > 8)
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Showing top 8 categories',
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 12,
                   ),
                 ),
@@ -481,13 +481,13 @@ class _EmptyChart extends StatelessWidget {
   const _EmptyChart();
 
   @override
-  Widget build(BuildContext context) => const Card(
+  Widget build(BuildContext context) => Card(
     child: SizedBox(
       height: 150,
       child: Center(
         child: Text(
           'No transactions found for this year',
-          style: TextStyle(color: AppColors.textSecondary),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ),
     ),

@@ -8,6 +8,7 @@ import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/compact_form_theme.dart';
 import '../../../data/providers/master_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../../budgets/services/budget_alert_service.dart';
 import '../models/expense_model.dart';
 import '../providers/expense_provider.dart';
 
@@ -104,6 +105,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       } else {
         await provider.addExpense(expense);
       }
+      await BudgetAlertService().checkAfterExpense(
+        categoryId: expense.categoryId,
+        dateIso: expense.date,
+      );
       if (!mounted) return;
       await context.read<DashboardProvider>().loadDashboardData();
       if (!mounted) return;

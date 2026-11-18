@@ -16,6 +16,9 @@ class DashboardTransactionModel {
 
   final TransactionKind kind;
 
+  /// Extra text used only by search (notes, remarks, ...).
+  final String extra;
+
   DashboardTransactionModel({
     required this.title,
     required this.subtitle,
@@ -23,9 +26,9 @@ class DashboardTransactionModel {
     required this.date,
     required this.isExpense,
     TransactionKind? kind,
+    this.extra = '',
   }) : kind =
-           kind ??
-           (isExpense ? TransactionKind.expense : TransactionKind.income);
+           kind ?? (isExpense ? TransactionKind.expense : TransactionKind.income);
 
   /// Parsed [date]; null if the stored text is not a valid date.
   DateTime? get dateTime => DateTime.tryParse(date);

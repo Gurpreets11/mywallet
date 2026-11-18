@@ -78,8 +78,8 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
             widget.child,
             // Until the lock state is known, cover the app (no content flash).
             if (!_lock.isLoaded)
-              const Positioned.fill(
-                child: ColoredBox(color: AppColors.background),
+              Positioned.fill(
+                child: ColoredBox(color: Theme.of(context).scaffoldBackgroundColor),
               )
             else if (_lock.isLocked)
               const Positioned.fill(child: _LockScreen()),
@@ -206,7 +206,7 @@ class _LockScreenState extends State<_LockScreen> {
   Widget build(BuildContext context) {
     final lockedOut = _lock.lockoutRemaining != null;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -220,12 +220,12 @@ class _LockScreenState extends State<_LockScreen> {
                   color: AppColors.primary,
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Enter PIN',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 8),

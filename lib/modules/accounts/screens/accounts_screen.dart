@@ -362,9 +362,9 @@ class _TransferTile extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
         child: Row(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 16,
-              backgroundColor: Colors.black12,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: Icon(Icons.swap_horiz_rounded, size: 18),
             ),
             const SizedBox(width: 10),

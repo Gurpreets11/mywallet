@@ -4,21 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../../core/database/app_database.dart';
-import '../../core/services/app_data_refresher.dart';
-import '../../core/services/backup/backup_service.dart';
-import '../../core/services/backup/data_reset_service.dart';
-import '../../core/services/backup/restore_service.dart';
-import '../../core/services/export/csv_export_service.dart';
-import '../../core/services/notification_service.dart';
-import '../../core/services/security/app_lock_service.dart';
-import '../../core/services/settings/app_preferences.dart';
-import '../../core/theme/app_colors.dart';
-import '../../core/utils/snackbar_utils.dart';
-import '../../core/widgets/app_responsive_content.dart';
-import '../../core/widgets/type_to_confirm_dialog.dart';
-import 'screens/pin_setup_screen.dart';
-import 'widgets/export_options_sheet.dart';
+import '../../../core/database/app_database.dart';
+import '../../../core/services/app_data_refresher.dart';
+import '../../../core/services/backup/backup_service.dart';
+import '../../../core/services/backup/data_reset_service.dart';
+import '../../../core/services/backup/restore_service.dart';
+import '../../../core/services/export/csv_export_service.dart';
+import '../../../core/services/notification_service.dart';
+import '../../../core/services/security/app_lock_service.dart';
+import '../../../core/services/settings/app_preferences.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/snackbar_utils.dart';
+import '../../../core/widgets/app_responsive_content.dart';
+import '../../../core/widgets/type_to_confirm_dialog.dart';
+import 'pin_setup_screen.dart';
+import '../widgets/export_options_sheet.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -166,12 +166,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         builder: (dialogContext) => SimpleDialog(
           title: const Text('Restore from safety copy'),
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(24, 0, 24, 12),
               child: Text(
                 'Copies are saved automatically before every restore or '
                 'reset. Pick the state you want to go back to.',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ),
             for (final f in files)
@@ -534,15 +534,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.dark_mode_outlined,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 16),
+                              const Text(
+                                'Appearance',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: SegmentedButton<AppThemeChoice>(
+                              showSelectedIcon: false,
+                              segments: [
+                                for (final option in AppThemeChoice.values)
+                                  ButtonSegment(
+                                    value: option,
+                                    label: Text(option.label),
+                                  ),
+                              ],
+                              selected: {_prefs.themeChoice},
+                              onSelectionChanged: (s) async {
+                                await _prefs.setThemeChoice(s.first);
+                                if (mounted) setState(() {});
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Row(
+                          Row(
                             children: [
                               Icon(
                                 Icons.format_size_rounded,
-                                color: AppColors.textSecondary,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                               SizedBox(width: 16),
                               Text('Text size', style: TextStyle(fontSize: 16)),
@@ -568,13 +610,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
+                          Text(
                             'Changes the text size across the whole app. '
                             'It is added to your phone\'s own font-size setting.',
                             style: TextStyle(
                               fontSize: 12,
                               height: 1.4,
-                              color: AppColors.textSecondary,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -622,6 +664,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       value: _prefs.sipRemindersEnabled,
                       onChanged: _toggleSipReminders,
+                    ),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.savings_outlined),
+                      title: const Text('Budget alerts'),
+                      subtitle: const Text(
+                        'When spending nears or reaches a budget',
+                      ),
+                      value: _prefs.budgetAlertsEnabled,
+                      onChanged: (value) async {
+                        await _prefs.setBudgetAlertsEnabled(value);
+                        if (mounted) setState(() {});
+                      },
                     ),
                   ]),
                   const SizedBox(height: 24),
@@ -691,10 +745,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.only(left: 4, bottom: 10),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
     );
@@ -761,9 +815,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Expanded(
                   child: Text(
                     _lastBackupLabel(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -801,7 +855,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Backup saves all your expenses, income, investments, loans, '
               'budgets and recurring items into one file. Keep it somewhere '
               'safe, such as Google Drive.\n\n'
@@ -811,7 +865,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(
                 fontSize: 12,
                 height: 1.4,
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -841,10 +895,10 @@ class _StatTile extends StatelessWidget {
         children: [
           Text(
             '$value',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 2),
@@ -852,9 +906,9 @@ class _StatTile extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],

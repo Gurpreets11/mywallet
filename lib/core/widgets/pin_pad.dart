@@ -60,10 +60,10 @@ class PinPad extends StatelessWidget {
       onTap: enabled ? () => onDigit(label) : null,
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
     );
@@ -89,9 +89,9 @@ class PinPad extends StatelessWidget {
               key('0'),
               _PadKey(
                 onTap: enabled ? onBackspace : null,
-                child: const Icon(
+                child: Icon(
                   Icons.backspace_outlined,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

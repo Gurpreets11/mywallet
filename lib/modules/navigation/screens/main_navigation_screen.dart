@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/app_breakpoints.dart';
 import '../../accounts/screens/accounts_screen.dart';
+import '../../goals/screens/savings_goals_screen.dart';
 import '../../budgets/screens/budget_screen.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 import '../../dashboard/screens/more_screen.dart';
@@ -11,7 +12,7 @@ import '../../expenses/screens/expense_list_screen.dart';
 import '../../income/screens/income_list_screen.dart';
 import '../../investments/screens/investment_list_screen.dart';
 import '../../loans/screens/loan_list_screen.dart';
-import '../../settings/setting_screen.dart';
+import '../../settings/screens/setting_screen.dart';
 import '../../recurring/screens/recurring_screen.dart';
 import '../../reports/screens/reports_screen.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
@@ -34,6 +35,7 @@ class MainNavigationScreen extends StatelessWidget {
     ReportsScreen(),
     BudgetScreen(),
     AccountsScreen(),
+    SavingsGoalsScreen(),
   ];
 
   static const List<NavigationDestination> _mobileDestinations = [
@@ -106,6 +108,11 @@ class MainNavigationScreen extends StatelessWidget {
       label: Text('Budgets'),
     ),
     NavigationRailDestination(
+      icon: Icon(Icons.flag_outlined),
+      selectedIcon: Icon(Icons.flag_rounded),
+      label: Text('Goals'),
+    ),
+    NavigationRailDestination(
       icon: Icon(Icons.settings_outlined),
       selectedIcon: Icon(Icons.settings_rounded),
       label: Text('Settings'),
@@ -113,10 +120,11 @@ class MainNavigationScreen extends StatelessWidget {
   ];
 
   static const int _accountsScreenIndex = 10;
+  static const int _goalsScreenIndex = 11;
 
   // Rail position -> index in _screens (order: Home, Expenses, Income,
-  // Accounts, Investments, Loans, Recurring, Reports, Budgets, Settings).
-  static const List<int> _railToScreen = [0, 1, 2, 10, 4, 5, 7, 8, 9, 6];
+  // Accounts, Investments, Loans, Recurring, Reports, Budgets, Goals, Settings).
+  static const List<int> _railToScreen = [0, 1, 2, 10, 4, 5, 7, 8, 9, 11, 6];
 
   int _screenIndexForWideDestination(int destinationIndex) =>
       _railToScreen[destinationIndex.clamp(0, _railToScreen.length - 1)];
@@ -163,7 +171,7 @@ class MainNavigationScreen extends StatelessWidget {
         return Scaffold(
           body: Row(
             children: [
-              // Scrollable so all 10 destinations stay reachable on short
+              // Scrollable so all 11 destinations stay reachable on short
               // tablet / landscape screens.
               LayoutBuilder(
                 builder: (context, rc) => SingleChildScrollView(
@@ -181,6 +189,8 @@ class MainNavigationScreen extends StatelessWidget {
                           // so refresh its balances when it is opened.
                           if (screenIndex == _accountsScreenIndex) {
                             context.read<DashboardProvider>().loadAccounts();
+                          } else if (screenIndex == _goalsScreenIndex) {
+                            context.read<DashboardProvider>().loadGoals();
                           }
                         },
                         extended: extendedRail,
@@ -192,7 +202,7 @@ class MainNavigationScreen extends StatelessWidget {
                         leading: Padding(
                           padding: const EdgeInsets.only(top: 20, bottom: 28),
                           child: extendedRail
-                              ? const Row(
+                              ? Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
@@ -206,7 +216,7 @@ class MainNavigationScreen extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 19,
                                         fontWeight: FontWeight.w800,
-                                        color: AppColors.textPrimary,
+                                        color: Theme.of(context).colorScheme.onSurface,
                                       ),
                                     ),
                                   ],

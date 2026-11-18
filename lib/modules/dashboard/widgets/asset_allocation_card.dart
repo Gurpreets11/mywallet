@@ -29,7 +29,7 @@ class AssetAllocationCard extends StatelessWidget {
         ),
         VerticalSpacing(height: 14),
         Card(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
 
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),

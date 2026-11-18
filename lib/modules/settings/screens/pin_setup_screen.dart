@@ -162,10 +162,10 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
               children: [
                 Text(
                   _prompt,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -193,14 +193,14 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
                 ),
                 if (widget.flow != PinFlow.disable) ...[
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'If you forget the PIN, the only way back in is to erase '
                     'all app data. Keep a backup file somewhere safe.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 12,
                       height: 1.4,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],

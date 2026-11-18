@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -18,6 +19,18 @@ enum AppFontSize {
   final double scale;
 }
 
+/// Light / dark / follow-the-phone appearance choice.
+enum AppThemeChoice {
+  light('Light', ThemeMode.light),
+  dark('Dark', ThemeMode.dark),
+  system('System', ThemeMode.system);
+
+  const AppThemeChoice(this.label, this.mode);
+
+  final String label;
+  final ThemeMode mode;
+}
+
 class AppPreferences extends ChangeNotifier {
   AppPreferences._();
 
@@ -30,6 +43,8 @@ class AppPreferences extends ChangeNotifier {
   static const String _kEmiReminders = 'pref_emi_reminders_enabled';
   static const String _kSipReminders = 'pref_sip_reminders_enabled';
   static const String _kFontSize = 'pref_font_size';
+  static const String _kThemeMode = 'pref_theme_mode';
+  static const String _kBudgetAlerts = 'pref_budget_alerts_enabled';
 
   /// Date patterns the user can pick from (shown with a live example).
   static const List<String> dateFormatOptions = [
@@ -45,7 +60,12 @@ class AppPreferences extends ChangeNotifier {
   int _dailyReminderMinute = 0;
   bool _emiRemindersEnabled = true;
   bool _sipRemindersEnabled = true;
+  bool _budgetAlertsEnabled = true;
   AppFontSize _fontSize = AppFontSize.medium;
+  AppThemeChoice _themeChoice = AppThemeChoice.light;
+
+  AppThemeChoice get themeChoice => _themeChoice;
+  ThemeMode get themeMode => _themeChoice.mode;
 
   AppFontSize get fontSize => _fontSize;
 
@@ -58,6 +78,7 @@ class AppPreferences extends ChangeNotifier {
   int get dailyReminderMinute => _dailyReminderMinute;
   bool get emiRemindersEnabled => _emiRemindersEnabled;
   bool get sipRemindersEnabled => _sipRemindersEnabled;
+  bool get budgetAlertsEnabled => _budgetAlertsEnabled;
 
   /// Loads saved preferences. Safe to call again (e.g. after a restore).
   /// Falls back to defaults for anything missing or invalid.
@@ -69,7 +90,9 @@ class AppPreferences extends ChangeNotifier {
     _dailyReminderMinute = 0;
     _emiRemindersEnabled = true;
     _sipRemindersEnabled = true;
+    _budgetAlertsEnabled = true;
     _fontSize = AppFontSize.medium;
+    _themeChoice = AppThemeChoice.light;
 
     try {
       final Database db = await AppDatabase.database;
@@ -101,6 +124,13 @@ class AppPreferences extends ChangeNotifier {
       }
       if (values[_kSipReminders] != null) {
         _sipRemindersEnabled = values[_kSipReminders] == '1';
+      }
+      if (values[_kBudgetAlerts] != null) {
+        _budgetAlertsEnabled = values[_kBudgetAlerts] == '1';
+      }
+      final themeName = values[_kThemeMode];
+      for (final option in AppThemeChoice.values) {
+        if (option.name == themeName) _themeChoice = option;
       }
       final fontName = values[_kFontSize];
       for (final option in AppFontSize.values) {
@@ -147,6 +177,17 @@ class AppPreferences extends ChangeNotifier {
   Future<void> setSipRemindersEnabled(bool value) async {
     await _save(_kSipReminders, value ? '1' : '0');
     _sipRemindersEnabled = value;
+  }
+
+  Future<void> setBudgetAlertsEnabled(bool value) async {
+    await _save(_kBudgetAlerts, value ? '1' : '0');
+    _budgetAlertsEnabled = value;
+  }
+
+  Future<void> setThemeChoice(AppThemeChoice value) async {
+    await _save(_kThemeMode, value.name);
+    _themeChoice = value;
+    notifyListeners();
   }
 
   Future<void> setFontSize(AppFontSize value) async {

@@ -4,6 +4,8 @@ import '../../../data/repositories/master_repository.dart';
 import '../../accounts/models/account_model.dart';
 import '../../accounts/repositories/account_repository.dart';
 import '../../expenses/repositories/expense_repository.dart';
+import '../../goals/models/savings_goal_model.dart';
+import '../../goals/repositories/goal_repository.dart';
 import '../../income/repositories/income_repository.dart';
 import '../../investments/models/investment_model.dart';
 import '../../investments/repositories/investment_repository.dart';
@@ -82,6 +84,20 @@ class DashboardProvider extends ChangeNotifier {
 
   List<DashboardTransactionModel> recentTransactions = [];
 
+  // ---- Savings goals ----
+  final GoalRepository _goalRepository = GoalRepository();
+
+  List<GoalProgress> goalProgress = [];
+
+  Future<void> loadGoals() async {
+    try {
+      goalProgress = await _goalRepository.getGoals();
+    } catch (e) {
+      debugPrint('Loading goals failed: $e');
+    }
+    notifyListeners();
+  }
+
   // ---- Accounts ----
   final AccountRepository _accountRepository = AccountRepository();
 
@@ -141,6 +157,8 @@ class DashboardProvider extends ChangeNotifier {
     await loadRecentTransactions();
 
     await loadAccounts();
+
+    await loadGoals();
   }
 
   Future<void> loadRecentTransactions() async {

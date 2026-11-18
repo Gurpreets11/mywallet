@@ -43,6 +43,12 @@ class RecurringProvider extends ChangeNotifier {
     await load(generateDue: false);
   }
 
+  Future<void> skipNext(RecurringTransactionModel item) async {
+    if (item.id == null) return;
+    await _repository.skipNext(item.id!);
+    await load(generateDue: false);
+  }
+
   Future<void> resume(RecurringTransactionModel item) async {
     if (item.id == null) return;
     await _repository.setStatus(item.id!, 'ACTIVE');

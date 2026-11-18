@@ -87,11 +87,13 @@ class FinanceManagerApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RecurringProvider()),
         ChangeNotifierProvider(create: (_) => ReportProvider()),
       ],
-      child: MaterialApp(
+      child: ListenableBuilder(
+        listenable: AppPreferences.instance,
+        builder: (context, _) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'My Wallet',
 
-        themeMode: ThemeMode.light,
+        themeMode: AppPreferences.instance.themeMode,
 
         theme: AppTheme.lightTheme,
 
@@ -112,6 +114,7 @@ class FinanceManagerApp extends StatelessWidget {
         ),
         home: const MainNavigationScreen(),
         navigatorKey: NavigationService.instance.navigatorKey,
+        ),
       ),
     );
   }

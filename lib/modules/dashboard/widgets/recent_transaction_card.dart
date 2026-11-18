@@ -43,7 +43,7 @@ class RecentTransactionCard extends StatelessWidget {
     final parsed = DateTime.tryParse(date);
     final when = parsed == null ? date : AppDateUtils.formatDateTime(parsed);
     return Card(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
@@ -54,14 +54,21 @@ class RecentTransactionCard extends StatelessWidget {
         minTileHeight: 40,
         leading: CircleAvatar(
           radius: 16,
-          backgroundColor: Colors.black12,
-          child: Icon(_icon, size: 16, color: _color),
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: Icon(
+            _icon,
+            size: 16,
+            color: _color,
+          ),
         ),
         title: Text(title),
         subtitle: Text(subtitle.isEmpty ? when : '$subtitle - $when'),
         trailing: Text(
           CurrencyUtils.formatAmount(amount),
-          style: TextStyle(color: _color, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: _color,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

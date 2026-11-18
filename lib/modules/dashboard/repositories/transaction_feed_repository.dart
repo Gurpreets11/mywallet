@@ -14,7 +14,7 @@ class TransactionFeedRepository {
 
     // EXPENSES
     final expenses = await db.rawQuery('''
-      SELECT e.amount, e.date, e.payment_mode,
+      SELECT e.amount, e.date, e.payment_mode, e.notes,
              c.category_name, s.subcategory_name
       FROM expenses e
       LEFT JOIN categories c ON e.category_id = c.id
@@ -29,13 +29,14 @@ class TransactionFeedRepository {
           date: _text(r['date']),
           isExpense: true,
           kind: TransactionKind.expense,
+          extra: _text(r['notes']),
         ),
       );
     }
 
     // INCOME
     final incomes = await db.rawQuery('''
-      SELECT i.amount, i.date, i.payment_mode,
+      SELECT i.amount, i.date, i.payment_mode, i.notes,
              c.category_name, s.subcategory_name
       FROM incomes i
       LEFT JOIN categories c ON i.category_id = c.id
@@ -50,6 +51,7 @@ class TransactionFeedRepository {
           date: _text(r['date']),
           isExpense: false,
           kind: TransactionKind.income,
+          extra: _text(r['notes']),
         ),
       );
     }
@@ -57,7 +59,7 @@ class TransactionFeedRepository {
     // LOAN EMI PAYMENTS (paid on a borrowed loan = out, received on a loan
     // you gave = in)
     final emis = await db.rawQuery('''
-      SELECT lp.payment_amount, lp.payment_date, lp.payment_mode,
+      SELECT lp.payment_amount, lp.payment_date, lp.payment_mode, lp.remarks,
              l.person_name, l.loan_type
       FROM loan_payments lp
       LEFT JOIN loans l ON lp.loan_id = l.id
@@ -76,6 +78,7 @@ class TransactionFeedRepository {
           date: _text(r['payment_date']),
           isExpense: !given,
           kind: TransactionKind.loanEmi,
+          extra: _text(r['remarks']),
         ),
       );
     }
@@ -83,7 +86,7 @@ class TransactionFeedRepository {
     // INVESTMENTS (money put in)
     final investments = await db.rawQuery('''
       SELECT investment_name, investment_type, investment_platform,
-             invested_amount, investment_date
+             invested_amount, investment_date, notes
       FROM investments
     ''');
     for (final r in investments) {
@@ -92,22 +95,24 @@ class TransactionFeedRepository {
           title: _text(r['investment_name']).isEmpty
               ? 'Investment'
               : _text(r['investment_name']),
-          subtitle: _join(
-            [r['investment_type'], r['investment_platform']],
-            'Investment',
-            separator: ' • ',
-          ),
+          subtitle: _join([
+            r['investment_type'],
+            r['investment_platform'],
+          ], 'Investment', separator: ' • '),
           amount: _amount(r['invested_amount']),
           date: _text(r['investment_date']),
           isExpense: true,
           kind: TransactionKind.investment,
+          extra: _text(r['notes']),
         ),
       );
     }
 
     // Newest first. Rows whose date cannot be read go to the end.
     final epoch = DateTime.fromMillisecondsSinceEpoch(0);
-    items.sort((a, b) => (b.dateTime ?? epoch).compareTo(a.dateTime ?? epoch));
+    items.sort(
+      (a, b) => (b.dateTime ?? epoch).compareTo(a.dateTime ?? epoch),
+    );
 
     if (limit != null && items.length > limit) {
       return items.sublist(0, limit);
