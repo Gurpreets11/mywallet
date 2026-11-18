@@ -9,6 +9,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/greeting_utils.dart';
 import '../../../core/widgets/empty_view.dart';
 import '../providers/dashboard_provider.dart';
+import 'all_transactions_screen.dart';
 import '../widgets/analytics_card.dart';
 import '../widgets/asset_allocation_card.dart';
 import '../widgets/balance_card.dart';
@@ -222,7 +223,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: MonthlyExpenseChart(data: provider.monthlyExpense),
                 ),
                 VerticalSpacing(height: 14),
-                const SectionTitle(title: 'Recent Transactions'),
+                SectionTitle(
+                  title: 'Recent Transactions',
+                  onViewAll: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AllTransactionsScreen(),
+                    ),
+                  ),
+                ),
 
                 VerticalSpacing(height: 10),
 
@@ -244,6 +253,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               amount: txn.amount,
                               date: txn.date,
                               isExpense: txn.isExpense,
+                              kind: txn.kind,
                             ),
                           )
                           .toList(),

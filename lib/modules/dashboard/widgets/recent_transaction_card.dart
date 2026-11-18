@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mywallet/core/utils/date_utils.dart';
 
 import '../../../core/utils/currency_utils.dart';
+import '../models/dashboard_transaction_model.dart';
 
 class RecentTransactionCard extends StatelessWidget {
   final String title;
@@ -9,6 +10,7 @@ class RecentTransactionCard extends StatelessWidget {
   final double amount;
   final String date;
   final bool isExpense;
+  final TransactionKind? kind;
 
   const RecentTransactionCard({
     super.key,
@@ -17,10 +19,29 @@ class RecentTransactionCard extends StatelessWidget {
     required this.amount,
     required this.date,
     required this.isExpense,
+    this.kind,
   });
+
+  Color get _color {
+    if (kind == TransactionKind.investment) return Colors.blue;
+    return isExpense ? Colors.red : Colors.green;
+  }
+
+  IconData get _icon {
+    switch (kind) {
+      case TransactionKind.loanEmi:
+        return Icons.account_balance;
+      case TransactionKind.investment:
+        return Icons.trending_up;
+      default:
+        return isExpense ? Icons.arrow_upward : Icons.arrow_downward;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final parsed = DateTime.tryParse(date);
+    final when = parsed == null ? date : AppDateUtils.formatDateTime(parsed);
     return Card(
       color: Colors.white,
       elevation: 0,
@@ -35,19 +56,17 @@ class RecentTransactionCard extends StatelessWidget {
           radius: 16,
           backgroundColor: Colors.black12,
           child: Icon(
-            isExpense ? Icons.arrow_upward : Icons.arrow_downward,
+            _icon,
             size: 16,
-            color: isExpense ? Colors.red : Colors.green,
+            color: _color,
           ),
         ),
         title: Text(title),
-        subtitle: Text(
-          '$subtitle - ${AppDateUtils.formatDateTime(DateTime.parse(date))} ',
-        ),
+        subtitle: Text(subtitle.isEmpty ? when : '$subtitle - $when'),
         trailing: Text(
           CurrencyUtils.formatAmount(amount),
           style: TextStyle(
-            color: isExpense ? Colors.red : Colors.green,
+            color: _color,
             fontWeight: FontWeight.bold,
           ),
         ),

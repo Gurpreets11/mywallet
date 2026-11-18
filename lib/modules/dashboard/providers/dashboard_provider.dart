@@ -9,6 +9,7 @@ import '../../loans/models/loan_model.dart';
 import '../../loans/repositories/loan_repository.dart';
 import '../models/dashboard_chart_model.dart';
 import '../models/dashboard_transaction_model.dart';
+import '../repositories/transaction_feed_repository.dart';
 
 class DashboardProvider extends ChangeNotifier {
   double _totalIncome = 0;
@@ -27,6 +28,8 @@ class DashboardProvider extends ChangeNotifier {
 
   final ExpenseRepository _expenseRepository = ExpenseRepository();
   final IncomeRepository _incomeRepository = IncomeRepository();
+  final TransactionFeedRepository _transactionFeed =
+      TransactionFeedRepository();
 
   final LoanRepository _loanRepository = LoanRepository();
 
@@ -119,47 +122,7 @@ class DashboardProvider extends ChangeNotifier {
   }
 
   Future<void> loadRecentTransactions() async {
-    final List<DashboardTransactionModel> transactions = [];
-
-    // EXPENSES
-    final expenses = await _expenseRepository.getAllExpenses();
-
-    for (final e in expenses.take(5)) {
-      transactions.add(
-        DashboardTransactionModel(
-          title: '${e.categoryName} - ${e.subcategoryName}',
-          subtitle: e.paymentMode,
-          amount: e.amount,
-          date: e.date,
-          isExpense: true,
-        ),
-      );
-    }
-
-    // INCOME
-    final incomes = await _incomeRepository.getAllIncomes();
-
-    for (final i in incomes.take(5)) {
-      transactions.add(
-        DashboardTransactionModel(
-          title: i.categoryName ?? 'Income',
-
-          subtitle: i.paymentMode,
-
-          amount: i.amount,
-
-          date: i.date,
-
-          isExpense: false,
-        ),
-      );
-    }
-
-    // SORT BY DATE
-    transactions.sort(
-      (a, b) => DateTime.parse(b.date).compareTo(DateTime.parse(a.date)),
-    );
-
-    recentTransactions = transactions.take(5).toList();
+    // Newest 5 across expenses, income, loan EMIs and investments.
+    recentTransactions = await _transactionFeed.getAll(limit: 5);
   }
 }

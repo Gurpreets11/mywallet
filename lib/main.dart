@@ -19,7 +19,7 @@ import 'modules/income/providers/income_provider.dart';
 import 'modules/investments/providers/investment_provider.dart';
 import 'modules/loans/providers/loan_payment_provider.dart';
 import 'modules/loans/providers/loan_provider.dart';
-import 'modules/navigation/providers/main_navigation_screen.dart';
+import 'modules/navigation/screens/main_navigation_screen.dart';
 import 'modules/navigation/providers/navigation_provider.dart';
 import 'modules/recurring/providers/recurring_provider.dart';
 import 'modules/recurring/repositories/recurring_repository.dart';

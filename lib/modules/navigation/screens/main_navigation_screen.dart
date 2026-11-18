@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/app_breakpoints.dart';
+import '../../budgets/screens/budget_screen.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 import '../../dashboard/screens/more_screen.dart';
 import '../../expenses/screens/expense_list_screen.dart';
@@ -29,6 +30,7 @@ class MainNavigationScreen extends StatelessWidget {
     SettingsScreen(),
     RecurringScreen(),
     ReportsScreen(),
+    BudgetScreen(),
   ];
 
   static const List<NavigationDestination> _mobileDestinations = [
@@ -81,11 +83,6 @@ class MainNavigationScreen extends StatelessWidget {
       label: Text('Loans'),
     ),
     NavigationRailDestination(
-      icon: Icon(Icons.settings_outlined),
-      selectedIcon: Icon(Icons.settings_rounded),
-      label: Text('Settings'),
-    ),
-    NavigationRailDestination(
       icon: Icon(Icons.event_repeat_outlined),
       selectedIcon: Icon(Icons.event_repeat_rounded),
       label: Text('Recurring'),
@@ -95,16 +92,28 @@ class MainNavigationScreen extends StatelessWidget {
       selectedIcon: Icon(Icons.analytics_rounded),
       label: Text('Reports'),
     ),
+    NavigationRailDestination(
+      icon: Icon(Icons.account_balance_wallet_outlined),
+      selectedIcon: Icon(Icons.account_balance_wallet_rounded),
+      label: Text('Budgets'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.settings_outlined),
+      selectedIcon: Icon(Icons.settings_rounded),
+      label: Text('Settings'),
+    ),
   ];
 
-  int _screenIndexForWideDestination(int destinationIndex) {
-    // Skip index 3, which is the mobile-only More screen.
-    return destinationIndex < 3 ? destinationIndex : destinationIndex + 1;
-  }
+  // Rail position -> index in _screens (order: Home, Expenses, Income,
+  // Investments, Loans, Recurring, Reports, Budgets, Settings).
+  static const List<int> _railToScreen = [0, 1, 2, 4, 5, 7, 8, 9, 6];
+
+  int _screenIndexForWideDestination(int destinationIndex) =>
+      _railToScreen[destinationIndex.clamp(0, _railToScreen.length - 1)];
 
   int _wideDestinationForScreen(int screenIndex) {
-    if (screenIndex <= 2) return screenIndex;
-    return (screenIndex - 1).clamp(0, 7);
+    final i = _railToScreen.indexOf(screenIndex);
+    return i < 0 ? 0 : i;
   }
 
   @override
@@ -144,46 +153,57 @@ class MainNavigationScreen extends StatelessWidget {
         return Scaffold(
           body: Row(
             children: [
-              NavigationRail(
-                selectedIndex: selectedRailIndex,
-                onDestinationSelected: (index) => navigation.changeIndex(
-                  _screenIndexForWideDestination(index),
-                ),
-                extended: extendedRail,
-                labelType: extendedRail
-                    ? NavigationRailLabelType.none
-                    : NavigationRailLabelType.all,
-                minWidth: 76,
-                minExtendedWidth: 220,
-                leading: Padding(
-                  padding: const EdgeInsets.only(top: 20, bottom: 28),
-                  child: extendedRail
-                      ? const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.account_balance_wallet_rounded,
-                              color: AppColors.primary,
-                              size: 26,
-                            ),
-                            SizedBox(width: 10),
-                            Text(
-                              'myWallet',
-                              style: TextStyle(
-                                fontSize: 19,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
-                        )
-                      : const Icon(
-                          Icons.account_balance_wallet_rounded,
-                          color: AppColors.primary,
-                          size: 28,
+              // Scrollable so all 9 destinations stay reachable on short
+              // tablet / landscape screens.
+              LayoutBuilder(
+                builder: (context, rc) => SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: rc.maxHeight),
+                    child: IntrinsicHeight(
+                      child: NavigationRail(
+                        selectedIndex: selectedRailIndex,
+                        onDestinationSelected: (index) => navigation.changeIndex(
+                          _screenIndexForWideDestination(index),
                         ),
+                        extended: extendedRail,
+                        labelType: extendedRail
+                            ? NavigationRailLabelType.none
+                            : NavigationRailLabelType.all,
+                        minWidth: 76,
+                        minExtendedWidth: 220,
+                        leading: Padding(
+                          padding: const EdgeInsets.only(top: 20, bottom: 28),
+                          child: extendedRail
+                              ? const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.account_balance_wallet_rounded,
+                                      color: AppColors.primary,
+                                      size: 26,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'myWallet',
+                                      style: TextStyle(
+                                        fontSize: 19,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : const Icon(
+                                  Icons.account_balance_wallet_rounded,
+                                  color: AppColors.primary,
+                                  size: 28,
+                                ),
+                        ),
+                        destinations: _wideDestinations,
+                      ),
+                    ),
+                  ),
                 ),
-                destinations: _wideDestinations,
               ),
               const VerticalDivider(width: 1, thickness: 1),
               Expanded(
