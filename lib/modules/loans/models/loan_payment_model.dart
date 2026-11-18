@@ -13,6 +13,9 @@ class LoanPaymentModel {
 
   final String createdAt;
 
+  /// Account this belongs to (null = default account).
+  final int? accountId;
+
   LoanPaymentModel({
     this.id,
     required this.loanId,
@@ -21,6 +24,7 @@ class LoanPaymentModel {
     required this.paymentMode,
     this.remarks,
     required this.createdAt,
+    this.accountId,
   });
 
   Map<String, dynamic> toMap() {
@@ -32,6 +36,7 @@ class LoanPaymentModel {
       'payment_mode': paymentMode,
       'remarks': remarks,
       'created_at': createdAt,
+      'account_id': accountId,
     };
   }
 
@@ -44,6 +49,7 @@ class LoanPaymentModel {
       paymentMode: map['payment_mode'],
       remarks: map['remarks'],
       createdAt: map['created_at'],
+      accountId: map['account_id'],
     );
   }
 }

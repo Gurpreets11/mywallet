@@ -5,6 +5,7 @@ import '../../../core/widgets/app_responsive_content.dart';
 import '../../investments/screens/investment_list_screen.dart';
 import '../../loans/screens/loan_list_screen.dart';
 import '../../settings/setting_screen.dart';
+import '../../accounts/screens/accounts_screen.dart';
 import '../../budgets/screens/budget_screen.dart';
 import '../../recurring/screens/recurring_screen.dart';
 import '../../reports/screens/reports_screen.dart';
@@ -42,6 +43,13 @@ class MoreScreen extends StatelessWidget {
                     : 170,
               ),
               children: [
+                _MoreMenuCard(
+                  title: 'Accounts',
+                  subtitle: 'Balances and transfers',
+                  icon: Icons.account_balance_wallet_outlined,
+                  iconColor: AppColors.primary,
+                  screen: const AccountsScreen(),
+                ),
                 _MoreMenuCard(
                   title: 'Budgets',
                   subtitle: 'Monthly spending limits',

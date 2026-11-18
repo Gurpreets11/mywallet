@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/app_breakpoints.dart';
+import '../../accounts/screens/accounts_screen.dart';
 import '../../budgets/screens/budget_screen.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 import '../../dashboard/screens/more_screen.dart';
@@ -13,6 +14,7 @@ import '../../loans/screens/loan_list_screen.dart';
 import '../../settings/setting_screen.dart';
 import '../../recurring/screens/recurring_screen.dart';
 import '../../reports/screens/reports_screen.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../providers/navigation_provider.dart';
 
 class MainNavigationScreen extends StatelessWidget {
@@ -31,6 +33,7 @@ class MainNavigationScreen extends StatelessWidget {
     RecurringScreen(),
     ReportsScreen(),
     BudgetScreen(),
+    AccountsScreen(),
   ];
 
   static const List<NavigationDestination> _mobileDestinations = [
@@ -73,6 +76,11 @@ class MainNavigationScreen extends StatelessWidget {
       label: Text('Income'),
     ),
     NavigationRailDestination(
+      icon: Icon(Icons.account_balance_wallet_outlined),
+      selectedIcon: Icon(Icons.account_balance_wallet_rounded),
+      label: Text('Accounts'),
+    ),
+    NavigationRailDestination(
       icon: Icon(Icons.trending_up_outlined),
       selectedIcon: Icon(Icons.trending_up_rounded),
       label: Text('Investments'),
@@ -93,8 +101,8 @@ class MainNavigationScreen extends StatelessWidget {
       label: Text('Reports'),
     ),
     NavigationRailDestination(
-      icon: Icon(Icons.account_balance_wallet_outlined),
-      selectedIcon: Icon(Icons.account_balance_wallet_rounded),
+      icon: Icon(Icons.savings_outlined),
+      selectedIcon: Icon(Icons.savings_rounded),
       label: Text('Budgets'),
     ),
     NavigationRailDestination(
@@ -104,9 +112,11 @@ class MainNavigationScreen extends StatelessWidget {
     ),
   ];
 
+  static const int _accountsScreenIndex = 10;
+
   // Rail position -> index in _screens (order: Home, Expenses, Income,
-  // Investments, Loans, Recurring, Reports, Budgets, Settings).
-  static const List<int> _railToScreen = [0, 1, 2, 4, 5, 7, 8, 9, 6];
+  // Accounts, Investments, Loans, Recurring, Reports, Budgets, Settings).
+  static const List<int> _railToScreen = [0, 1, 2, 10, 4, 5, 7, 8, 9, 6];
 
   int _screenIndexForWideDestination(int destinationIndex) =>
       _railToScreen[destinationIndex.clamp(0, _railToScreen.length - 1)];
@@ -153,7 +163,7 @@ class MainNavigationScreen extends StatelessWidget {
         return Scaffold(
           body: Row(
             children: [
-              // Scrollable so all 9 destinations stay reachable on short
+              // Scrollable so all 10 destinations stay reachable on short
               // tablet / landscape screens.
               LayoutBuilder(
                 builder: (context, rc) => SingleChildScrollView(
@@ -162,9 +172,17 @@ class MainNavigationScreen extends StatelessWidget {
                     child: IntrinsicHeight(
                       child: NavigationRail(
                         selectedIndex: selectedRailIndex,
-                        onDestinationSelected: (index) => navigation.changeIndex(
-                          _screenIndexForWideDestination(index),
-                        ),
+                        onDestinationSelected: (index) {
+                          final screenIndex = _screenIndexForWideDestination(
+                            index,
+                          );
+                          navigation.changeIndex(screenIndex);
+                          // The Accounts tab stays alive in the background,
+                          // so refresh its balances when it is opened.
+                          if (screenIndex == _accountsScreenIndex) {
+                            context.read<DashboardProvider>().loadAccounts();
+                          }
+                        },
                         extended: extendedRail,
                         labelType: extendedRail
                             ? NavigationRailLabelType.none

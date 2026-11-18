@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../accounts/widgets/account_dropdown.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
@@ -26,6 +27,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
 
   DateTime _selectedDate = DateTime.now();
   String _paymentMode = 'Bank';
+  int? _accountId;
   bool _isRecurring = false;
   String _recurringType = 'Monthly';
   int? _selectedCategoryId;
@@ -46,6 +48,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
       _notesController.text = income.notes ?? '';
       _selectedDate = DateTime.tryParse(income.date) ?? DateTime.now();
       _paymentMode = income.paymentMode;
+      _accountId = income.accountId;
       _selectedCategoryId = income.categoryId;
       _selectedCategoryName = income.categoryName;
       _selectedSubcategoryId = income.subcategoryId;
@@ -110,6 +113,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
         subcategoryId: _selectedSubcategoryId,
         date: _selectedDate.toIso8601String(),
         paymentMode: _paymentMode,
+        accountId: _accountId,
         notes: _notesController.text.trim().isEmpty
             ? null
             : _notesController.text.trim(),
@@ -329,6 +333,10 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                   },
                                 ),
                                 const SizedBox(height: 12),
+                                AccountDropdown(
+                                  value: _accountId,
+                                  onChanged: (v) => _accountId = v,
+                                ),
                                 DropdownButtonFormField<String>(
                                   initialValue: _paymentMode,
                                   isExpanded: true,

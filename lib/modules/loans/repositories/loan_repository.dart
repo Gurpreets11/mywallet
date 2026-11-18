@@ -164,6 +164,8 @@ class LoanRepository {
     required String paymentMode,
 
     String? remarks,
+
+    int? accountId,
   }) async {
     final Database db = await AppDatabase.database;
 
@@ -179,6 +181,8 @@ class LoanRepository {
       paymentMode: paymentMode,
 
       remarks: remarks,
+
+      accountId: accountId,
 
       createdAt: DateTime.now().toIso8601String(),
     );

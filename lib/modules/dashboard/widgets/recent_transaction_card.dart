@@ -55,20 +55,13 @@ class RecentTransactionCard extends StatelessWidget {
         leading: CircleAvatar(
           radius: 16,
           backgroundColor: Colors.black12,
-          child: Icon(
-            _icon,
-            size: 16,
-            color: _color,
-          ),
+          child: Icon(_icon, size: 16, color: _color),
         ),
         title: Text(title),
         subtitle: Text(subtitle.isEmpty ? when : '$subtitle - $when'),
         trailing: Text(
           CurrencyUtils.formatAmount(amount),
-          style: TextStyle(
-            color: _color,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: _color, fontWeight: FontWeight.bold),
         ),
       ),
     );

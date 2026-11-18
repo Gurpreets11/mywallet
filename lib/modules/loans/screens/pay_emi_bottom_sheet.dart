@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/app_section_header.dart';
+import '../../accounts/widgets/account_dropdown.dart';
 
 class PayEmiBottomSheet extends StatefulWidget {
   final Function({
@@ -9,16 +10,22 @@ class PayEmiBottomSheet extends StatefulWidget {
     required String paymentMode,
 
     String? remarks,
+
+    int? accountId,
   })
   onSubmit;
 
   /// Pre-filled amount (normally the loan's EMI).
   final double? initialAmount;
 
+  /// Label for the account picker ("Paid from" / "Received in").
+  final String accountLabel;
+
   const PayEmiBottomSheet({
     super.key,
     required this.onSubmit,
     this.initialAmount,
+    this.accountLabel = 'Paid from account',
   });
 
   @override
@@ -32,6 +39,7 @@ class _PayEmiBottomSheetState extends State<PayEmiBottomSheet> {
 
   String _paymentMode = 'UPI';
   String? _amountError;
+  int? _accountId;
 
   @override
   void initState() {
@@ -64,6 +72,7 @@ class _PayEmiBottomSheetState extends State<PayEmiBottomSheet> {
       paymentAmount: amount,
       paymentMode: _paymentMode,
       remarks: _remarksController.text,
+      accountId: _accountId,
     );
 
     Navigator.pop(context);
@@ -99,6 +108,12 @@ class _PayEmiBottomSheetState extends State<PayEmiBottomSheet> {
           ),
 
           const SizedBox(height: 12),
+
+          AccountDropdown(
+            label: widget.accountLabel,
+            value: _accountId,
+            onChanged: (v) => _accountId = v,
+          ),
 
           DropdownButtonFormField<String>(
             initialValue: _paymentMode,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../accounts/widgets/account_dropdown.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
@@ -34,6 +35,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
   late DateTime _investmentDate;
   int _sipDate = 1;
   bool _isSaving = false;
+  int? _accountId;
 
   bool get isEditMode => widget.investment != null;
 
@@ -51,6 +53,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
       _currentValueController.text = investment.currentValue.toString();
       _notesController.text = investment.notes ?? '';
       _investmentType = investment.investmentType;
+      _accountId = investment.accountId;
       _isSip = investment.isSip;
       _sipAmountController.text = investment.sipAmount?.toString() ?? '';
       _sipDate = investment.sipDate ?? 1;
@@ -113,6 +116,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
         investmentDate: _investmentDate.toIso8601String(),
         isSip: _isSip,
         createdAt: old?.createdAt ?? AppDateUtils.getCurrentTimestamp(),
+        accountId: _accountId,
         notes: _notesController.text.trim().isEmpty
             ? null
             : _notesController.text.trim(),
@@ -295,6 +299,10 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                           validator: _validateAmount,
                         ),
                         const SizedBox(height: 12),
+                        AccountDropdown(
+                          value: _accountId,
+                          onChanged: (v) => _accountId = v,
+                        ),
                         TextFormField(
                           controller: _currentValueController,
                           keyboardType: const TextInputType.numberWithOptions(

@@ -15,6 +15,7 @@ class Migrations {
     await _createBudgetTable(db);
     await _createAppMetadataTable(db);
     await _createRecurringTables(db);
+    await _applyAccountsSchema(db);
   }
 
   static Future<void> onUpgrade(
@@ -45,6 +46,59 @@ class Migrations {
     }
     if (oldVersion < 12) {
       await _createRecurringTables(db);
+    }
+    if (oldVersion < 13) {
+      await _applyAccountsSchema(db);
+    }
+  }
+
+  /// Accounts / wallets. Safe to run more than once.
+  /// - `accounts` and `account_transfers` tables
+  /// - `account_id` on expenses, incomes, loan_payments and investments
+  ///   (NULL = belongs to the default account, so old data keeps working)
+  /// - one default "Cash" account
+  static Future<void> _applyAccountsSchema(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ${DatabaseConstants.tableAccounts} (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        account_type TEXT NOT NULL,
+        opening_balance REAL NOT NULL DEFAULT 0,
+        is_default INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ${DatabaseConstants.tableAccountTransfers} (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        from_account_id INTEGER NOT NULL,
+        to_account_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        date TEXT NOT NULL,
+        notes TEXT,
+        created_at TEXT NOT NULL
+      )
+    ''');
+
+    for (final table in ['expenses', 'incomes', 'loan_payments', 'investments']) {
+      final info = await db.rawQuery('PRAGMA table_info($table)');
+      final hasColumn = info.any((c) => c['name'] == 'account_id');
+      if (!hasColumn && info.isNotEmpty) {
+        await db.execute('ALTER TABLE $table ADD COLUMN account_id INTEGER');
+      }
+    }
+
+    final existing = await db.rawQuery(
+      'SELECT COUNT(*) AS total FROM ${DatabaseConstants.tableAccounts}',
+    );
+    if (((existing.first['total'] as num?) ?? 0) == 0) {
+      await db.insert(DatabaseConstants.tableAccounts, {
+        'name': 'Cash',
+        'account_type': 'CASH',
+        'opening_balance': 0,
+        'is_default': 1,
+        'created_at': DateTime.now().toIso8601String(),
+      });
     }
   }
 

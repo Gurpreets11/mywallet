@@ -1,6 +1,6 @@
 class DatabaseConstants {
   static const String databaseName = 'my_wallet.db';
-  static const int databaseVersion = 12;
+  static const int databaseVersion = 13;
 
   static const String colId = 'id';
   static const String tableExpenses = 'expenses';
@@ -43,6 +43,9 @@ class DatabaseConstants {
   static const String tableSubcategories = 'subcategories';
   static const String colCategoryId = 'category_id';
   static const String colSubcategoryName = 'subcategory_name';
+
+  static const String tableAccounts = 'accounts';
+  static const String tableAccountTransfers = 'account_transfers';
 
   static const String tableRecurringTransactions = 'recurring_transactions';
   static const String tableRecurringOccurrences = 'recurring_occurrences';

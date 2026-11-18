@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/repositories/master_repository.dart';
+import '../../accounts/models/account_model.dart';
+import '../../accounts/repositories/account_repository.dart';
 import '../../expenses/repositories/expense_repository.dart';
 import '../../income/repositories/income_repository.dart';
 import '../../investments/models/investment_model.dart';
@@ -80,6 +82,26 @@ class DashboardProvider extends ChangeNotifier {
 
   List<DashboardTransactionModel> recentTransactions = [];
 
+  // ---- Accounts ----
+  final AccountRepository _accountRepository = AccountRepository();
+
+  List<AccountBalance> accountBalances = [];
+  List<AccountTransferModel> accountTransfers = [];
+
+  /// Sum of every account's balance.
+  double get totalAccountBalance =>
+      accountBalances.fold(0.0, (sum, a) => sum + a.balance);
+
+  Future<void> loadAccounts() async {
+    try {
+      accountBalances = await _accountRepository.getAccountBalances();
+      accountTransfers = await _accountRepository.getTransfers();
+    } catch (e) {
+      debugPrint('Loading accounts failed: $e');
+    }
+    notifyListeners();
+  }
+
   Future<void> loadDashboardData() async {
     // Later:
     // Load from repositories
@@ -118,7 +140,7 @@ class DashboardProvider extends ChangeNotifier {
 
     await loadRecentTransactions();
 
-    notifyListeners();
+    await loadAccounts();
   }
 
   Future<void> loadRecentTransactions() async {

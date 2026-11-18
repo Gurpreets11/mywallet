@@ -77,6 +77,8 @@ class LoanProvider extends ChangeNotifier {
     required String paymentMode,
 
     String? remarks,
+
+    int? accountId,
   }) async {
     await _repository.payEmi(
       loan: loan,
@@ -86,6 +88,8 @@ class LoanProvider extends ChangeNotifier {
       paymentMode: paymentMode,
 
       remarks: remarks,
+
+      accountId: accountId,
     );
 
     await loadLoans();

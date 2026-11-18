@@ -33,6 +33,9 @@ class InvestmentModel {
 
   final String createdAt;
 
+  /// Account the money was paid from (null = default account).
+  final int? accountId;
+
   InvestmentModel({
     this.id,
     required this.investmentType,
@@ -51,6 +54,7 @@ class InvestmentModel {
     this.sipDate,
     this.notes,
     required this.createdAt,
+    this.accountId,
   });
 
   Map<String, dynamic> toMap() {
@@ -88,6 +92,7 @@ class InvestmentModel {
       'notes': notes,
 
       'created_at': createdAt,
+      'account_id': accountId,
     };
   }
 
@@ -126,6 +131,8 @@ class InvestmentModel {
       notes: map['notes'],
 
       createdAt: map['created_at'],
+
+      accountId: map['account_id'],
     );
   }
 }

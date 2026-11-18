@@ -55,12 +55,16 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
       showDragHandle: true,
       builder: (_) => PayEmiBottomSheet(
         initialAmount: loan.emiAmount,
+        accountLabel: loan.loanType.toUpperCase() == 'GIVEN'
+            ? 'Received in account'
+            : 'Paid from account',
         onSubmit:
             ({
               required double paymentAmount,
               required String paymentMode,
               String? remarks,
-            }) => _recordEmi(loan, paymentAmount, paymentMode, remarks),
+              int? accountId,
+            }) => _recordEmi(loan, paymentAmount, paymentMode, remarks, accountId),
       ),
     );
   }
@@ -70,6 +74,7 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
     double amount,
     String mode,
     String? remarks,
+    int? accountId,
   ) async {
     final loanProvider = context.read<LoanProvider>();
     final payments = context.read<LoanPaymentProvider>();
@@ -79,6 +84,7 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
         loan: loan,
         paymentAmount: amount,
         paymentMode: mode,
+        accountId: accountId,
         remarks: (remarks == null || remarks.trim().isEmpty)
             ? null
             : remarks.trim(),

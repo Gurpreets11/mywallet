@@ -23,6 +23,9 @@ class IncomeModel {
 
   final String? subcategoryName;
 
+  /// Account this belongs to (null = default account).
+  final int? accountId;
+
   IncomeModel({
     this.id,
     required this.amount,
@@ -36,6 +39,7 @@ class IncomeModel {
     required this.createdAt,
     this.categoryName,
     this.subcategoryName,
+    this.accountId,
   });
 
   Map<String, dynamic> toMap() {
@@ -50,6 +54,7 @@ class IncomeModel {
       'is_recurring': isRecurring ? 1 : 0,
       'recurring_type': recurringType,
       'created_at': createdAt,
+      'account_id': accountId,
     };
   }
 
@@ -67,6 +72,7 @@ class IncomeModel {
       createdAt: map['created_at'],
       categoryName: map['category_name'],
       subcategoryName: map['subcategory_name'],
+      accountId: map['account_id'],
     );
   }
 }

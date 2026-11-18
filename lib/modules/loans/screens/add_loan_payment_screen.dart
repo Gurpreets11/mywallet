@@ -5,6 +5,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/common_button.dart';
 import '../../../core/widgets/common_text_field.dart';
+import '../../accounts/widgets/account_dropdown.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/loan_model.dart';
 import '../models/loan_payment_model.dart';
@@ -31,6 +32,7 @@ class _AddLoanPaymentScreenState extends State<AddLoanPaymentScreen> {
   DateTime _paymentDate = DateTime.now();
 
   String _paymentMode = 'Bank';
+  int? _accountId;
 
   final LoanRepository _loanRepository = LoanRepository();
 
@@ -49,6 +51,7 @@ class _AddLoanPaymentScreenState extends State<AddLoanPaymentScreen> {
       paymentAmount: amount,
       paymentDate: _paymentDate.toIso8601String(),
       paymentMode: _paymentMode,
+      accountId: _accountId,
       remarks: _remarksController.text,
       createdAt: AppDateUtils.getCurrentTimestamp(),
     );
@@ -102,6 +105,14 @@ class _AddLoanPaymentScreenState extends State<AddLoanPaymentScreen> {
               ),
 
               const SizedBox(height: 16),
+
+              AccountDropdown(
+                label: widget.loan.loanType.toUpperCase() == 'GIVEN'
+                    ? 'Received in account'
+                    : 'Paid from account',
+                value: _accountId,
+                onChanged: (v) => _accountId = v,
+              ),
 
               DropdownButtonFormField<String>(
                 initialValue: _paymentMode,

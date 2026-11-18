@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../accounts/widgets/account_dropdown.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
@@ -23,6 +24,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _notesController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   String _paymentMode = 'Cash';
+  int? _accountId;
   int? _selectedCategoryId;
   int? _selectedSubcategoryId;
   String? _selectedCategoryName;
@@ -39,6 +41,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _amountController.text = expense.amount.toString();
       _notesController.text = expense.notes ?? '';
       _paymentMode = expense.paymentMode;
+      _accountId = expense.accountId;
       _selectedDate = DateTime.tryParse(expense.date) ?? DateTime.now();
       _selectedCategoryId = expense.categoryId;
       _selectedSubcategoryId = expense.subcategoryId;
@@ -91,6 +94,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         subcategoryName: _selectedSubCategoryName,
         date: _selectedDate.toIso8601String(),
         paymentMode: _paymentMode,
+        accountId: _accountId,
         notes: _notesController.text.trim(),
         createdAt: old?.createdAt ?? AppDateUtils.getCurrentTimestamp(),
       );
@@ -296,6 +300,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                     ),
                               ),
                               const SizedBox(height: 12),
+                              AccountDropdown(
+                                value: _accountId,
+                                onChanged: (v) => _accountId = v,
+                              ),
                               DropdownButtonFormField<String>(
                                 initialValue: _paymentMode,
                                 isExpanded: true,

@@ -92,10 +92,11 @@ class TransactionFeedRepository {
           title: _text(r['investment_name']).isEmpty
               ? 'Investment'
               : _text(r['investment_name']),
-          subtitle: _join([
-            r['investment_type'],
-            r['investment_platform'],
-          ], 'Investment', separator: ' • '),
+          subtitle: _join(
+            [r['investment_type'], r['investment_platform']],
+            'Investment',
+            separator: ' • ',
+          ),
           amount: _amount(r['invested_amount']),
           date: _text(r['investment_date']),
           isExpense: true,
@@ -106,9 +107,7 @@ class TransactionFeedRepository {
 
     // Newest first. Rows whose date cannot be read go to the end.
     final epoch = DateTime.fromMillisecondsSinceEpoch(0);
-    items.sort(
-      (a, b) => (b.dateTime ?? epoch).compareTo(a.dateTime ?? epoch),
-    );
+    items.sort((a, b) => (b.dateTime ?? epoch).compareTo(a.dateTime ?? epoch));
 
     if (limit != null && items.length > limit) {
       return items.sublist(0, limit);

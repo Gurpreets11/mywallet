@@ -9,7 +9,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/greeting_utils.dart';
 import '../../../core/widgets/empty_view.dart';
 import '../providers/dashboard_provider.dart';
+import '../../accounts/screens/accounts_screen.dart';
 import 'all_transactions_screen.dart';
+import '../widgets/accounts_summary_card.dart';
 import '../widgets/analytics_card.dart';
 import '../widgets/asset_allocation_card.dart';
 import '../widgets/balance_card.dart';
@@ -129,6 +131,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: Icons.arrow_upward,
                     ),
                   ],
+                ),
+
+                VerticalSpacing(height: 14),
+
+                SectionTitle(
+                  title: 'Accounts',
+                  onViewAll: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AccountsScreen()),
+                  ),
+                ),
+
+                VerticalSpacing(height: 10),
+
+                AccountsSummaryCard(
+                  accounts: provider.accountBalances,
+                  total: provider.totalAccountBalance,
                 ),
 
                 VerticalSpacing(height: 14),

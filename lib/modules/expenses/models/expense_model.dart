@@ -11,6 +11,9 @@ class ExpenseModel {
   final String? notes;
   final String createdAt;
 
+  /// Account this belongs to (null = default account).
+  final int? accountId;
+
   ExpenseModel({
     this.id,
     required this.amount,
@@ -22,6 +25,7 @@ class ExpenseModel {
     required this.paymentMode,
     this.notes,
     required this.createdAt,
+    this.accountId,
   });
 
   Map<String, dynamic> toMap() {
@@ -36,6 +40,7 @@ class ExpenseModel {
       'payment_mode': paymentMode,
       'notes': notes,
       'created_at': createdAt,
+      'account_id': accountId,
     };
   }
 
@@ -51,6 +56,7 @@ class ExpenseModel {
       paymentMode: map['payment_mode'],
       notes: map['notes'],
       createdAt: map['created_at'],
+      accountId: map['account_id'],
     );
   }
 }
