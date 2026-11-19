@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../expenses/widgets/quick_add_expense_sheet.dart';
+import '../../networth/screens/net_worth_screen.dart';
+import '../widgets/month_insights_card.dart';
+import '../widgets/net_worth_card.dart';
 import 'package:mywallet/core/widgets/vertical_spacing.dart';
 import 'package:mywallet/modules/expenses/screens/add_expense_screen.dart';
 import 'package:mywallet/modules/income/screens/add_income_screen.dart';
@@ -52,6 +56,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final provider = context.watch<DashboardProvider>();
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => QuickAddExpenseSheet.show(context),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Quick add'),
+      ),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
@@ -103,26 +112,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.refresh),
-                          tooltip: 'Refresh',
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      tooltip: 'Refresh',
 
-                          onPressed: () async {
-                            await context
-                                .read<DashboardProvider>()
-                                .loadDashboardData();
+                      onPressed: () async {
+                        await context
+                            .read<DashboardProvider>()
+                            .loadDashboardData();
 
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Dashboard refreshed'),
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Dashboard refreshed'),
 
-                                  duration: Duration(seconds: 1),
-                                ),
-                              );
-                            }
-                          },
-                        ),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        }
+                      },
+                    ),
                       ],
                     ),
                   ],
@@ -150,6 +159,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: Icons.arrow_upward,
                     ),
                   ],
+                ),
+
+                VerticalSpacing(height: 14),
+
+                const SectionTitle(title: 'This month'),
+
+                VerticalSpacing(height: 10),
+
+                MonthInsightsCard(insights: provider.insights),
+
+                VerticalSpacing(height: 14),
+
+                SectionTitle(
+                  title: 'Net Worth',
+                  onViewAll: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const NetWorthScreen()),
+                  ),
+                ),
+
+                VerticalSpacing(height: 10),
+
+                NetWorthCard(
+                  result: provider.netWorth,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const NetWorthScreen()),
+                  ),
                 ),
 
                 VerticalSpacing(height: 14),
@@ -322,6 +359,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     );
                   },
                 ),
+
+                // Room so the Quick add button never covers the last card.
+                VerticalSpacing(height: 80),
               ],
             ),
           ),
