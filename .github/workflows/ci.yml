@@ -65,12 +65,12 @@ jobs:
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Verify Java and Gradle
-        run: |
-          java -version
-          echo "JAVA_HOME=$JAVA_HOME"
-          cd android
-          ./gradlew --version
+      #- name: Verify Java and Gradle
+      #  run: |
+      #    java -version
+      #    echo "JAVA_HOME=$JAVA_HOME"
+      #    cd android
+      #    ./gradlew --version
 
       - name: Build release APK
         run: flutter build apk --release
