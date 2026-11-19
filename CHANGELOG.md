@@ -5,6 +5,66 @@ All notable changes to **My Wallet** will be documented in this file.
 The format is based on [Keep a ](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# myWallet Phase 16 - Net Worth, Monthly Insights & Quick Add
+
+## Features Included:
+- **Net Worth** card on the home screen and a **Net worth** screen (home -> Net Worth -> View All). Net worth = account balances + investment values + money lent (loans you gave) - money owed (loans you took). The screen shows the headline figure with the change since last month, a 12-month trend chart, and an assets / liabilities breakdown.
+- **This month** card on the home screen: expenses and income so far this month compared with the same days of last month (with % change, green when spending falls or income rises), last month's total, and the **top 3 spending categories** with their share of spending and change versus last month.
+- **Quick add** button on the home screen: bottom sheet with amount, the categories you use most as chips (last 90 days), an optional note, and Save. Date is today and the payment mode is the one used last; "More options" opens the full Add Expense form. Budget alerts still run after a quick add.
+
+## Behaviour notes:
+- Earlier months of the net worth trend are estimates worked out backwards from today: cash = today's cash minus money in/out since then, investments use the latest recorded value before that month end (invested amount if none), loans add back payments made since. The last point always equals today's net worth.
+- Savings goals are not added to net worth (that money is already inside accounts).
+- Closed loans count as zero today; the home cards refresh whenever dashboard data reloads.
+
+## Database:
+- No schema change (version stays 15).
+
+## Files changed/new files only:
+- lib/modules/networth/ (new: models, repository, screen)
+- lib/modules/dashboard/models/month_insights.dart, repositories/month_insights_repository.dart (new)
+- lib/modules/dashboard/widgets/net_worth_card.dart, month_insights_card.dart (new)
+- lib/modules/dashboard/providers/dashboard_provider.dart, screens/dashboard_screen.dart
+- lib/modules/expenses/widgets/quick_add_expense_sheet.dart (new)
+
+
+# myWallet Phase 15 - Settings Completion & Investment Valuation History
+
+## Features Included:
+- **Currency setting** (Settings -> Preferences): INR, USD, EUR, GBP, AED, SAR, SGD, AUD, CAD, JPY. All amounts, amount input prefixes and notification text now follow the selected currency (previously a hardcoded rupee symbol). Existing stored amounts are not converted - only the symbol and number grouping change.
+- **Import from CSV** (Settings -> Export & import): reads the same layout the app exports (Date, Type, Category, Subcategory, Amount, Payment mode, Notes). Only Date and Amount are required; a file without a Type column is imported as expenses or income by choice. Missing categories and subcategories are created, rows already in the app are skipped (so re-importing is safe), unreadable rows are listed and skipped, and a safety copy is saved first.
+- **Automatic backup**: Off / Daily / Weekly (default Weekly). A copy is saved in app storage when the app opens and one is due; the newest 7 are kept. "Back up now" is also available.
+- **Backup history** screen: lists automatic backups and the safety copies taken before restore, reset and import, with Restore and Delete.
+- **About screen**: app version, database version, privacy statement and support link.
+- **Investment valuation history** (investment card menu -> Value history, or the button on the investment details screen): chart of value against the invested amount, highest/lowest value, time held, annualised return, and a list of recorded values with change per entry. "Add value" records a valuation for any past date; the investment's current value always follows the latest dated entry.
+- Editing an investment's current value on the edit form is recorded as a new valuation; a new investment starts its history with an opening value.
+
+## Behaviour notes:
+- Deleting an investment also deletes its valuation history.
+- The last remaining valuation of an investment cannot be deleted.
+- Restoring a backup made before this version brings back investments without history; the chart fills in as new values are recorded.
+- Automatic backups stay on the device (removed if the app is uninstalled); "Backup Data" is still the way to keep a copy elsewhere. The last-automatic-backup time is device-only and is not part of backup files.
+
+## Database:
+- databaseVersion changes from 14 to 15 (`_applyV15Schema`, idempotent): new table `investment_valuations` and an index on `(investment_id, date)`. Existing investments get one opening entry with their current value.
+- New preference keys: `pref_currency`, `pref_auto_backup`. Device-only key: `last_auto_backup_at`.
+
+## Files changed/new files only:
+- lib/core/utils/currency_utils.dart, lib/core/services/settings/app_preferences.dart, lib/core/constants/app_constants.dart
+- lib/core/services/import/csv_import_service.dart (new)
+- lib/core/services/backup/auto_backup_service.dart (new), lib/core/services/backup/backup_service.dart
+- lib/core/database/database_constants.dart, lib/core/database/migrations.dart
+- lib/modules/settings/setting_screen.dart, screens/about_screen.dart (new), screens/backup_history_screen.dart (new)
+- lib/modules/investments/ (model, repository, provider, valuation screen, detail screen, list screen, card)
+- Currency symbol in the amount fields of the expense, income, loan EMI, budget, recurring, account, transfer, goal and investment forms
+- lib/main.dart
+
+## Integration:
+1. Copy the files into the project, preserving the folder structure.
+2. Run: `flutter pub get`, `dart format lib`, `flutter analyze`.
+3. Keep `AppConstants.appVersion` in sync with `version:` in `pubspec.yaml` when releasing.
+
+
 # myWallet Phase 14 - Categories, Undo, Duplicate & Date Presets
 
 ## Features Included:
@@ -312,22 +372,22 @@ No database schema or migration changes are included.
 ## Changed files only
 
 - `lib/modules/investments/screens/investment_list_screen.dart`
-  - Responsive constrained content layout for mobile/tablet/web.
-  - Portfolio overview and investment allocation by current value.
-  - Search, type/SIP filtering and sorting controls.
-  - Responsive list/grid presentation and pull-to-refresh.
+    - Responsive constrained content layout for mobile/tablet/web.
+    - Portfolio overview and investment allocation by current value.
+    - Search, type/SIP filtering and sorting controls.
+    - Responsive list/grid presentation and pull-to-refresh.
 - `lib/modules/investments/widgets/investment_summary_card.dart`
-  - Clear portfolio value, invested amount, profit/loss and ROI summary.
+    - Clear portfolio value, invested amount, profit/loss and ROI summary.
 - `lib/modules/investments/widgets/investment_card.dart`
-  - Cleaner investment cards with current value, invested value, gain/loss, ROI, SIP marker and contextual actions.
+    - Cleaner investment cards with current value, invested value, gain/loss, ROI, SIP marker and contextual actions.
 - `lib/modules/investments/screens/investment_detail_screen.dart`
-  - Expanded details including available quantity, prices, maturity, interest and SIP fields.
+    - Expanded details including available quantity, prices, maturity, interest and SIP fields.
 - `lib/modules/investments/screens/add_investment_screen.dart`
-  - Preserve original investment date and created timestamp during edits.
-  - Save notes and preserve existing optional model fields when editing.
-  - Dispose controllers and validate required name/amount fields.
+    - Preserve original investment date and created timestamp during edits.
+    - Save notes and preserve existing optional model fields when editing.
+    - Dispose controllers and validate required name/amount fields.
 - `lib/modules/investments/providers/investment_provider.dart`
-  - Search notes and make latest sorting safe when an ID is null.
+    - Search notes and make latest sorting safe when an ID is null.
 
 ## Integration
 
@@ -413,9 +473,9 @@ The package is based on the Phase 1 fixed `lib` archive. A Flutter SDK and compl
 - Added shared mobile/tablet/desktop breakpoints.
 - Added a reusable max-width responsive content wrapper.
 - Replaced the always-bottom navigation with adaptive navigation:
-  - Mobile: bottom NavigationBar.
-  - Tablet: NavigationRail with labels (starting at 600 logical pixels).
-  - Desktop: extended NavigationRail with myWallet branding.
+    - Mobile: bottom NavigationBar.
+    - Tablet: NavigationRail with labels (starting at 600 logical pixels).
+    - Desktop: extended NavigationRail with myWallet branding.
 - Updated the More screen grid to adapt to available width and use clearer menu cards.
 
 ## Files added
@@ -442,10 +502,18 @@ The supplied archive contained only the `lib/` directory and did not include `pu
 ## [Unreleased]
 
 ### Added
-- Nothing yet.
+- Net Worth card and screen with a 12-month trend.
+- Month-over-month comparison and top-spending card on the home screen.
+- Quick add expense button on the home screen.
+- Currency setting (INR, USD, EUR, GBP, AED, SAR, SGD, AUD, CAD, JPY).
+- Import from CSV (same layout as the export, duplicates skipped).
+- Automatic backup (Off / Daily / Weekly) with a backup history and restore screen.
+- About screen.
+- Investment valuation history with chart, performance figures and recorded values.
 
 ### Changed
-- Nothing yet.
+- Database version 15 (`investment_valuations`).
+- Amounts and amount fields use the selected currency instead of a fixed rupee symbol.
 
 ### Fixed
 - Nothing yet.

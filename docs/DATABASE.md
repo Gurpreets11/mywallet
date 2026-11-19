@@ -5,7 +5,7 @@ My Wallet stores all data locally on-device using SQLite via the [`sqflite`](htt
 > **Note:** This document describes the schema as implemented in `core/database/migrations.dart`. If you change table/column definitions there, update this file in the same PR so they stay in sync (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 - Database file: `my_wallet.db`
-- Current schema version: **14**
+- Current schema version: **15**
 
 ## Overview
 
@@ -26,6 +26,7 @@ My Wallet stores all data locally on-device using SQLite via the [`sqflite`](htt
 | `account_transfers`          | Transfers between accounts                                     |
 | `savings_goals`              | Savings goals                                                  |
 | `savings_goal_contributions` | Money added to / withdrawn from a goal                         |
+| `investment_valuations`      | Recorded value of an investment on a date (value history)      |
 | `app_metadata`               | Key/value store for app preferences (`pref_*` keys) and metadata |
 
 ## Entity Relationship Overview
@@ -37,6 +38,7 @@ subcategories 1───* expenses / incomes
 loans         1───* loan_payments
 recurring_transactions 1───* recurring_occurrences
 savings_goals 1───* savings_goal_contributions
+investments   1───* investment_valuations
 accounts      1───* expenses / incomes / loan_payments / investments / recurring_transactions   (via account_id)
 accounts      1───* account_transfers                                                           (from / to)
 ```
@@ -262,6 +264,19 @@ A default "Cash" account is created if none exists. Balance = opening balance + 
 
 Saved amount for a goal = sum of its contributions. Goals do not affect income, expenses or account balances. Deleting a goal removes its contributions (Undo restores both).
 
+### `investment_valuations`
+
+| Column          | Type    | Notes                                                  |
+| --------------- | ------- | ------------------------------------------------------ |
+| `id`            | INTEGER | Primary key, autoincrement                             |
+| `investment_id` | INTEGER | → `investments.id`                                     |
+| `value`         | REAL    | Value of the investment on `date`                      |
+| `date`          | TEXT    | ISO-8601 date                                          |
+| `notes`         | TEXT    | Optional                                               |
+| `created_at`    | TEXT    | ISO-8601 timestamp                                     |
+
+Index: `idx_investment_valuations_investment (investment_id, date)`. `investments.current_value` always equals the value of the latest dated entry. A new investment gets an "Opening value" entry; editing the current value on the edit form adds an entry dated today. Deleting an investment deletes its entries.
+
 ### `app_metadata`
 
 | Column       | Type | Notes                                                       |
@@ -269,7 +284,7 @@ Saved amount for a goal = sum of its contributions. Goals do not affect income, 
 | `meta_key`   | TEXT | Primary key                                                 |
 | `meta_value` | TEXT | Value stored as text                                        |
 
-Preference keys are prefixed `pref_` (e.g. `pref_theme_mode`, `pref_font_size`, `pref_date_format`, `pref_daily_reminder_enabled`, `pref_daily_reminder_time`, `pref_emi_reminders_enabled`, `pref_sip_reminders_enabled`, `pref_budget_alerts_enabled`).
+Preference keys are prefixed `pref_` (e.g. `pref_theme_mode`, `pref_font_size`, `pref_date_format`, `pref_daily_reminder_enabled`, `pref_daily_reminder_time`, `pref_emi_reminders_enabled`, `pref_sip_reminders_enabled`, `pref_budget_alerts_enabled`, `pref_currency`, `pref_auto_backup`).
 
 > Sensitive values such as the PIN are **not** stored here — see [SECURITY.md](SECURITY.md).
 
@@ -279,6 +294,7 @@ Preference keys are prefixed `pref_` (e.g. `pref_theme_mode`, `pref_font_size`, 
 | ------- | ------ |
 | 11 → 12 | Recurring transactions (`recurring_transactions`, `recurring_occurrences`) |
 | 12 → 13 | Accounts (`accounts`, `account_transfers`, `account_id` on expenses, incomes, loan_payments, investments, default Cash account) |
+| 14 → 15 | Investment valuation history (`investment_valuations`, one opening entry per existing investment) |
 | 13 → 14 | Savings goals (`savings_goals`, `savings_goal_contributions`), `budgets.last_alert_level`, `recurring_transactions.account_id` |
 
 Manage Categories, undo, duplicate and date presets did **not** change the schema.

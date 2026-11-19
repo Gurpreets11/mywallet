@@ -31,6 +31,8 @@ For released changes, see [CHANGELOG.md](CHANGELOG.md). To propose something new
 | 12    | Accounts and transfers          | ✅ |
 | 13    | Dark mode, savings goals, budget alerts, recurring upgrades | ✅ |
 | 14    | Manage categories, undo, duplicate, date presets | ✅ |
+| 15    | Currency, CSV import, automatic backup, About, investment valuation history | ✅ |
+| 16    | Net worth, monthly insights, quick add | ✅ |
 
 ---
 
@@ -51,6 +53,10 @@ For released changes, see [CHANGELOG.md](CHANGELOG.md). To propose something new
 - ✅ Accounts / wallets with balances and transfers
 - ✅ Savings goals
 - ✅ Manage categories and subcategories
+- ✅ Currency setting, CSV import, automatic backup with history
+- ✅ Investment valuation history
+- ✅ Net worth dashboard with 12-month trend
+- ✅ Month-over-month comparison, top spending and quick-add expense
 - 📋 Edit/duplicate for recurring schedules and account transfers
 - 💡 Undo for investment and budget deletes
 - 💡 Category icons/colors in Manage Categories
