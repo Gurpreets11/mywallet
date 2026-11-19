@@ -216,7 +216,9 @@ class MainNavigationScreen extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 19,
                                         fontWeight: FontWeight.w800,
-                                        color: Theme.of(context).colorScheme.onSurface,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
                                       ),
                                     ),
                                   ],

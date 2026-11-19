@@ -487,7 +487,9 @@ class _EmptyChart extends StatelessWidget {
       child: Center(
         child: Text(
           'No transactions found for this year',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     ),

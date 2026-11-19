@@ -79,7 +79,10 @@ class _GoalHistorySheetState extends State<_GoalHistorySheet> {
             Padding(
               padding: const EdgeInsets.all(32),
               child: Center(
-                child: Text('Nothing added yet', style: TextStyle(color: muted)),
+                child: Text(
+                  'Nothing added yet',
+                  style: TextStyle(color: muted),
+                ),
               ),
             )
           else

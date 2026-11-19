@@ -221,11 +221,7 @@ class CategoryRepository {
     });
   }
 
-  Future<void> renameSubcategory(
-    int id,
-    int categoryId,
-    String rawName,
-  ) async {
+  Future<void> renameSubcategory(int id, int categoryId, String rawName) async {
     final Database db = await AppDatabase.database;
     final name = _cleanName(rawName, 'subcategory');
 

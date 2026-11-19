@@ -258,12 +258,12 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                                       _investmentType,
                                   ]
                                   .map(
-                                (type) => DropdownMenuItem(
-                                  value: type,
-                                  child: Text(type),
-                                ),
-                              )
-                              .toList(),
+                                    (type) => DropdownMenuItem(
+                                      value: type,
+                                      child: Text(type),
+                                    ),
+                                  )
+                                  .toList(),
                           onChanged: (value) {
                             if (value != null) {
                               setState(() => _investmentType = value);

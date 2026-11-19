@@ -129,9 +129,8 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
                 labelText: 'Account name',
                 hintText: 'e.g. HDFC Savings',
               ),
-              validator: (v) => (v == null || v.trim().isEmpty)
-                  ? 'Enter a name'
-                  : null,
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Enter a name' : null,
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<AccountType>(
@@ -172,7 +171,9 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
               validator: (v) {
                 final t = (v ?? '').trim();
                 if (t.isEmpty) return null; // empty = 0
-                return double.tryParse(t) == null ? 'Enter a valid amount' : null;
+                return double.tryParse(t) == null
+                    ? 'Enter a valid amount'
+                    : null;
               },
             ),
             const SizedBox(height: 16),

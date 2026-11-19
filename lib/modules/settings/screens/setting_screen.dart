@@ -172,7 +172,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Text(
                 'Copies are saved automatically before every restore or '
                 'reset. Pick the state you want to go back to.',
-                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
             for (final f in files)
@@ -521,7 +524,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ListTile(
                       leading: const Icon(Icons.category_outlined),
                       title: const Text('Manage categories'),
-                      subtitle: const Text('Add or edit expense and income categories'),
+                      subtitle: const Text(
+                        'Add or edit expense and income categories',
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Navigator.push(
                         context,
@@ -597,7 +602,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             children: [
                               Icon(
                                 Icons.format_size_rounded,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                               SizedBox(width: 16),
                               Text('Text size', style: TextStyle(fontSize: 16)),
@@ -629,7 +636,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               height: 1.4,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],

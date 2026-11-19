@@ -58,10 +58,7 @@ class RecurringRepository {
 
     await db.update(
       _table,
-      {
-        'next_due_date': _dateOnly(next),
-        if (finished) 'status': 'COMPLETED',
-      },
+      {'next_due_date': _dateOnly(next), if (finished) 'status': 'COMPLETED'},
       where: 'id = ?',
       whereArgs: [id],
     );

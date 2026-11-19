@@ -28,7 +28,8 @@ class DashboardTransactionModel {
     TransactionKind? kind,
     this.extra = '',
   }) : kind =
-           kind ?? (isExpense ? TransactionKind.expense : TransactionKind.income);
+           kind ??
+           (isExpense ? TransactionKind.expense : TransactionKind.income);
 
   /// Parsed [date]; null if the stored text is not a valid date.
   DateTime? get dateTime => DateTime.tryParse(date);

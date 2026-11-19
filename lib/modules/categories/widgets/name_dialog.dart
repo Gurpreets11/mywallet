@@ -62,7 +62,9 @@ class _NameDialogState extends State<_NameDialog> {
       return;
     }
     if (text.length > CategoryRepository.maxNameLength) {
-      setState(() => _error = 'Max ${CategoryRepository.maxNameLength} letters');
+      setState(
+        () => _error = 'Max ${CategoryRepository.maxNameLength} letters',
+      );
       return;
     }
     Navigator.pop(context, text);
@@ -81,10 +83,7 @@ class _NameDialogState extends State<_NameDialog> {
         onChanged: (_) {
           if (_error != null) setState(() => _error = null);
         },
-        decoration: InputDecoration(
-          hintText: widget.hint,
-          errorText: _error,
-        ),
+        decoration: InputDecoration(hintText: widget.hint, errorText: _error),
       ),
       actions: [
         TextButton(

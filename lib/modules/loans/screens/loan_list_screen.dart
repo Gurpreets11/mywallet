@@ -37,8 +37,7 @@ class _LoanListScreenState extends State<LoanListScreen> {
     final confirmed = await confirmDelete(
       context,
       title: 'Delete loan?',
-      message:
-          '"${loan.personName}" and its payment history will be deleted.',
+      message: '"${loan.personName}" and its payment history will be deleted.',
     );
     if (confirmed && loan.id != null) {
       final payments = await provider.deleteLoanWithPayments(loan.id!);

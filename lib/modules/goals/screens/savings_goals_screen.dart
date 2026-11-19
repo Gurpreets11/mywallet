@@ -112,8 +112,10 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
                       progress: goals[i],
                       withdraw: true,
                     ),
-                    onHistory: () => showGoalHistorySheet(context, goals[i].goal),
-                    onEdit: () => showGoalFormSheet(context, goal: goals[i].goal),
+                    onHistory: () =>
+                        showGoalHistorySheet(context, goals[i].goal),
+                    onEdit: () =>
+                        showGoalFormSheet(context, goal: goals[i].goal),
                     onDelete: () => _delete(goals[i]),
                   ),
                 ),
@@ -175,7 +177,9 @@ class _GoalCard extends StatelessWidget {
             Row(
               children: [
                 Icon(
-                  p.isReached ? Icons.emoji_events_outlined : Icons.flag_outlined,
+                  p.isReached
+                      ? Icons.emoji_events_outlined
+                      : Icons.flag_outlined,
                   size: 20,
                   color: barColor,
                 ),
@@ -202,7 +206,10 @@ class _GoalCard extends StatelessWidget {
                         value: 'withdraw',
                         child: Text('Take money out'),
                       ),
-                    const PopupMenuItem(value: 'history', child: Text('History')),
+                    const PopupMenuItem(
+                      value: 'history',
+                      child: Text('History'),
+                    ),
                     const PopupMenuItem(value: 'edit', child: Text('Edit')),
                     const PopupMenuItem(value: 'delete', child: Text('Delete')),
                   ],
@@ -226,7 +233,9 @@ class _GoalCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         'of ${CurrencyUtils.formatAmount(p.goal.targetAmount)}',
-                        style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: muted,
+                        ),
                       ),
                       const Spacer(),
                       Text(

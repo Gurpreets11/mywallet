@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/services/export/csv_export_service.dart';
-import '../../../core/theme/app_colors.dart';
 
 /// The choices made in the "Export to CSV" sheet.
 class ExportOptions {

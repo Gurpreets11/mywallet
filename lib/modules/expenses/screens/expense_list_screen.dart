@@ -36,7 +36,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       provider.loadExpenses();
       provider.loadMonthlySummary();
-      context.read<MasterProvider>().loadExpenseCategories(includeInactive: true);
+      context.read<MasterProvider>().loadExpenseCategories(
+        includeInactive: true,
+      );
     });
   }
 

@@ -103,26 +103,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                         ),
-                    IconButton(
-                      icon: const Icon(Icons.refresh),
-                      tooltip: 'Refresh',
+                        IconButton(
+                          icon: const Icon(Icons.refresh),
+                          tooltip: 'Refresh',
 
-                      onPressed: () async {
-                        await context
-                            .read<DashboardProvider>()
-                            .loadDashboardData();
+                          onPressed: () async {
+                            await context
+                                .read<DashboardProvider>()
+                                .loadDashboardData();
 
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Dashboard refreshed'),
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Dashboard refreshed'),
 
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                        }
-                      },
-                    ),
+                                  duration: Duration(seconds: 1),
+                                ),
+                              );
+                            }
+                          },
+                        ),
                       ],
                     ),
                   ],

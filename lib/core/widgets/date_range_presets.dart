@@ -30,7 +30,10 @@ class DateRangePresets extends StatelessWidget {
       ),
       (
         'Last 7 days',
-        DateTimeRange(start: today.subtract(const Duration(days: 6)), end: today),
+        DateTimeRange(
+          start: today.subtract(const Duration(days: 6)),
+          end: today,
+        ),
       ),
       (
         'Last 30 days',
@@ -39,7 +42,10 @@ class DateRangePresets extends StatelessWidget {
           end: today,
         ),
       ),
-      ('This year', DateTimeRange(start: DateTime(today.year, 1, 1), end: today)),
+      (
+        'This year',
+        DateTimeRange(start: DateTime(today.year, 1, 1), end: today),
+      ),
     ];
   }
 

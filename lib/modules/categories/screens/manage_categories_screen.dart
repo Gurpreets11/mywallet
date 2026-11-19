@@ -47,8 +47,8 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen>
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => (isExpense ? _expenseTab : _incomeTab).currentState
-            ?.addCategory(),
+        onPressed: () =>
+            (isExpense ? _expenseTab : _incomeTab).currentState?.addCategory(),
         icon: const Icon(Icons.add),
         label: Text(isExpense ? 'Expense category' : 'Income category'),
       ),

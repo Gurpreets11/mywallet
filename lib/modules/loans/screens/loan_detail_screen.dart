@@ -64,7 +64,13 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
               required String paymentMode,
               String? remarks,
               int? accountId,
-            }) => _recordEmi(loan, paymentAmount, paymentMode, remarks, accountId),
+            }) => _recordEmi(
+              loan,
+              paymentAmount,
+              paymentMode,
+              remarks,
+              accountId,
+            ),
       ),
     );
   }

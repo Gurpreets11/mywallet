@@ -44,7 +44,10 @@ class SummaryCard extends StatelessWidget {
 
             Text(
               title,
-              style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
 
             const SizedBox(height: 4),

@@ -87,7 +87,11 @@ class Migrations {
     }
 
     // 0 = no alert sent yet, 1 = "near limit" sent, 2 = "limit reached" sent
-    await addColumn('budgets', 'last_alert_level', 'INTEGER NOT NULL DEFAULT 0');
+    await addColumn(
+      'budgets',
+      'last_alert_level',
+      'INTEGER NOT NULL DEFAULT 0',
+    );
     await addColumn('recurring_transactions', 'account_id', 'INTEGER');
   }
 
@@ -119,7 +123,12 @@ class Migrations {
       )
     ''');
 
-    for (final table in ['expenses', 'incomes', 'loan_payments', 'investments']) {
+    for (final table in [
+      'expenses',
+      'incomes',
+      'loan_payments',
+      'investments',
+    ]) {
       final info = await db.rawQuery('PRAGMA table_info($table)');
       final hasColumn = info.any((c) => c['name'] == 'account_id');
       if (!hasColumn && info.isNotEmpty) {

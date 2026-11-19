@@ -15,7 +15,6 @@ import '../providers/income_provider.dart';
 class AddIncomeScreen extends StatefulWidget {
   final IncomeModel? income;
 
-
   /// When true, [income] only pre-fills the form and a new entry is saved.
   final bool isDuplicate;
   const AddIncomeScreen({super.key, this.income, this.isDuplicate = false});
@@ -412,9 +411,11 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                       value: 'Bank',
                                       child: Text('Bank'),
                                     ),
-                                    if (!const ['Cash', 'UPI', 'Bank'].contains(
-                                      _paymentMode,
-                                    ))
+                                    if (!const [
+                                      'Cash',
+                                      'UPI',
+                                      'Bank',
+                                    ].contains(_paymentMode))
                                       DropdownMenuItem(
                                         value: _paymentMode,
                                         child: Text(_paymentMode),

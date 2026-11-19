@@ -79,7 +79,9 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
             // Until the lock state is known, cover the app (no content flash).
             if (!_lock.isLoaded)
               Positioned.fill(
-                child: ColoredBox(color: Theme.of(context).scaffoldBackgroundColor),
+                child: ColoredBox(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
               )
             else if (_lock.isLocked)
               const Positioned.fill(child: _LockScreen()),

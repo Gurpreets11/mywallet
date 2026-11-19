@@ -34,7 +34,9 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<IncomeProvider>().loadIncomes();
-      context.read<MasterProvider>().loadIncomeCategories(includeInactive: true);
+      context.read<MasterProvider>().loadIncomeCategories(
+        includeInactive: true,
+      );
     });
   }
 
