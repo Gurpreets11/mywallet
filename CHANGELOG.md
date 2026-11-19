@@ -312,22 +312,22 @@ No database schema or migration changes are included.
 ## Changed files only
 
 - `lib/modules/investments/screens/investment_list_screen.dart`
-    - Responsive constrained content layout for mobile/tablet/web.
-    - Portfolio overview and investment allocation by current value.
-    - Search, type/SIP filtering and sorting controls.
-    - Responsive list/grid presentation and pull-to-refresh.
+  - Responsive constrained content layout for mobile/tablet/web.
+  - Portfolio overview and investment allocation by current value.
+  - Search, type/SIP filtering and sorting controls.
+  - Responsive list/grid presentation and pull-to-refresh.
 - `lib/modules/investments/widgets/investment_summary_card.dart`
-    - Clear portfolio value, invested amount, profit/loss and ROI summary.
+  - Clear portfolio value, invested amount, profit/loss and ROI summary.
 - `lib/modules/investments/widgets/investment_card.dart`
-    - Cleaner investment cards with current value, invested value, gain/loss, ROI, SIP marker and contextual actions.
+  - Cleaner investment cards with current value, invested value, gain/loss, ROI, SIP marker and contextual actions.
 - `lib/modules/investments/screens/investment_detail_screen.dart`
-    - Expanded details including available quantity, prices, maturity, interest and SIP fields.
+  - Expanded details including available quantity, prices, maturity, interest and SIP fields.
 - `lib/modules/investments/screens/add_investment_screen.dart`
-    - Preserve original investment date and created timestamp during edits.
-    - Save notes and preserve existing optional model fields when editing.
-    - Dispose controllers and validate required name/amount fields.
+  - Preserve original investment date and created timestamp during edits.
+  - Save notes and preserve existing optional model fields when editing.
+  - Dispose controllers and validate required name/amount fields.
 - `lib/modules/investments/providers/investment_provider.dart`
-    - Search notes and make latest sorting safe when an ID is null.
+  - Search notes and make latest sorting safe when an ID is null.
 
 ## Integration
 
@@ -413,9 +413,9 @@ The package is based on the Phase 1 fixed `lib` archive. A Flutter SDK and compl
 - Added shared mobile/tablet/desktop breakpoints.
 - Added a reusable max-width responsive content wrapper.
 - Replaced the always-bottom navigation with adaptive navigation:
-    - Mobile: bottom NavigationBar.
-    - Tablet: NavigationRail with labels (starting at 600 logical pixels).
-    - Desktop: extended NavigationRail with myWallet branding.
+  - Mobile: bottom NavigationBar.
+  - Tablet: NavigationRail with labels (starting at 600 logical pixels).
+  - Desktop: extended NavigationRail with myWallet branding.
 - Updated the More screen grid to adapt to available width and use clearer menu cards.
 
 ## Files added
@@ -440,6 +440,19 @@ The supplied archive contained only the `lib/` directory and did not include `pu
 
 
 ## [Unreleased]
+
+### Added
+- Nothing yet.
+
+### Changed
+- Nothing yet.
+
+### Fixed
+- Nothing yet.
+
+---
+
+## [1.1.0] - 2026-11-19
 
 ### Added
 - Manage Categories (add, rename, hide, delete categories and subcategories for expenses and income) with inline "New category / New subcategory" links on the forms.
