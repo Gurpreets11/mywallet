@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -49,7 +48,11 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
       _emiController.text = loan.emiAmount.toString();
       _tenureController.text = loan.tenureMonths.toString();
       _notesController.text = loan.notes ?? '';
-      _loanType = loan.loanType;
+      // Older / demo loans may carry a free-text type (e.g. "Home Loan");
+      // anything that is not GIVEN is a borrowed loan.
+      _loanType = loan.loanType.toUpperCase() == 'GIVEN'
+          ? 'GIVEN'
+          : 'BORROWED';
       _loanStatus = loan.loanStatus.toUpperCase() == 'CLOSED'
           ? 'CLOSED'
           : 'ACTIVE';
@@ -156,13 +159,7 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
 
       // Do not fail the loan save if Android notification permission is unavailable.
       try {
-        await NotificationService.instance.scheduleNotification(
-          id: old?.id ?? DateTime.now().millisecondsSinceEpoch,
-          title: 'EMI Reminder',
-          body: 'EMI payment due for ${loan.personName}',
-          scheduledDate: _nextEmiDate.subtract(const Duration(days: 1)),
-          payload: jsonEncode({'type': 'loan', 'loanId': loan.id}),
-        );
+        await NotificationService.instance.rescheduleAll();
       } catch (error) {
         debugPrint('Unable to schedule EMI reminder: $error');
       }

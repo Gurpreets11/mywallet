@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/widgets/common_delete_dialog.dart';
+import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/utils/currency_utils.dart';
+import '../../../core/widgets/date_range_presets.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/empty_view.dart';
 import '../../../core/widgets/loading_view.dart';
@@ -31,7 +34,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<IncomeProvider>().loadIncomes();
-      context.read<MasterProvider>().loadIncomeCategories();
+      context.read<MasterProvider>().loadIncomeCategories(includeInactive: true);
     });
   }
 
@@ -43,7 +46,7 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
 
   Future<void> _openFilters() async {
     final master = context.read<MasterProvider>();
-    await master.loadIncomeCategories();
+    await master.loadIncomeCategories(includeInactive: true);
     if (!mounted) return;
     int? category = _categoryId;
     String? payment = _paymentMode;
@@ -103,6 +106,11 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                 onChanged: (v) => setSheetState(() => payment = v),
               ),
               const SizedBox(height: 12),
+              DateRangePresets(
+                range: range,
+                onSelected: (r) => setSheetState(() => range = r),
+              ),
+              const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: () async {
                   final picked = await showDateRangePicker(
@@ -205,25 +213,19 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
     IncomeProvider provider,
     IncomeModel income,
   ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete income?'),
-        content: const Text('This transaction will be permanently deleted.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton.tonal(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    final confirmed = await confirmDelete(
+      context,
+      title: 'Delete income?',
+      message: 'This transaction will be permanently deleted.',
     );
-    if (confirmed == true && income.id != null) {
+    if (confirmed && income.id != null) {
       await provider.deleteIncome(income.id!);
+      if (!mounted) return;
+      SnackbarUtils.showUndo(
+        context,
+        'Income deleted',
+        () => provider.addIncome(income),
+      );
     }
   }
 
@@ -360,6 +362,15 @@ class _IncomeListScreenState extends State<IncomeListScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (_) => AddIncomeScreen(income: income),
+                            ),
+                          ),
+                          onDuplicate: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AddIncomeScreen(
+                                income: income,
+                                isDuplicate: true,
+                              ),
                             ),
                           ),
                           onDelete: () => _deleteIncome(provider, income),

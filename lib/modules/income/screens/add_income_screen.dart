@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../categories/widgets/quick_add.dart';
 import '../../accounts/widgets/account_dropdown.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
@@ -14,7 +15,10 @@ import '../providers/income_provider.dart';
 class AddIncomeScreen extends StatefulWidget {
   final IncomeModel? income;
 
-  const AddIncomeScreen({super.key, this.income});
+
+  /// When true, [income] only pre-fills the form and a new entry is saved.
+  final bool isDuplicate;
+  const AddIncomeScreen({super.key, this.income, this.isDuplicate = false});
 
   @override
   State<AddIncomeScreen> createState() => _AddIncomeScreenState();
@@ -37,7 +41,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
   bool _isSaving = false;
   bool _isLoadingCategories = true;
 
-  bool get isEditMode => widget.income != null;
+  bool get isEditMode => widget.income != null && !widget.isDuplicate;
 
   @override
   void initState() {
@@ -46,7 +50,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
     if (income != null) {
       _amountController.text = income.amount.toString();
       _notesController.text = income.notes ?? '';
-      _selectedDate = DateTime.tryParse(income.date) ?? DateTime.now();
+      _selectedDate = widget.isDuplicate
+          ? DateTime.now()
+          : (DateTime.tryParse(income.date) ?? DateTime.now());
       _paymentMode = income.paymentMode;
       _accountId = income.accountId;
       _selectedCategoryId = income.categoryId;
@@ -62,13 +68,50 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
   Future<void> _loadCategories() async {
     final master = context.read<MasterProvider>();
     try {
-      await master.loadIncomeCategories();
+      await master.loadIncomeCategories(alsoIncludeId: _selectedCategoryId);
       if (_selectedCategoryId != null) {
-        await master.loadIncomeSubcategories(_selectedCategoryId!);
+        await master.loadIncomeSubcategories(
+          _selectedCategoryId!,
+          alsoIncludeId: _selectedSubcategoryId,
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoadingCategories = false);
     }
+  }
+
+  Future<void> _addCategory() async {
+    final created = await showQuickAddCategory(context, typeId: 1);
+    if (created == null || !mounted) return;
+    final master = context.read<MasterProvider>();
+    await master.loadIncomeCategories(alsoIncludeId: created.id);
+    await master.loadIncomeSubcategories(created.id);
+    if (!mounted) return;
+    setState(() {
+      _selectedCategoryId = created.id;
+      _selectedCategoryName = created.name;
+      _selectedSubcategoryId = null;
+      _selectedSubCategoryName = null;
+    });
+  }
+
+  Future<void> _addSubcategory() async {
+    final categoryId = _selectedCategoryId;
+    if (categoryId == null) return;
+    final created = await showQuickAddSubcategory(
+      context,
+      categoryId: categoryId,
+    );
+    if (created == null || !mounted) return;
+    await context.read<MasterProvider>().loadIncomeSubcategories(
+      categoryId,
+      alsoIncludeId: created.id,
+    );
+    if (!mounted) return;
+    setState(() {
+      _selectedSubcategoryId = created.id;
+      _selectedSubCategoryName = created.name;
+    });
   }
 
   @override
@@ -105,7 +148,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
 
     setState(() => _isSaving = true);
     try {
-      final old = widget.income;
+      final old = widget.isDuplicate ? null : widget.income;
       final income = IncomeModel(
         id: old?.id,
         amount: double.parse(_amountController.text.trim()),
@@ -243,6 +286,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                         ? _selectedCategoryId
                                         : null;
                                     return DropdownButtonFormField<int>(
+                                      key: ValueKey('cat-$_selectedCategoryId'),
                                       initialValue: selectedValue,
                                       isExpanded: true,
                                       decoration: const InputDecoration(
@@ -298,6 +342,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                         ? _selectedSubcategoryId
                                         : null;
                                     return DropdownButtonFormField<int>(
+                                      key: ValueKey(
+                                        'sub-$_selectedCategoryId-$_selectedSubcategoryId',
+                                      ),
                                       initialValue: selectedValue,
                                       isExpanded: true,
                                       decoration: const InputDecoration(
@@ -332,6 +379,12 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                     );
                                   },
                                 ),
+                                QuickAddLinks(
+                                  onAddCategory: _addCategory,
+                                  onAddSubcategory: _selectedCategoryId == null
+                                      ? null
+                                      : _addSubcategory,
+                                ),
                                 const SizedBox(height: 12),
                                 AccountDropdown(
                                   value: _accountId,
@@ -346,7 +399,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                       Icons.account_balance_wallet_outlined,
                                     ),
                                   ),
-                                  items: const [
+                                  items: [
                                     DropdownMenuItem(
                                       value: 'Cash',
                                       child: Text('Cash'),
@@ -359,6 +412,13 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                       value: 'Bank',
                                       child: Text('Bank'),
                                     ),
+                                    if (!const ['Cash', 'UPI', 'Bank'].contains(
+                                      _paymentMode,
+                                    ))
+                                      DropdownMenuItem(
+                                        value: _paymentMode,
+                                        child: Text(_paymentMode),
+                                      ),
                                   ],
                                   onChanged: (value) {
                                     if (value != null) {

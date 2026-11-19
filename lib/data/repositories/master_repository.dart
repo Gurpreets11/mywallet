@@ -30,27 +30,53 @@ class MasterRepository {
     return await db.query(DatabaseConstants.tableTransactionTypes);
   }
 
+  /// Active categories of a type. [alsoIncludeId] keeps one hidden category
+  /// in the list (the one an old entry already uses); [includeInactive] returns
+  /// everything (used by filters).
   Future<List<Map<String, dynamic>>> getCategoriesByType(
-    int transactionTypeId,
-  ) async {
+    int transactionTypeId, {
+    int? alsoIncludeId,
+    bool includeInactive = false,
+  }) async {
     final Database db = await AppDatabase.database;
+
+    final activeOnly = includeInactive
+        ? ''
+        : ' AND (COALESCE(is_active, 1) = 1'
+              '${alsoIncludeId != null ? ' OR id = ?' : ''})';
 
     return await db.query(
       DatabaseConstants.tableCategories,
-      where: '${DatabaseConstants.colTransactionTypeId} = ?',
-      whereArgs: [transactionTypeId],
+      where: '${DatabaseConstants.colTransactionTypeId} = ?$activeOnly',
+      whereArgs: [
+        transactionTypeId,
+        if (!includeInactive && alsoIncludeId != null) alsoIncludeId,
+      ],
+      orderBy: 'id ASC',
     );
   }
 
+  /// Active subcategories of a category (see [getCategoriesByType]).
   Future<List<Map<String, dynamic>>> getSubcategoriesByCategory(
-    int categoryId,
-  ) async {
+    int categoryId, {
+    int? alsoIncludeId,
+    bool includeInactive = false,
+  }) async {
     final Database db = await AppDatabase.database;
+
+    final activeOnly = includeInactive
+        ? ''
+        : ' AND (COALESCE(is_active, 1) = 1'
+              '${alsoIncludeId != null ? ' OR id = ?' : ''})';
 
     return await db.query(
       DatabaseConstants.tableSubcategories,
-      where: '${DatabaseConstants.colCategoryId} = ?',
-      whereArgs: [categoryId],
+      where: '${DatabaseConstants.colCategoryId} = ?$activeOnly',
+      whereArgs: [
+        categoryId,
+        if (!includeInactive && alsoIncludeId != null) alsoIncludeId,
+      ],
+      orderBy: 'id ASC',
     );
   }
 

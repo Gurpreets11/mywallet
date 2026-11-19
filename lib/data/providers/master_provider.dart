@@ -13,14 +13,24 @@ class MasterProvider extends ChangeNotifier {
 
   List<Map<String, dynamic>> get subcategories => _subcategories;
 
-  Future<void> loadExpenseCategories() async {
-    _expenseCategories = await _repository.getCategoriesByType(0);
+  Future<void> loadExpenseCategories({
+    int? alsoIncludeId,
+    bool includeInactive = false,
+  }) async {
+    _expenseCategories = await _repository.getCategoriesByType(
+      0,
+      alsoIncludeId: alsoIncludeId,
+      includeInactive: includeInactive,
+    );
 
     notifyListeners();
   }
 
-  Future<void> loadSubcategories(int categoryId) async {
-    _subcategories = await _repository.getSubcategoriesByCategory(categoryId);
+  Future<void> loadSubcategories(int categoryId, {int? alsoIncludeId}) async {
+    _subcategories = await _repository.getSubcategoriesByCategory(
+      categoryId,
+      alsoIncludeId: alsoIncludeId,
+    );
 
     notifyListeners();
   }
@@ -35,16 +45,27 @@ class MasterProvider extends ChangeNotifier {
 
   List<Map<String, dynamic>> get incomeSubCategories => _incomeSubcategories;
 
-  Future<void> loadIncomeCategories() async {
-    _incomeCategories = await _repository.getCategoriesByType(1);
+  Future<void> loadIncomeCategories({
+    int? alsoIncludeId,
+    bool includeInactive = false,
+  }) async {
+    _incomeCategories = await _repository.getCategoriesByType(
+      1,
+      alsoIncludeId: alsoIncludeId,
+      includeInactive: includeInactive,
+    );
 
     notifyListeners();
   }
 
-  Future<void> loadIncomeSubcategories(int categoryId) async {
+  Future<void> loadIncomeSubcategories(
+    int categoryId, {
+    int? alsoIncludeId,
+  }) async {
     debugPrint("categoryId   ::  $categoryId");
     _incomeSubcategories = await _repository.getSubcategoriesByCategory(
       categoryId,
+      alsoIncludeId: alsoIncludeId,
     );
 
     debugPrint("_incomeSubcategories Size ::  ${_incomeSubcategories.length}");

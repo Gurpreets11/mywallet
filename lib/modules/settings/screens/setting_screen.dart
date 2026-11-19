@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../../categories/screens/manage_categories_screen.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/services/app_data_refresher.dart';
 import '../../../core/services/backup/backup_service.dart';
@@ -17,7 +18,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/type_to_confirm_dialog.dart';
-import 'pin_setup_screen.dart';
+import '../screens/pin_setup_screen.dart';
 import '../widgets/export_options_sheet.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -517,6 +518,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                   _sectionTitle('Preferences'),
                   _groupCard([
+                    ListTile(
+                      leading: const Icon(Icons.category_outlined),
+                      title: const Text('Manage categories'),
+                      subtitle: const Text('Add or edit expense and income categories'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ManageCategoriesScreen(),
+                        ),
+                      ),
+                    ),
                     ListTile(
                       leading: const Icon(Icons.calendar_today_outlined),
                       title: const Text('Date format'),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/widgets/common_delete_dialog.dart';
+import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
@@ -29,31 +31,24 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
   }
 
   Future<void> _delete(GoalProgress p) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Delete "${p.goal.name}"?'),
-        content: const Text(
+    final ok = await confirmDelete(
+      context,
+      title: 'Delete "${p.goal.name}"?',
+      message:
           'The goal and its savings history are removed. '
           'Your income, expenses and accounts are not affected.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
     );
-    if (ok != true || !mounted) return;
+    if (!ok || !mounted) return;
     final dashboard = context.read<DashboardProvider>();
-    await GoalRepository().deleteGoal(p.goal.id!);
+    final repo = GoalRepository();
+    final contributions = await repo.getContributions(p.goal.id!);
+    await repo.deleteGoal(p.goal.id!);
     await dashboard.loadGoals();
+    if (!mounted) return;
+    SnackbarUtils.showUndo(context, 'Goal deleted', () async {
+      await repo.restoreGoal(p.goal, contributions);
+      await dashboard.loadGoals();
+    });
   }
 
   @override

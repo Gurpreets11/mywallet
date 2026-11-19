@@ -350,15 +350,15 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
     context,
     MaterialPageRoute(builder: (_) => InvestmentDetailScreen(investment: item)),
   );
-  void _deleteInvestment(InvestmentModel item, InvestmentProvider provider) =>
-      showDialog(
-        context: context,
-        builder: (_) => CommonDeleteDialog(
-          title: 'Delete Investment',
-          message: 'Are you sure you want to delete this investment?',
-          onConfirm: () async {
-            if (item.id != null) await provider.deleteInvestment(item.id!);
-          },
-        ),
-      );
+  Future<void> _deleteInvestment(
+    InvestmentModel item,
+    InvestmentProvider provider,
+  ) async {
+    final ok = await confirmDelete(
+      context,
+      title: 'Delete investment?',
+      message: 'This investment will be permanently deleted.',
+    );
+    if (ok && item.id != null) await provider.deleteInvestment(item.id!);
+  }
 }

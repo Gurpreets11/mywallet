@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/widgets/common_delete_dialog.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../models/recurring_transaction_model.dart';
@@ -62,26 +63,12 @@ class _RecurringScreenState extends State<RecurringScreen> {
       );
       if (confirmed == true) await provider.skipNext(item);
     } else if (action == 'delete') {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Delete schedule?'),
-          content: const Text(
-            'Generated transactions will remain in your history.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Delete'),
-            ),
-          ],
-        ),
+      final confirmed = await confirmDelete(
+        context,
+        title: 'Delete schedule?',
+        message: 'Generated transactions will remain in your history.',
       );
-      if (confirmed == true) await provider.delete(item);
+      if (confirmed) await provider.delete(item);
     }
   }
 

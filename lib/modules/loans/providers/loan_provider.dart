@@ -69,6 +69,23 @@ class LoanProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Deletes a loan and its payments; returns the payments for Undo.
+  Future<List<LoanPaymentModel>> deleteLoanWithPayments(int id) async {
+    final payments = await _repository.deleteLoanWithPayments(id);
+    await loadLoans();
+    notifyListeners();
+    return payments;
+  }
+
+  Future<void> restoreLoan(
+    LoanModel loan,
+    List<LoanPaymentModel> payments,
+  ) async {
+    await _repository.restoreLoan(loan, payments);
+    await loadLoans();
+    notifyListeners();
+  }
+
   Future<void> payEmi({
     required LoanModel loan,
 

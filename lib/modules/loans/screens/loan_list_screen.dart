@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/widgets/common_delete_dialog.dart';
+import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/empty_view.dart';
 import '../../../core/widgets/loading_view.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/loan_model.dart';
 import '../providers/loan_provider.dart';
 import '../widgets/loan_card.dart';
@@ -31,27 +34,21 @@ class _LoanListScreenState extends State<LoanListScreen> {
   }
 
   Future<void> _confirmDelete(LoanProvider provider, LoanModel loan) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete loan?'),
-        content: Text(
-          '"${loan.personName}" and its details will be permanently deleted.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton.tonal(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    final confirmed = await confirmDelete(
+      context,
+      title: 'Delete loan?',
+      message:
+          '"${loan.personName}" and its payment history will be deleted.',
     );
-    if (confirmed == true && loan.id != null) {
-      await provider.deleteLoan(loan.id!);
+    if (confirmed && loan.id != null) {
+      final payments = await provider.deleteLoanWithPayments(loan.id!);
+      if (!mounted) return;
+      final dashboard = context.read<DashboardProvider>();
+      dashboard.loadDashboardData();
+      SnackbarUtils.showUndo(context, 'Loan deleted', () async {
+        await provider.restoreLoan(loan, payments);
+        await dashboard.loadDashboardData();
+      });
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/widgets/common_delete_dialog.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
@@ -42,27 +43,13 @@ class _AccountsScreenState extends State<AccountsScreen> {
     );
   }
 
-  Future<bool> _confirm(String title, String message, String action) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(action),
-          ),
-        ],
-      ),
-    );
-    return result ?? false;
-  }
+  Future<bool> _confirm(String title, String message, String action) =>
+      confirmDelete(
+        context,
+        title: title,
+        message: message,
+        confirmLabel: action,
+      );
 
   Future<void> _deleteAccount(AccountModel account) async {
     final ok = await _confirm(

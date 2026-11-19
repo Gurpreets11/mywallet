@@ -9,6 +9,7 @@ class ExpenseCard extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback onTap;
   final VoidCallback onEdit;
+  final VoidCallback? onDuplicate;
 
   /// Show the date on the card. The list hides it when transactions are
   /// already grouped under date headings.
@@ -20,6 +21,7 @@ class ExpenseCard extends StatelessWidget {
     required this.onDelete,
     required this.onTap,
     required this.onEdit,
+    this.onDuplicate,
     this.showDate = true,
   });
 
@@ -115,6 +117,7 @@ class ExpenseCard extends StatelessWidget {
                 icon: Icon(Icons.more_vert, size: 20, color: muted),
                 onSelected: (value) {
                   if (value == 'edit') onEdit();
+                  if (value == 'duplicate') onDuplicate?.call();
                   if (value == 'delete') onDelete();
                 },
                 itemBuilder: (_) => const [
@@ -124,6 +127,14 @@ class ExpenseCard extends StatelessWidget {
                       dense: true,
                       leading: Icon(Icons.edit_outlined),
                       title: Text('Edit'),
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'duplicate',
+                    child: ListTile(
+                      dense: true,
+                      leading: Icon(Icons.copy_outlined),
+                      title: Text('Duplicate'),
                     ),
                   ),
                   PopupMenuItem(

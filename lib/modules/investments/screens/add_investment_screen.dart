@@ -142,12 +142,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
       // A reminder failure must not undo or hide a successfully saved investment.
       if (_isSip) {
         try {
-          await NotificationService.instance.scheduleSipReminder(
-            id: DateTime.now().millisecondsSinceEpoch,
-            investmentName: investment.investmentName,
-            amount: investment.sipAmount!,
-            sipDate: _sipDate,
-          );
+          await NotificationService.instance.rescheduleAll();
         } catch (error) {
           debugPrint('Unable to schedule SIP reminder: $error');
         }
@@ -255,8 +250,14 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                           decoration: const InputDecoration(
                             labelText: 'Investment type',
                           ),
-                          items: InvestmentConstants.investmentTypes
-                              .map(
+                          items:
+                              [
+                                    ...InvestmentConstants.investmentTypes,
+                                    if (!InvestmentConstants.investmentTypes
+                                        .contains(_investmentType))
+                                      _investmentType,
+                                  ]
+                                  .map(
                                 (type) => DropdownMenuItem(
                                   value: type,
                                   child: Text(type),

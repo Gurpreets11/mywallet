@@ -43,6 +43,20 @@ class GoalRepository {
     );
   }
 
+  /// Puts a deleted goal (and its contributions) back with the same ids.
+  Future<void> restoreGoal(
+    SavingsGoalModel goal,
+    List<GoalContributionModel> contributions,
+  ) async {
+    final db = await AppDatabase.database;
+    await db.transaction((txn) async {
+      await txn.insert('savings_goals', goal.toMap());
+      for (final c in contributions) {
+        await txn.insert('savings_goal_contributions', c.toMap());
+      }
+    });
+  }
+
   Future<void> deleteGoal(int id) async {
     final db = await AppDatabase.database;
     await db.transaction((txn) async {

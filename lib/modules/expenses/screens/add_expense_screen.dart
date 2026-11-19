@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../categories/widgets/quick_add.dart';
 import '../../accounts/widgets/account_dropdown.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
@@ -14,7 +15,10 @@ import '../providers/expense_provider.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   final ExpenseModel? expense;
-  const AddExpenseScreen({super.key, this.expense});
+
+  /// When true, [expense] only pre-fills the form and a new entry is saved.
+  final bool isDuplicate;
+  const AddExpenseScreen({super.key, this.expense, this.isDuplicate = false});
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
 }
@@ -32,7 +36,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   String? _selectedSubCategoryName;
   bool _isSaving = false;
   bool _isLoadingMaster = true;
-  bool get isEditMode => widget.expense != null;
+  bool get isEditMode => widget.expense != null && !widget.isDuplicate;
 
   @override
   void initState() {
@@ -43,7 +47,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _notesController.text = expense.notes ?? '';
       _paymentMode = expense.paymentMode;
       _accountId = expense.accountId;
-      _selectedDate = DateTime.tryParse(expense.date) ?? DateTime.now();
+      _selectedDate = widget.isDuplicate
+          ? DateTime.now()
+          : (DateTime.tryParse(expense.date) ?? DateTime.now());
       _selectedCategoryId = expense.categoryId;
       _selectedSubcategoryId = expense.subcategoryId;
       _selectedCategoryName = expense.categoryName;
@@ -54,12 +60,49 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   Future<void> _loadMasterData() async {
     final master = context.read<MasterProvider>();
-    await master.loadExpenseCategories();
+    await master.loadExpenseCategories(alsoIncludeId: _selectedCategoryId);
     if (_selectedCategoryId != null) {
-      await master.loadSubcategories(_selectedCategoryId!);
+      await master.loadSubcategories(
+        _selectedCategoryId!,
+        alsoIncludeId: _selectedSubcategoryId,
+      );
     }
     if (!mounted) return;
     setState(() => _isLoadingMaster = false);
+  }
+
+  Future<void> _addCategory() async {
+    final created = await showQuickAddCategory(context, typeId: 0);
+    if (created == null || !mounted) return;
+    final master = context.read<MasterProvider>();
+    await master.loadExpenseCategories(alsoIncludeId: created.id);
+    await master.loadSubcategories(created.id);
+    if (!mounted) return;
+    setState(() {
+      _selectedCategoryId = created.id;
+      _selectedCategoryName = created.name;
+      _selectedSubcategoryId = null;
+      _selectedSubCategoryName = null;
+    });
+  }
+
+  Future<void> _addSubcategory() async {
+    final categoryId = _selectedCategoryId;
+    if (categoryId == null) return;
+    final created = await showQuickAddSubcategory(
+      context,
+      categoryId: categoryId,
+    );
+    if (created == null || !mounted) return;
+    await context.read<MasterProvider>().loadSubcategories(
+      categoryId,
+      alsoIncludeId: created.id,
+    );
+    if (!mounted) return;
+    setState(() {
+      _selectedSubcategoryId = created.id;
+      _selectedSubCategoryName = created.name;
+    });
   }
 
   @override
@@ -85,7 +128,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     }
     setState(() => _isSaving = true);
     try {
-      final old = widget.expense;
+      final old = widget.isDuplicate ? null : widget.expense;
       final expense = ExpenseModel(
         id: old?.id,
         amount: double.parse(_amountController.text.trim()),
@@ -220,6 +263,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               Consumer<MasterProvider>(
                                 builder: (context, master, _) =>
                                     DropdownButtonFormField<int>(
+                                      key: ValueKey('cat-$_selectedCategoryId'),
                                       initialValue: _selectedCategoryId,
                                       isExpanded: true,
                                       decoration: const InputDecoration(
@@ -267,6 +311,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               Consumer<MasterProvider>(
                                 builder: (context, master, _) =>
                                     DropdownButtonFormField<int>(
+                                      key: ValueKey(
+                                        'sub-$_selectedCategoryId-$_selectedSubcategoryId',
+                                      ),
                                       initialValue: _selectedSubcategoryId,
                                       isExpanded: true,
                                       decoration: const InputDecoration(
@@ -304,6 +351,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                       },
                                     ),
                               ),
+                              QuickAddLinks(
+                                onAddCategory: _addCategory,
+                                onAddSubcategory: _selectedCategoryId == null
+                                    ? null
+                                    : _addSubcategory,
+                              ),
                               const SizedBox(height: 12),
                               AccountDropdown(
                                 value: _accountId,
@@ -318,7 +371,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                     Icons.account_balance_wallet_outlined,
                                   ),
                                 ),
-                                items: const [
+                                items: [
                                   DropdownMenuItem(
                                     value: 'Cash',
                                     child: Text('Cash'),
@@ -335,6 +388,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                     value: 'Bank',
                                     child: Text('Bank'),
                                   ),
+                                  if (!const [
+                                    'Cash',
+                                    'UPI',
+                                    'Card',
+                                    'Bank',
+                                  ].contains(_paymentMode))
+                                    DropdownMenuItem(
+                                      value: _paymentMode,
+                                      child: Text(_paymentMode),
+                                    ),
                                 ],
                                 onChanged: (value) => setState(
                                   () => _paymentMode = value ?? 'Cash',

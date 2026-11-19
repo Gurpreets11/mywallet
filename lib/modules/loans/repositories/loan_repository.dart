@@ -36,6 +36,35 @@ class LoanRepository {
     return await db.delete('loans', where: 'id = ?', whereArgs: [id]);
   }
 
+  /// Deletes the loan together with its payments (so no orphan EMI rows are
+  /// left behind) and returns the removed payments for an Undo.
+  Future<List<LoanPaymentModel>> deleteLoanWithPayments(int id) async {
+    final Database db = await AppDatabase.database;
+    final rows = await db.query(
+      'loan_payments',
+      where: 'loan_id = ?',
+      whereArgs: [id],
+    );
+    await db.transaction((txn) async {
+      await txn.delete('loan_payments', where: 'loan_id = ?', whereArgs: [id]);
+      await txn.delete('loans', where: 'id = ?', whereArgs: [id]);
+    });
+    return rows.map((e) => LoanPaymentModel.fromMap(e)).toList();
+  }
+
+  Future<void> restoreLoan(
+    LoanModel loan,
+    List<LoanPaymentModel> payments,
+  ) async {
+    final Database db = await AppDatabase.database;
+    await db.transaction((txn) async {
+      await txn.insert('loans', loan.toMap());
+      for (final p in payments) {
+        await txn.insert('loan_payments', p.toMap());
+      }
+    });
+  }
+
   Future<double> getTotalOutstandingLoan() async {
     final Database db = await AppDatabase.database;
 

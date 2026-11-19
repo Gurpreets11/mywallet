@@ -8,6 +8,7 @@ class IncomeCard extends StatelessWidget {
   final IncomeModel income;
   final VoidCallback onTap;
   final VoidCallback onEdit;
+  final VoidCallback? onDuplicate;
   final VoidCallback onDelete;
 
   /// Show the date on the card. The list hides it when transactions are
@@ -19,6 +20,7 @@ class IncomeCard extends StatelessWidget {
     required this.income,
     required this.onTap,
     required this.onEdit,
+    this.onDuplicate,
     required this.onDelete,
     this.showDate = true,
   });
@@ -138,7 +140,11 @@ class IncomeCard extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                 icon: Icon(Icons.more_vert, size: 20, color: muted),
-                onSelected: (value) => value == 'edit' ? onEdit() : onDelete(),
+                onSelected: (value) {
+                  if (value == 'edit') onEdit();
+                  if (value == 'duplicate') onDuplicate?.call();
+                  if (value == 'delete') onDelete();
+                },
                 itemBuilder: (_) => const [
                   PopupMenuItem(
                     value: 'edit',
@@ -146,6 +152,14 @@ class IncomeCard extends StatelessWidget {
                       dense: true,
                       leading: Icon(Icons.edit_outlined),
                       title: Text('Edit'),
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'duplicate',
+                    child: ListTile(
+                      dense: true,
+                      leading: Icon(Icons.copy_outlined),
+                      title: Text('Duplicate'),
                     ),
                   ),
                   PopupMenuItem(

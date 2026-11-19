@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/widgets/common_delete_dialog.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../models/budget_model.dart';
 import '../providers/budget_provider.dart';
@@ -150,26 +151,12 @@ class _BudgetScreenState extends State<BudgetScreen> {
   }
 
   Future<void> _deleteBudget(BudgetModel budget) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete budget?'),
-        content: Text(
-          'Delete the ${budget.categoryName} budget for this month?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    final confirm = await confirmDelete(
+      context,
+      title: 'Delete budget?',
+      message: 'Delete the ${budget.categoryName} budget for this month?',
     );
-    if (confirm == true && budget.id != null && mounted) {
+    if (confirm && budget.id != null && mounted) {
       await context.read<BudgetProvider>().delete(budget.id!);
     }
   }
