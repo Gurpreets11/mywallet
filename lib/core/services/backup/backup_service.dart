@@ -14,6 +14,7 @@ class BackupMetaKeys {
 
   static const String lastBackupAt = 'last_backup_at';
   static const String lastRestoreAt = 'last_restore_at';
+  static const String lastAutoBackupAt = 'last_auto_backup_at';
 
   /// App-lock data. Must never leave the device inside a backup file.
   static const String appLockEnabled = 'app_lock_enabled';
@@ -23,6 +24,7 @@ class BackupMetaKeys {
   static const Set<String> deviceLocal = {
     lastBackupAt,
     lastRestoreAt,
+    lastAutoBackupAt,
     appLockEnabled,
     appLockSalt,
     appLockHash,
@@ -38,6 +40,7 @@ class BackupService {
 
   static const String _metadataTable = 'app_metadata';
   static const int _keepSafetyBackups = 5;
+  static const int _keepAutoBackups = 7;
 
   /// Returns every user-created table name (skips sqlite's own internal tables).
   Future<List<String>> _getAllTableNames() async {
@@ -159,6 +162,97 @@ class BackupService {
       } catch (_) {}
     }
     return file;
+  }
+
+  /// Scheduled automatic backup (Settings -> Automatic backup). Saved in the
+  /// same private folder as safety copies; only the newest few are kept.
+  Future<File> createAutoBackup() async {
+    final jsonString = await _buildJson();
+    final dir = await _safetyDir(create: true);
+    final file = File('${dir.path}/${_buildFileName('mywallet_auto')}');
+    await file.writeAsString(jsonString, flush: true);
+
+    final all = await listAutoBackups();
+    for (final f in all.skip(_keepAutoBackups)) {
+      try {
+        await f.delete();
+      } catch (_) {}
+    }
+    try {
+      await db.insert(_metadataTable, {
+        'meta_key': BackupMetaKeys.lastAutoBackupAt,
+        'meta_value': DateTime.now().toIso8601String(),
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    } catch (_) {}
+    return file;
+  }
+
+  /// When the last automatic backup was saved (null = never).
+  Future<DateTime?> getLastAutoBackupAt() async {
+    try {
+      final rows = await db.query(
+        _metadataTable,
+        columns: ['meta_value'],
+        where: 'meta_key = ?',
+        whereArgs: [BackupMetaKeys.lastAutoBackupAt],
+        limit: 1,
+      );
+      if (rows.isEmpty) return null;
+      return DateTime.tryParse(rows.first['meta_value'] as String);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Automatic (scheduled) backups, newest first.
+  Future<List<File>> listAutoBackups() async {
+    final dir = await _safetyDir();
+    if (!await dir.exists()) return [];
+    return dir
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.contains('mywallet_auto_'))
+        .toList()
+      ..sort((a, b) => _stampOf(b).compareTo(_stampOf(a)));
+  }
+
+  /// Every private backup on this device (scheduled + safety copies),
+  /// newest first, with a readable label.
+  Future<List<({File file, String label, DateTime? time})>>
+  listAllPrivateBackups() async {
+    final result = <({File file, String label, DateTime? time})>[];
+    for (final f in await listAutoBackups()) {
+      result.add((file: f, label: 'Automatic backup', time: _timeOf(f)));
+    }
+    for (final f in await listSafetyBackups()) {
+      final info = describeSafetyBackup(f);
+      result.add((
+        file: f,
+        label: switch (info.reason) {
+          'reset' => 'Before reset',
+          'import' => 'Before import',
+          _ => 'Before restore',
+        },
+        time: info.time,
+      ));
+    }
+    result.sort((a, b) {
+      final at = a.time ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bt = b.time ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return bt.compareTo(at);
+    });
+    return result;
+  }
+
+  static DateTime? _timeOf(File file) {
+    final m = RegExp(r'(\d{8})_(\d{6})\.json$').firstMatch(file.path);
+    if (m == null) return null;
+    final d = m.group(1)!;
+    final t = m.group(2)!;
+    return DateTime.tryParse(
+      '${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)} '
+      '${t.substring(0, 2)}:${t.substring(2, 4)}:${t.substring(4, 6)}',
+    );
   }
 
   Future<Directory> _safetyDir({bool create = false}) async {

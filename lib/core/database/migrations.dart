@@ -17,6 +17,7 @@ class Migrations {
     await _createRecurringTables(db);
     await _applyAccountsSchema(db);
     await _applyV14Schema(db);
+    await _applyV15Schema(db);
   }
 
   static Future<void> onUpgrade(
@@ -54,6 +55,39 @@ class Migrations {
     if (oldVersion < 14) {
       await _applyV14Schema(db);
     }
+    if (oldVersion < 15) {
+      await _applyV15Schema(db);
+    }
+  }
+
+  /// Investment valuation history. Safe to run more than once.
+  /// Every investment that has no history yet gets one opening entry with its
+  /// current value, so existing data keeps showing the same numbers.
+  static Future<void> _applyV15Schema(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS investment_valuations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        investment_id INTEGER NOT NULL,
+        value REAL NOT NULL,
+        date TEXT NOT NULL,
+        notes TEXT,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_investment_valuations_investment '
+      'ON investment_valuations (investment_id, date)',
+    );
+    await db.execute('''
+      INSERT INTO investment_valuations
+        (investment_id, value, date, notes, created_at)
+      SELECT i.id, i.current_value, date('now'), 'Opening value',
+             datetime('now')
+      FROM investments i
+      WHERE NOT EXISTS (
+        SELECT 1 FROM investment_valuations v WHERE v.investment_id = i.id
+      )
+    ''');
   }
 
   /// Savings goals, budget-alert state and the account on recurring items.
@@ -87,11 +121,7 @@ class Migrations {
     }
 
     // 0 = no alert sent yet, 1 = "near limit" sent, 2 = "limit reached" sent
-    await addColumn(
-      'budgets',
-      'last_alert_level',
-      'INTEGER NOT NULL DEFAULT 0',
-    );
+    await addColumn('budgets', 'last_alert_level', 'INTEGER NOT NULL DEFAULT 0');
     await addColumn('recurring_transactions', 'account_id', 'INTEGER');
   }
 
@@ -123,12 +153,7 @@ class Migrations {
       )
     ''');
 
-    for (final table in [
-      'expenses',
-      'incomes',
-      'loan_payments',
-      'investments',
-    ]) {
+    for (final table in ['expenses', 'incomes', 'loan_payments', 'investments']) {
       final info = await db.rawQuery('PRAGMA table_info($table)');
       final hasColumn = info.any((c) => c['name'] == 'account_id');
       if (!hasColumn && info.isNotEmpty) {

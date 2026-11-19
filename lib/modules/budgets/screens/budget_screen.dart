@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../../core/widgets/common_delete_dialog.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../models/budget_model.dart';
@@ -83,9 +84,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Monthly budget',
-                        prefixText: '₹ ',
+                        prefixText: '${CurrencyUtils.symbol} ',
                       ),
                       validator: (value) {
                         final amount = double.tryParse((value ?? '').trim());
@@ -332,7 +333,7 @@ class _SummaryValue extends StatelessWidget {
       Text(label, style: Theme.of(context).textTheme.bodySmall),
       const SizedBox(height: 4),
       Text(
-        '₹${value.toStringAsFixed(0)}',
+        CurrencyUtils.simple(value),
         style: Theme.of(
           context,
         ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),

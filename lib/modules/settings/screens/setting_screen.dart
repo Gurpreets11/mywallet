@@ -11,6 +11,7 @@ import '../../../core/services/backup/backup_service.dart';
 import '../../../core/services/backup/data_reset_service.dart';
 import '../../../core/services/backup/restore_service.dart';
 import '../../../core/services/export/csv_export_service.dart';
+import '../../../core/services/import/csv_import_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/security/app_lock_service.dart';
 import '../../../core/services/settings/app_preferences.dart';
@@ -18,6 +19,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/type_to_confirm_dialog.dart';
+import '../screens/about_screen.dart';
+import '../screens/backup_history_screen.dart';
 import '../screens/pin_setup_screen.dart';
 import '../widgets/export_options_sheet.dart';
 
@@ -172,10 +175,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Text(
                 'Copies are saved automatically before every restore or '
                 'reset. Pick the state you want to go back to.',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ),
             for (final f in files)
@@ -198,7 +198,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   String _describeSafetyCopy(File file) {
     final info = BackupService.describeSafetyBackup(file);
-    final what = info.reason == 'reset' ? 'Before reset' : 'Before restore';
+    final what = switch (info.reason) {
+      'reset' => 'Before reset',
+      'import' => 'Before import',
+      _ => 'Before restore',
+    };
     final when = info.time == null
         ? ''
         : ' • ${DateFormat('dd MMM yyyy, hh:mm a').format(info.time!)}';
@@ -337,6 +341,163 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {});
     // Providers notify their listeners, so open screens redraw their dates.
     await AppDataRefresher.refreshAll(context);
+  }
+
+  Future<void> _changeCurrency(AppCurrency? value) async {
+    if (value == null || value == _prefs.currency) return;
+    await _prefs.setCurrency(value);
+    if (!mounted) return;
+    setState(() {});
+    // Providers notify their listeners, so open screens redraw their amounts.
+    await AppDataRefresher.refreshAll(context);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Automatic backup history / CSV import
+  // ---------------------------------------------------------------------------
+
+  Future<void> _openBackupHistory() async {
+    final chosen = await Navigator.push<File>(
+      context,
+      MaterialPageRoute(builder: (_) => const BackupHistoryScreen()),
+    );
+    await _loadOverview();
+    if (chosen == null || !mounted) return;
+    try {
+      final Database db = await AppDatabase.database;
+      final backupMap = await RestoreService(db).parseBackupFile(chosen.path);
+      await _runRestore(backupMap);
+    } on BackupFormatException catch (e) {
+      _snack(e.message);
+    } catch (e) {
+      _snack('Restore failed: $e. Your existing data was not changed.');
+    }
+  }
+
+  Future<void> _importCsv() async {
+    if (_busy) return;
+    try {
+      final Database db = await AppDatabase.database;
+      final service = CsvImportService(db);
+      final text = await _lock.runWithoutLock(() => service.pickFileText());
+      if (text == null || !mounted) return;
+
+      final parsed = service.parse(text);
+      if (parsed.rows.isEmpty) {
+        _snack(
+          parsed.problems.isEmpty
+              ? 'No rows found in the file.'
+              : 'Nothing to import. ${parsed.problems.first}',
+        );
+        return;
+      }
+
+      final choice = await _confirmImport(parsed);
+      if (choice == null || !mounted) return;
+
+      setState(() => _busy = true);
+      await BackupService(db).createSafetyBackup(reason: 'import');
+      final result = await service.import(
+        parsed.rows,
+        defaultIsIncome: choice == _ImportDefault.income,
+      );
+      await _afterDataChanged();
+      final extra = <String>[
+        if (result.duplicates > 0) '${result.duplicates} duplicates skipped',
+        if (result.newCategories > 0)
+          '${result.newCategories} new categories added',
+      ];
+      _snack(
+        'Imported ${result.imported} records'
+        '${extra.isEmpty ? '' : ' (${extra.join(', ')})'}',
+      );
+    } on CsvImportException catch (e) {
+      _snack(e.message);
+    } catch (e) {
+      _snack('Import failed: $e. Your existing data was not changed.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// Summary dialog. When the file has no Type column the user also chooses
+  /// whether the rows are expenses or income. Returns null if cancelled.
+  Future<_ImportDefault?> _confirmImport(CsvParseResult parsed) {
+    final incomeRows = parsed.rows.where((r) => r.isIncome == true).length;
+    final expenseRows = parsed.rows.where((r) => r.isIncome == false).length;
+    var choice = _ImportDefault.expense;
+
+    return showDialog<_ImportDefault>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setLocal) => AlertDialog(
+          title: const Text('Import from CSV?'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${parsed.rows.length} rows can be imported.'),
+                if (parsed.hasTypeColumn) ...[
+                  const SizedBox(height: 4),
+                  Text('Expenses: $expenseRows\nIncome: $incomeRows'),
+                ] else ...[
+                  const SizedBox(height: 12),
+                  const Text(
+                    'The file has no Type column. Import these rows as:',
+                  ),
+                  RadioListTile<_ImportDefault>(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: const Text('Expenses'),
+                    value: _ImportDefault.expense,
+                    groupValue: choice,
+                    onChanged: (v) => setLocal(() => choice = v!),
+                  ),
+                  RadioListTile<_ImportDefault>(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: const Text('Income'),
+                    value: _ImportDefault.income,
+                    groupValue: choice,
+                    onChanged: (v) => setLocal(() => choice = v!),
+                  ),
+                ],
+                if (parsed.problems.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    '${parsed.problems.length} rows will be skipped:\n'
+                    '${parsed.problems.take(5).join('\n')}'
+                    '${parsed.problems.length > 5 ? '\n...' : ''}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                const Text(
+                  'Missing categories are created automatically and entries '
+                  'already in the app are skipped. A safety copy is saved '
+                  'before importing.',
+                  style: TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(dialogContext, choice),
+              child: const Text('Import'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _toggleDailyReminder(bool value) async {
@@ -502,9 +663,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                   _sectionTitle('Backup & restore'),
                   _buildBackupCard(),
+                  const SizedBox(height: 12),
+                  _groupCard([
+                    ListTile(
+                      leading: const Icon(Icons.schedule_rounded),
+                      title: const Text('Automatic backup'),
+                      subtitle: Text(
+                        '${_prefs.autoBackup.label} • history and restore',
+                      ),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      enabled: !_busy,
+                      onTap: _openBackupHistory,
+                    ),
+                  ]),
                   const SizedBox(height: 24),
 
-                  _sectionTitle('Export'),
+                  _sectionTitle('Export & import'),
                   _groupCard([
                     ListTile(
                       leading: const Icon(Icons.table_chart_outlined),
@@ -516,6 +690,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       enabled: !_busy,
                       onTap: _exportCsv,
                     ),
+                    ListTile(
+                      leading: const Icon(Icons.file_upload_outlined),
+                      title: const Text('Import from CSV'),
+                      subtitle: const Text(
+                        'Add expenses and income from a CSV file',
+                      ),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      enabled: !_busy,
+                      onTap: _importCsv,
+                    ),
                   ]),
                   const SizedBox(height: 24),
 
@@ -524,15 +708,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ListTile(
                       leading: const Icon(Icons.category_outlined),
                       title: const Text('Manage categories'),
-                      subtitle: const Text(
-                        'Add or edit expense and income categories',
-                      ),
+                      subtitle: const Text('Add or edit expense and income categories'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => const ManageCategoriesScreen(),
                         ),
+                      ),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.payments_outlined),
+                      title: const Text('Currency'),
+                      trailing: DropdownButton<AppCurrency>(
+                        value: _prefs.currency,
+                        underline: const SizedBox.shrink(),
+                        items: [
+                          for (final c in AppCurrency.values)
+                            DropdownMenuItem(
+                              value: c,
+                              child: Text('${c.code} (${c.symbol.trim()})'),
+                            ),
+                        ],
+                        onChanged: _changeCurrency,
                       ),
                     ),
                     ListTile(
@@ -602,9 +800,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             children: [
                               Icon(
                                 Icons.format_size_rounded,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                               SizedBox(width: 16),
                               Text('Text size', style: TextStyle(fontSize: 16)),
@@ -636,9 +832,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               height: 1.4,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -721,6 +915,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         trailing: const Icon(Icons.chevron_right_rounded),
                         onTap: _changePin,
                       ),
+                  ]),
+                  const SizedBox(height: 24),
+
+                  _sectionTitle('About'),
+                  _groupCard([
+                    ListTile(
+                      leading: const Icon(Icons.info_outline_rounded),
+                      title: const Text('About My Wallet'),
+                      subtitle: const Text('Version, privacy and support'),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AboutScreen()),
+                      ),
+                    ),
                   ]),
                   const SizedBox(height: 24),
 
@@ -896,6 +1105,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
+
+enum _ImportDefault { expense, income }
 
 class _StatTile extends StatelessWidget {
   const _StatTile({required this.label, required this.value});

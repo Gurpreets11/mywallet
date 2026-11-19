@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/currency_utils.dart';
 import '../models/budget_model.dart';
 
 class BudgetProgressCard extends StatelessWidget {
@@ -19,7 +20,7 @@ class BudgetProgressCard extends StatelessWidget {
         : budget.isNearLimit
         ? Colors.orange
         : Theme.of(context).colorScheme.primary;
-    String money(double value) => '₹${value.toStringAsFixed(0)}';
+    String money(double value) => CurrencyUtils.simple(value);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),

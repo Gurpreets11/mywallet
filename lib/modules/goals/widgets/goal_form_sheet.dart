@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
@@ -145,9 +146,9 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Target amount',
-                prefixText: '₹ ',
+                prefixText: '${CurrencyUtils.symbol} ',
               ),
               validator: (v) {
                 final n = double.tryParse((v ?? '').trim());

@@ -1,3 +1,4 @@
+import '../utils/currency_utils.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:timezone/data/latest.dart' as tz;
@@ -326,7 +327,7 @@ class NotificationService {
       title: 'SIP Reminder',
 
       body:
-          '₹${amount.toStringAsFixed(0)} '
+          '${CurrencyUtils.simple(amount)} '
           'SIP due for '
           '$investmentName',
 

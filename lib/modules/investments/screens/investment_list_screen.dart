@@ -11,6 +11,7 @@ import '../providers/investment_provider.dart';
 import '../widgets/investment_card.dart';
 import '../widgets/investment_summary_card.dart';
 import 'add_investment_screen.dart';
+import 'investment_valuation_screen.dart';
 import 'investment_detail_screen.dart';
 
 class InvestmentListScreen extends StatefulWidget {
@@ -210,6 +211,7 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
                               investment: investment,
                               onTap: () => _openDetails(investment),
                               onEdit: () => _editInvestment(investment),
+                              onHistory: () => _openHistory(investment),
                               onDelete: () =>
                                   _deleteInvestment(investment, provider),
                             ),
@@ -315,6 +317,7 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
             investment: item,
             onTap: () => _openDetails(item),
             onEdit: () => _editInvestment(item),
+            onHistory: () => _openHistory(item),
             onDelete: () => _deleteInvestment(item, provider),
           );
         },
@@ -350,6 +353,16 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
     context,
     MaterialPageRoute(builder: (_) => InvestmentDetailScreen(investment: item)),
   );
+  void _openHistory(InvestmentModel item) {
+    if (item.id == null) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => InvestmentValuationScreen(investment: item),
+      ),
+    );
+  }
+
   Future<void> _deleteInvestment(
     InvestmentModel item,
     InvestmentProvider provider,

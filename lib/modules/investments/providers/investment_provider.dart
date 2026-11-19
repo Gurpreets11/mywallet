@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../enums/investment_sort_type.dart';
 import '../models/investment_analytics_model.dart';
 import '../models/investment_model.dart';
+import '../models/investment_valuation_model.dart';
 
 import '../repositories/investment_repository.dart';
 import '../utils/investment_utils.dart';
@@ -165,6 +166,29 @@ class InvestmentProvider extends ChangeNotifier {
 
     await loadInvestments();
     notifyListeners();
+  }
+
+  Future<List<InvestmentValuation>> getValuations(int investmentId) =>
+      _repository.getValuations(investmentId);
+
+  Future<void> addValuation({
+    required int investmentId,
+    required double value,
+    required DateTime date,
+    String? notes,
+  }) async {
+    await _repository.addValuation(
+      investmentId: investmentId,
+      value: value,
+      date: date,
+      notes: notes,
+    );
+    await loadInvestments();
+  }
+
+  Future<void> deleteValuation(int valuationId, int investmentId) async {
+    await _repository.deleteValuation(valuationId, investmentId);
+    await loadInvestments();
   }
 
   Future<void> deleteInvestment(int id) async {

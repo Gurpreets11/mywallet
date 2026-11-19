@@ -1,6 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
@@ -49,7 +51,9 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
       _notesController.text = loan.notes ?? '';
       // Older / demo loans may carry a free-text type (e.g. "Home Loan");
       // anything that is not GIVEN is a borrowed loan.
-      _loanType = loan.loanType.toUpperCase() == 'GIVEN' ? 'GIVEN' : 'BORROWED';
+      _loanType = loan.loanType.toUpperCase() == 'GIVEN'
+          ? 'GIVEN'
+          : 'BORROWED';
       _loanStatus = loan.loanStatus.toUpperCase() == 'CLOSED'
           ? 'CLOSED'
           : 'ACTIVE';
@@ -280,9 +284,9 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
                         TextFormField(
                           controller: _amountController,
                           keyboardType: numberKeyboard,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Principal amount',
-                            prefixText: '₹ ',
+                            prefixText: '${CurrencyUtils.symbol} ',
                           ),
                           validator: _validatePositiveAmount,
                         ),
@@ -290,9 +294,9 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
                         TextFormField(
                           controller: _emiController,
                           keyboardType: numberKeyboard,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'EMI amount',
-                            prefixText: '₹ ',
+                            prefixText: '${CurrencyUtils.symbol} ',
                           ),
                           validator: _validatePositiveAmount,
                         ),

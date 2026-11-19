@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../accounts/widgets/account_dropdown.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/compact_form_theme.dart';
@@ -247,9 +248,9 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Amount',
-                            prefixText: '₹ ',
+                            prefixText: '${CurrencyUtils.symbol} ',
                           ),
                           validator: (value) {
                             final amount = double.tryParse(

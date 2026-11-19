@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import '../../../core/utils/currency_utils.dart';
 import '../../../core/utils/date_utils.dart';
+import 'package:provider/provider.dart';
 import '../models/investment_model.dart';
+import '../providers/investment_provider.dart';
+import 'investment_valuation_screen.dart';
 import '../utils/investment_utils.dart';
 
 class InvestmentDetailScreen extends StatelessWidget {
-  final InvestmentModel investment;
-  const InvestmentDetailScreen({super.key, required this.investment});
+  final InvestmentModel initial;
+  const InvestmentDetailScreen({super.key, required InvestmentModel investment})
+    : initial = investment;
 
   @override
   Widget build(BuildContext context) {
+    // Follow the latest saved values (e.g. after recording a new valuation).
+    final investment = context
+        .watch<InvestmentProvider>()
+        .investments
+        .firstWhere((i) => i.id == initial.id, orElse: () => initial);
     final profit = InvestmentUtils.calculateProfit(
       investedAmount: investment.investedAmount,
       currentValue: investment.currentValue,
@@ -155,6 +164,21 @@ class InvestmentDetailScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: investment.id == null
+                        ? null
+                        : () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => InvestmentValuationScreen(
+                                investment: investment,
+                              ),
+                            ),
+                          ),
+                    icon: const Icon(Icons.show_chart_rounded),
+                    label: const Text('Value history & performance'),
                   ),
                 ],
               ),

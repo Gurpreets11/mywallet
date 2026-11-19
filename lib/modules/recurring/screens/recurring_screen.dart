@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../../core/widgets/common_delete_dialog.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_responsive_content.dart';
@@ -79,7 +80,7 @@ class _RecurringScreenState extends State<RecurringScreen> {
         title: Text(item.title),
         content: Text(
           '${item.transactionType} • ${item.categoryName}\n'
-          'Amount: ₹${item.amount.toStringAsFixed(2)}\n'
+          'Amount: ${CurrencyUtils.simple(item.amount, decimals: 2)}\n'
           'Payment: ${item.paymentMode}\n'
           'Repeat: ${_frequencyLabel(item.frequency, item.intervalValue)}\n'
           'Start: ${_displayDate(item.startDate)}\n'
@@ -134,9 +135,7 @@ class _RecurringScreenState extends State<RecurringScreen> {
                           Icon(
                             Icons.event_repeat,
                             size: 48,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(height: 10),
                           const Text(
@@ -212,7 +211,7 @@ class _RecurringScreenState extends State<RecurringScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                '₹${item.amount.toStringAsFixed(0)}',
+                                CurrencyUtils.simple(item.amount),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w700,
                                 ),
