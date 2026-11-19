@@ -1,6 +1,6 @@
 # My Wallet
 
-A Flutter-based personal finance management application that helps you track expenses, income, investments, and loans — completely offline, using only local storage.
+A Flutter-based personal finance management application that helps you track expenses, income, investments, loans, accounts, budgets and savings goals — completely offline, using only local storage.
 
 ![Platform](https://img.shields.io/badge/platform-Android-blue)
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.5-blue.svg)](https://flutter.dev)
@@ -59,11 +59,34 @@ My Wallet is designed for people who want full control over their financial data
 - Outstanding balance calculation
 - Loan repayment progress
 
+### 🗂️ Categories
+- Manage categories and subcategories for expenses and income separately (Settings → Manage categories)
+- Add, rename, hide/show and delete; "New category" shortcuts directly on the forms
+
+### 🏧 Accounts
+- Cash, bank and wallet accounts with live balances
+- Transfers between accounts; account selector on every transaction form
+
+### 🎯 Savings Goals & Budgets
+- Savings goals with progress, contributions and a "save per month" hint
+- Monthly category budgets with notification alerts
+
+### 🔁 Recurring Transactions
+- Daily, weekly, monthly and yearly schedules, pause/resume and Skip next
+
 ### 📊 Dashboard & Analytics
 - Monthly financial summary
 - Income vs. expense overview
 - Savings analysis
-- Financial charts and reports
+- Financial charts and reports (PDF and CSV export)
+- All Transactions screen with search
+
+### ✨ Everyday Convenience
+- Undo after deleting an expense, income, loan or goal
+- Duplicate an expense or income entry
+- Date-range presets in filters (This month, Last 7 days, ...)
+- Dark mode (Light / Dark / System)
+- Adaptive layout: bottom bar on mobile, navigation rail on tablet and web
 
 ### 🔒 Security
 - Local device storage only — no cloud sync
@@ -107,11 +130,18 @@ lib/
 │   └── services/
 │
 ├── modules/
+│   ├── accounts/
+│   ├── budgets/
+│   ├── categories/
 │   ├── dashboard/
 │   ├── expenses/
+│   ├── goals/
 │   ├── income/
 │   ├── investments/
 │   ├── loans/
+│   ├── navigation/
+│   ├── recurring/
+│   ├── reports/
 │   └── settings/
 │
 ├── routes/
@@ -188,14 +218,20 @@ build/app/outputs/flutter-apk/
 | `investments`  | Store investment details        |
 | `loans`        | Store loan information          |
 | `loan_payments`| Store EMI / payment history     |
-| `categories`   | Store transaction categories    |
-| `app_settings` | Store local app settings        |
+| `categories`, `subcategories`, `transaction_types` | Store transaction categories |
+| `budgets`      | Monthly category budgets        |
+| `recurring_transactions`, `recurring_occurrences` | Recurring schedules |
+| `accounts`, `account_transfers` | Accounts and transfers |
+| `savings_goals`, `savings_goal_contributions` | Savings goals |
+| `app_metadata` | Store local app settings        |
+
+Current schema version: 14. Full details are in [DATABASE.md](DATABASE.md).
 
 ---
 
 ## Roadmap
 
-See [ROADMAP.md](ROADMAP.md) for completed phases and what's planned next (budgeting, recurring transactions, cloud backup, dark mode, and more).
+See [ROADMAP.md](ROADMAP.md) for completed phases and what's planned next (what's done, and ideas such as cloud backup and multi-currency).
 
 ---
 

@@ -5,7 +5,160 @@ All notable changes to **My Wallet** will be documented in this file.
 The format is based on [Keep a ](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# myWallet Phase 14 - Categories, Undo, Duplicate & Date Presets
+
+## Features Included:
+- **Manage Categories** (Settings -> Manage categories): add, rename, hide/show and delete categories and subcategories, separately for Expense and Income. Uses the existing `categories` / `subcategories` tables - no migration.
+- Inline **New category / New subcategory** links on the Add/Edit Expense and Add/Edit Income forms; the new item is selected automatically.
+- **Undo after delete** (6-second snackbar) for expenses, income, loans and savings goals.
+- **Duplicate** action in the expense and income card menu (opens the form pre-filled, dated today).
+- **Date-range presets** in the expense and income filters: This month, Last month, Last 7 days, Last 30 days, This year (custom range picker still available).
+- Home screen balance card label renamed from "Total Balance" to "This month's savings".
+
+## Behaviour notes:
+- A category/subcategory can only be deleted when nothing uses it (expenses, income, budgets, recurring schedules). Otherwise use **Hide**.
+- Hidden categories no longer appear in the add forms, but old entries that use one still show it when edited, and it stays available in the list filters.
+- Renaming a category also updates the stored `category_name` on expenses, budgets and recurring schedules (and `subcategory_name` on expenses), so reports stay consistent.
+- Adding a category whose name matches a hidden one re-activates it instead of creating a duplicate.
+- Deleting a loan now deletes its EMI payments in the same transaction (previously they were left behind as orphan "Loan EMI" rows); Undo restores the loan and its payments.
+- Undo for expenses/income restores the row with its original id.
+
+## Fixes:
+- Loan and investment reminders: notification ids were built from `DateTime.now().millisecondsSinceEpoch`, which exceeds the 32-bit id limit on Android. Add Loan / Add Investment now call `NotificationService.rescheduleAll()` (loans use `loan.id`, SIPs use `1000000 + investment.id`).
+- Edit screens for Income, Loans and Investments showed an error and a blank screen for entries whose saved value was not in the dropdown list (e.g. payment mode "Net Banking", loan type "Home Loan", an unlisted investment type). Dropdowns now include the saved value; loan types other than GIVEN open as BORROWED. The same safeguard was added to the expense payment-mode dropdown.
+
+## Consistency:
+- One shared delete confirmation (`confirmDelete` in `core/widgets/common_delete_dialog.dart`: warning icon, Cancel, red Delete) is used for expenses, income, loans, investments, goals, budgets, accounts, recurring schedules and categories.
+
+## Files changed/new files only:
+- lib/modules/categories/models/category_item.dart (new)
+- lib/modules/categories/repositories/category_repository.dart (new)
+- lib/modules/categories/screens/manage_categories_screen.dart (new)
+- lib/modules/categories/widgets/name_dialog.dart (new)
+- lib/modules/categories/widgets/quick_add.dart (new)
+- lib/core/widgets/date_range_presets.dart (new)
+- lib/core/widgets/common_delete_dialog.dart
+- lib/core/utils/snackbar_utils.dart (`showUndo`)
+- lib/data/repositories/master_repository.dart, lib/data/providers/master_provider.dart
+- lib/modules/expenses/ and lib/modules/income/ (add forms, list screens, cards)
+- lib/modules/loans/ (repository, provider, add/list screens)
+- lib/modules/goals/ (repository, goals screen)
+- lib/modules/investments/screens/ (add form, list screen)
+- lib/modules/budgets/screens/budget_screen.dart, lib/modules/recurring/screens/recurring_screen.dart, lib/modules/accounts/screens/accounts_screen.dart (delete dialog)
+- lib/modules/settings/setting_screen.dart, lib/modules/dashboard/widgets/balance_card.dart
+
+## Database:
+- No schema change (database version stays at 14).
+
+## Integration:
+1. Copy the files into the project, preserving the folder structure.
+2. Run: `flutter pub get`, `dart format lib`, `flutter analyze`.
+
+
+# myWallet Phase 13 - Dark Mode, Savings Goals, Budget Alerts, Recurring Upgrades & Search
+
+## Features Included:
+- **Dark mode**: Appearance setting (Light / Dark / System) in Settings; full dark theme; dashboard cards, PIN screens, reports, More screen and export sheet made theme-aware.
+- **Savings goals**: create goals with a target amount and optional date, add/withdraw money, view history, "save per month" hint, goals summary card on the dashboard, Goals entry in the More screen and navigation rail.
+- **Budget alerts**: local notification when a category budget reaches its alert percentage and again when the limit is reached (checked after saving an expense). Toggle in Settings.
+- **Recurring**: account selector on schedules (generated entries carry the account) and a **Skip next** action.
+- **Search**: search box on All Transactions (notes/remarks included) and a search shortcut on the home screen.
+
+## Database:
+- databaseVersion changes from 13 to 14 (`_applyV14Schema`, idempotent):
+  - new tables `savings_goals`, `savings_goal_contributions`
+  - new column `budgets.last_alert_level`
+  - new column `recurring_transactions.account_id`
+- Existing databases are upgraded automatically through onUpgrade.
+
+## Files changed/new files only (key items):
+- lib/core/theme/app_theme.dart, lib/main.dart
+- lib/core/services/settings/app_preferences.dart (`pref_theme_mode`, `pref_budget_alerts_enabled`)
+- lib/core/database/migrations.dart, lib/core/database/database_constants.dart
+- lib/modules/goals/** (new)
+- lib/modules/budgets/services/budget_alert_service.dart (new)
+- lib/modules/recurring/** (model, repository, provider, screen)
+- lib/modules/dashboard/** (goals card, search, theme-aware cards)
+- lib/modules/settings/setting_screen.dart
+
+
+# myWallet Phase 12 - Accounts
+
+## Features Included:
+- Accounts / wallets (Cash, Bank, etc.) with an opening balance and a default account.
+- Live balance per account: opening balance + income + EMI received - expenses - EMI paid - investments +/- transfers.
+- Transfers between accounts.
+- Account selector on the Expense, Income, Loan EMI and Investment forms.
+- Accounts screen with add / edit / delete (transactions of a deleted account move to the default account).
+
+## Behaviour notes:
+- Entries with no account (created before this feature) count towards the default account, so old data keeps working.
+- Loan EMIs count as money in for GIVEN loans and money out for BORROWED loans.
+
+## Database:
+- databaseVersion changes from 12 to 13 (`_applyAccountsSchema`, idempotent):
+  - new tables `accounts`, `account_transfers`
+  - new column `account_id` on `expenses`, `incomes`, `loan_payments`, `investments`
+  - one default "Cash" account is created if none exists
+
+## Files changed/new files only:
+- lib/modules/accounts/** (new: models, repositories, screens, widgets incl. `AccountDropdown`)
+- lib/core/database/migrations.dart, lib/core/database/database_constants.dart
+- Expense, income, loan and investment models / forms (account field)
+
+
+# myWallet Phase 11 - All Transactions
+
+## Features Included:
+- "View all" on the home Recent Transactions card opens **All Transactions**.
+- One date-wise feed combining expenses, income, loan EMI payments and investments.
+- Backed by `transaction_feed_repository.dart`, which unions the source tables into a single list.
+
+## Files changed/new files only:
+- lib/modules/dashboard/screens/all_transactions_screen.dart (new)
+- lib/modules/dashboard/repositories/transaction_feed_repository.dart (new)
+- lib/modules/dashboard/models/ and dashboard screen (View all button)
+
+
+# myWallet Phase 10 - Responsive Navigation & Loans Redesign
+
+## Features Included:
+- **Tablet / web navigation rail**: all destinations are shown in the rail (Home, Expenses, Income, Investments, Loans, Recurring, Reports, Budgets, Settings; Accounts and Goals were added to it in Phases 12-13). The **More** screen is now mobile-only; mobile layout is unchanged.
+- Loans screens redesigned (summary card, loan cards, details) to match the expense/income styling.
+- Expense and Income screens use the shared responsive content wrapper and pinned bottom action bar.
+
+## Files changed/new files only:
+- lib/main.dart
+- lib/modules/navigation/screens/main_navigation_screen.dart
+- lib/modules/loans/**
+
+
 # myWallet Phase 9 - Settings
+
+## Features Included:
+- **Settings screen** with grouped sections: Preferences, Reminders, Security, Backup and Data.
+- **Preferences**: date format, text size (selectable size applied app-wide) and Export to CSV (expenses, income or both, for a chosen period).
+- **Reminders**: daily expense reminder with a configurable time, EMI reminders (a day before each EMI is due) and SIP reminders. Each can be switched on or off.
+- **App lock (PIN)**: set, change and disable a PIN; the app asks for it on launch and when returning from the background. The PIN is stored hashed, not as plain text.
+- **Backup Data**: exports all tables to a single JSON file (`my_wallet_backup.json`), with the backup version, database version and app version included.
+- **Restore Data**: pick a backup file, review a summary (including a warning if it holds no transactions) and confirm before restoring.
+- **Safety copies**: an automatic copy is saved before every restore or reset (the latest 5 are kept) and can be restored from Settings -> "Restore from safety copy".
+- **Erase all data**: deletes everything and starts fresh, with a typed confirmation; a safety copy is taken first.
+- Preferences are stored in the `app_metadata` table under `pref_*` keys. Backup and restore read the table list at runtime, so new tables are included automatically; device-only keys are excluded from backups.
+
+## Files changed/new files only:
+- lib/modules/settings/setting_screen.dart
+- lib/modules/settings/screens/pin_setup_screen.dart
+- lib/modules/settings/widgets/export_options_sheet.dart
+- lib/core/services/settings/app_preferences.dart
+- lib/core/services/backup/ (backup_service, restore_service, data_reset_service, backup_model, backup_result, backup_constants)
+- lib/core/services/security/ (app_lock_service, sha256_lite)
+- lib/core/services/export/csv_export_service.dart
+- lib/core/widgets/type_to_confirm_dialog.dart, lib/core/widgets/app_lock_gate.dart
+
+## Database:
+- No schema change for this phase (preferences reuse `app_metadata`).
+
 
 
 # myWallet Phase 8 - Reports & Analytics
@@ -289,13 +442,25 @@ The supplied archive contained only the `lib/` directory and did not include `pu
 ## [Unreleased]
 
 ### Added
-- Placeholder section for upcoming changes.
+- Manage Categories (add, rename, hide, delete categories and subcategories for expenses and income) with inline "New category / New subcategory" links on the forms.
+- Accounts with per-account balances and transfers; account selector on the transaction forms.
+- Savings goals with progress, contributions and a dashboard summary card.
+- Budget alerts (local notifications) and a Settings toggle.
+- Dark mode (Light / Dark / System).
+- All Transactions screen with search; global search shortcut on the home screen.
+- Undo after delete (expenses, income, loans, goals), Duplicate for expenses and income, date-range presets in filters.
+- Responsive navigation rail on tablet and web.
+- Recurring transactions: account selector and "Skip next".
 
 ### Changed
-- Placeholder section for upcoming changes.
+- Home balance card label "Total Balance" is now "This month's savings".
+- Deleting a loan also deletes its EMI payments.
+- One shared delete confirmation dialog across the app.
+- Database version 14 (see DATABASE.md).
 
 ### Fixed
-- Placeholder section for upcoming changes.
+- Edit screens for Income, Loans and Investments failing when the saved dropdown value was not in the list.
+- Loan/investment reminder notification ids exceeding the 32-bit limit.
 
 ---
 
