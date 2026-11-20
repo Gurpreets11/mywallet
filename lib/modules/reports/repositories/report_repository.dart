@@ -9,17 +9,17 @@ class ReportRepository {
     final end = '${year + 1}-01-01';
     final incomeRows = await db.rawQuery(
       """
-      SELECT CAST(strftime('%m', date(date)) AS INTEGER) AS month, COALESCE(SUM(amount), 0) AS total
-      FROM incomes WHERE date(date) >= date(?) AND date(date) < date(?)
-      GROUP BY strftime('%m', date(date))
+      SELECT CAST(substr(date, 6, 2) AS INTEGER) AS month, COALESCE(SUM(amount), 0) AS total
+      FROM incomes WHERE date >= ? AND date < ?
+      GROUP BY substr(date, 6, 2)
     """,
       [start, end],
     );
     final expenseRows = await db.rawQuery(
       """
-      SELECT CAST(strftime('%m', date(date)) AS INTEGER) AS month, COALESCE(SUM(amount), 0) AS total
-      FROM expenses WHERE date(date) >= date(?) AND date(date) < date(?)
-      GROUP BY strftime('%m', date(date))
+      SELECT CAST(substr(date, 6, 2) AS INTEGER) AS month, COALESCE(SUM(amount), 0) AS total
+      FROM expenses WHERE date >= ? AND date < ?
+      GROUP BY substr(date, 6, 2)
     """,
       [start, end],
     );
@@ -45,7 +45,7 @@ class ReportRepository {
       SELECT COALESCE(NULLIF(c.category_name,''), NULLIF(e.category_name,''), 'Uncategorised') AS category_name,
              COALESCE(SUM(e.amount),0) AS total
       FROM expenses e LEFT JOIN categories c ON c.id=e.category_id
-      WHERE date(e.date)>=date(?) AND date(e.date)<date(?)
+      WHERE e.date >= ? AND e.date < ?
       GROUP BY COALESCE(NULLIF(c.category_name,''), NULLIF(e.category_name,''), 'Uncategorised')
       ORDER BY total DESC
     """,

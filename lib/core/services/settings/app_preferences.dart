@@ -81,6 +81,7 @@ class AppPreferences extends ChangeNotifier {
   static const String _kBudgetAlerts = 'pref_budget_alerts_enabled';
   static const String _kCurrency = 'pref_currency';
   static const String _kBillReminders = 'pref_bill_reminders_enabled';
+  static const String _kLockDelay = 'pref_lock_delay_seconds';
   static const String _kAutoBackup = 'pref_auto_backup';
 
   /// Date patterns the user can pick from (shown with a live example).
@@ -103,9 +104,15 @@ class AppPreferences extends ChangeNotifier {
   AppThemeChoice _themeChoice = AppThemeChoice.light;
   AppCurrency _currency = AppCurrency.inr;
   AutoBackupFrequency _autoBackup = AutoBackupFrequency.weekly;
+  int _lockDelaySeconds = 30;
 
   AppCurrency get currency => _currency;
   AutoBackupFrequency get autoBackup => _autoBackup;
+
+  /// Seconds the app may stay in the background before the PIN is asked
+  /// again (0 = every time).
+  static const List<int> lockDelayOptions = [0, 30, 60, 300];
+  int get lockDelaySeconds => _lockDelaySeconds;
 
   AppThemeChoice get themeChoice => _themeChoice;
   ThemeMode get themeMode => _themeChoice.mode;
@@ -140,6 +147,7 @@ class AppPreferences extends ChangeNotifier {
     _themeChoice = AppThemeChoice.light;
     _currency = AppCurrency.inr;
     _autoBackup = AutoBackupFrequency.weekly;
+    _lockDelaySeconds = 30;
 
     try {
       final Database db = await AppDatabase.database;
@@ -185,6 +193,10 @@ class AppPreferences extends ChangeNotifier {
       final currencyCode = values[_kCurrency];
       for (final option in AppCurrency.values) {
         if (option.code == currencyCode) _currency = option;
+      }
+      final delay = int.tryParse(values[_kLockDelay] ?? '');
+      if (delay != null && lockDelayOptions.contains(delay)) {
+        _lockDelaySeconds = delay;
       }
       final autoName = values[_kAutoBackup];
       for (final option in AutoBackupFrequency.values) {
@@ -235,6 +247,11 @@ class AppPreferences extends ChangeNotifier {
   Future<void> setSipRemindersEnabled(bool value) async {
     await _save(_kSipReminders, value ? '1' : '0');
     _sipRemindersEnabled = value;
+  }
+
+  Future<void> setLockDelaySeconds(int seconds) async {
+    await _save(_kLockDelay, seconds.toString());
+    _lockDelaySeconds = seconds;
   }
 
   Future<void> setBillRemindersEnabled(bool value) async {

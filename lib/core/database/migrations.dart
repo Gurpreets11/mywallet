@@ -19,6 +19,7 @@ class Migrations {
     await _applyV14Schema(db);
     await _applyV15Schema(db);
     await _applyV16Schema(db);
+    await _applyV17Schema(db);
   }
 
   static Future<void> onUpgrade(
@@ -61,6 +62,33 @@ class Migrations {
     }
     if (oldVersion < 16) {
       await _applyV16Schema(db);
+    }
+    if (oldVersion < 17) {
+      await _applyV17Schema(db);
+    }
+  }
+
+  /// Indexes for fast lists, filters and reports on large histories.
+  /// Safe to run more than once; skips tables/columns that do not exist.
+  static Future<void> _applyV17Schema(Database db) async {
+    const indexes = <(String, String, List<String>)>[
+      ('expenses', 'idx_expenses_date', ['date']),
+      ('expenses', 'idx_expenses_category', ['category_id']),
+      ('expenses', 'idx_expenses_account', ['account_id']),
+      ('incomes', 'idx_incomes_date', ['date']),
+      ('incomes', 'idx_incomes_account', ['account_id']),
+      ('loan_payments', 'idx_loan_payments_loan', ['loan_id']),
+      ('loan_payments', 'idx_loan_payments_date', ['payment_date']),
+      ('account_transfers', 'idx_transfers_date', ['date']),
+      ('savings_goal_contributions', 'idx_goal_contrib_goal', ['goal_id']),
+    ];
+    for (final (table, name, columns) in indexes) {
+      final info = await db.rawQuery('PRAGMA table_info($table)');
+      final existing = info.map((c) => c['name']).toSet();
+      if (existing.isEmpty || !columns.every(existing.contains)) continue;
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS $name ON $table (${columns.join(', ')})',
+      );
     }
   }
 

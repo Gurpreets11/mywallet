@@ -31,6 +31,10 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
   final AppLockService _lock = AppLockService.instance;
   DateTime? _backgroundedAt;
 
+  /// Hides the app while it is inactive / in the app switcher so balances
+  /// never show in the recent-apps preview.
+  bool _covered = false;
+
   @override
   void initState() {
     super.initState();
@@ -47,12 +51,19 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_lock.isEnabled) return;
+    if (!_lock.isEnabled) {
+      if (_covered && mounted) setState(() => _covered = false);
+      return;
+    }
     switch (state) {
+      case AppLifecycleState.inactive:
+        if (!_lock.isSuspended && !_covered) setState(() => _covered = true);
+        break;
       case AppLifecycleState.paused:
       case AppLifecycleState.hidden:
         // System pickers (backup / restore / export) also background the app.
         _backgroundedAt ??= _lock.isSuspended ? null : DateTime.now();
+        if (!_lock.isSuspended && !_covered) setState(() => _covered = true);
         break;
       case AppLifecycleState.resumed:
         final since = _backgroundedAt;
@@ -62,6 +73,7 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
                 AppLockService.backgroundGracePeriod) {
           _lock.lockNow();
         }
+        if (_covered) setState(() => _covered = false);
         break;
       default:
         break;
@@ -79,12 +91,23 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
             // Until the lock state is known, cover the app (no content flash).
             if (!_lock.isLoaded)
               Positioned.fill(
-                child: ColoredBox(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                ),
+                child: ColoredBox(color: Theme.of(context).scaffoldBackgroundColor),
               )
             else if (_lock.isLocked)
-              const Positioned.fill(child: _LockScreen()),
+              const Positioned.fill(child: _LockScreen())
+            else if (_covered && _lock.isEnabled)
+              Positioned.fill(
+                child: ColoredBox(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  child: const Center(
+                    child: Icon(
+                      Icons.lock_rounded,
+                      size: 44,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ),
           ],
         );
       },
