@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/services/notification_service.dart';
+import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/common_delete_dialog.dart';
 import '../../../core/widgets/empty_view.dart';
@@ -372,6 +374,21 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
       title: 'Delete investment?',
       message: 'This investment will be permanently deleted.',
     );
-    if (ok && item.id != null) await provider.deleteInvestment(item.id!);
+    if (!ok || item.id == null || !mounted) return;
+    final history = await provider.deleteInvestmentWithHistory(item.id!);
+    if (!mounted) return;
+    _refreshReminders();
+    SnackbarUtils.showUndo(context, 'Investment deleted', () async {
+      await provider.restoreInvestment(item, history);
+      await _refreshReminders();
+    });
+  }
+
+  Future<void> _refreshReminders() async {
+    try {
+      await NotificationService.instance.rescheduleAll();
+    } catch (e) {
+      debugPrint('Unable to refresh reminders: $e');
+    }
   }
 }

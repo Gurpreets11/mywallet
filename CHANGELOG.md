@@ -510,13 +510,24 @@ The supplied archive contained only the `lib/` directory and did not include `pu
 - Automatic backup (Off / Daily / Weekly) with a backup history and restore screen.
 - About screen.
 - Investment valuation history with chart, performance figures and recorded values.
+- Loan reminders: optional pay-by / repay-by date on a loan with notifications a day before and on the day; EMI reminders now say whether to collect or pay and the amount.
+- Bill reminders on recurring schedules ("Remind me" on the day or 1, 3 or 7 days before) with a Settings switch.
+- Edit and Duplicate for recurring schedules.
+- Edit and Duplicate for account transfers.
+- "Lock after" setting (Immediately / 30 seconds / 1 min / 5 min) for the PIN lock; the app is hidden in the recent-apps preview while the lock is on.
+- Database indexes for expenses, income, loan payments, transfers and goal contributions (faster lists and reports on large histories).
+- Reports: retry button on errors, empty-year message with export disabled, multi-page PDF export, and the selected currency code in exports.
+- First unit tests (SHA-256 used by the PIN lock, model round trips).
+- Undo after deleting an investment (with its value history) or a budget.
 
 ### Changed
-- Database version 15 (`investment_valuations`).
+- Database version 17 (indexes); version 16 added `recurring_transactions.reminder_days`; version 15 added `investment_valuations`.
+- Reminders are refreshed after an EMI payment, a loan delete/undo and any recurring change.
 - Amounts and amount fields use the selected currency instead of a fixed rupee symbol.
 
 ### Fixed
-- Nothing yet.
+- PDF report no longer cuts off after one page and no longer always says INR.
+- Yearly report queries now use the date index.
 
 ---
 

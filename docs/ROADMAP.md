@@ -39,9 +39,9 @@ For released changes, see [CHANGELOG.md](CHANGELOG.md). To propose something new
 ## Near-Term (Next Release)
 
 - 📋 Polish reports/charts (export-ready views, better empty/error states)
-- 📋 Security hardening: enforce PIN/biometric prompt on app resume, audit `flutter_secure_storage` usage
-- 📋 Performance pass on database queries for large transaction histories
-- 📋 Expand test coverage for repositories and business logic in `data/`
+- ✅ PIN prompt on resume with a "Lock after" setting and hidden app preview (biometric unlock still 💡)
+- ✅ Database indexes and index-friendly report queries
+- 🚧 Expand test coverage (first unit tests added; database tests need `sqflite_common_ffi`)
 
 ## Mid-Term
 
@@ -57,8 +57,8 @@ For released changes, see [CHANGELOG.md](CHANGELOG.md). To propose something new
 - ✅ Investment valuation history
 - ✅ Net worth dashboard with 12-month trend
 - ✅ Month-over-month comparison, top spending and quick-add expense
-- 📋 Edit/duplicate for recurring schedules and account transfers
-- 💡 Undo for investment and budget deletes
+- ✅ Loan reminders, bill reminders on recurring schedules, edit/duplicate for recurring schedules and account transfers
+- ✅ Undo for investment and budget deletes
 - 💡 Category icons/colors in Manage Categories
 - 💡 Reorder and merge categories
 

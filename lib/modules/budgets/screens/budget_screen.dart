@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/utils/currency_utils.dart';
+import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/common_delete_dialog.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../models/budget_model.dart';
@@ -158,7 +159,12 @@ class _BudgetScreenState extends State<BudgetScreen> {
       message: 'Delete the ${budget.categoryName} budget for this month?',
     );
     if (confirm && budget.id != null && mounted) {
-      await context.read<BudgetProvider>().delete(budget.id!);
+      final provider = context.read<BudgetProvider>();
+      await provider.delete(budget.id!);
+      if (!mounted) return;
+      SnackbarUtils.showUndo(context, 'Budget deleted', () async {
+        await provider.save(budget);
+      });
     }
   }
 

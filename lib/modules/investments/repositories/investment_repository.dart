@@ -88,6 +88,36 @@ class InvestmentRepository {
     });
   }
 
+  /// Deletes an investment and returns its value history so the delete can
+  /// be undone with [restoreInvestment].
+  Future<List<InvestmentValuation>> deleteInvestmentWithHistory(int id) async {
+    final history = await getValuations(id);
+    await deleteInvestment(id);
+    return history;
+  }
+
+  /// Puts back a deleted investment (same id) with its value history.
+  Future<void> restoreInvestment(
+    InvestmentModel investment,
+    List<InvestmentValuation> valuations,
+  ) async {
+    final Database db = await AppDatabase.database;
+    await db.transaction((txn) async {
+      await txn.insert(
+        'investments',
+        investment.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      for (final v in valuations) {
+        await txn.insert(
+          'investment_valuations',
+          v.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // Valuation history
   // ---------------------------------------------------------------------------

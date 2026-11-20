@@ -191,6 +191,20 @@ class InvestmentProvider extends ChangeNotifier {
     await loadInvestments();
   }
 
+  Future<List<InvestmentValuation>> deleteInvestmentWithHistory(int id) async {
+    final history = await _repository.deleteInvestmentWithHistory(id);
+    await loadInvestments();
+    return history;
+  }
+
+  Future<void> restoreInvestment(
+    InvestmentModel investment,
+    List<InvestmentValuation> valuations,
+  ) async {
+    await _repository.restoreInvestment(investment, valuations);
+    await loadInvestments();
+  }
+
   Future<void> deleteInvestment(int id) async {
     await _repository.deleteInvestment(id);
 
