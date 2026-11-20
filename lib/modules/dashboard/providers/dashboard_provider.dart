@@ -11,7 +11,11 @@ import '../../investments/models/investment_model.dart';
 import '../../investments/repositories/investment_repository.dart';
 import '../../loans/models/loan_model.dart';
 import '../../loans/repositories/loan_repository.dart';
+import '../../networth/models/net_worth_models.dart';
+import '../../networth/repositories/net_worth_repository.dart';
 import '../models/dashboard_chart_model.dart';
+import '../models/month_insights.dart';
+import '../repositories/month_insights_repository.dart';
 import '../models/dashboard_transaction_model.dart';
 import '../repositories/transaction_feed_repository.dart';
 
@@ -98,6 +102,28 @@ class DashboardProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ---- Net worth and this-month insights ----
+  NetWorthResult? netWorth;
+  MonthInsights? insights;
+
+  Future<void> loadNetWorth() async {
+    try {
+      netWorth = await NetWorthRepository().load();
+    } catch (e) {
+      debugPrint('Loading net worth failed: $e');
+    }
+    notifyListeners();
+  }
+
+  Future<void> loadInsights() async {
+    try {
+      insights = await MonthInsightsRepository().load();
+    } catch (e) {
+      debugPrint('Loading insights failed: $e');
+    }
+    notifyListeners();
+  }
+
   // ---- Accounts ----
   final AccountRepository _accountRepository = AccountRepository();
 
@@ -159,6 +185,10 @@ class DashboardProvider extends ChangeNotifier {
     await loadAccounts();
 
     await loadGoals();
+
+    await loadInsights();
+
+    await loadNetWorth();
   }
 
   Future<void> loadRecentTransactions() async {

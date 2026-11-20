@@ -72,7 +72,35 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ? Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
-                  child: Text(p.error!, textAlign: TextAlign.center),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 44,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Could not load the report',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Please try again. If it keeps happening, restart the app.',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 14),
+                      FilledButton.icon(
+                        onPressed: () => p.load(),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Try again'),
+                      ),
+                    ],
+                  ),
                 ),
               )
             : report == null
@@ -123,12 +151,25 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     const SizedBox(height: 14),
                     _sectionTitle('Export Report'),
                     const SizedBox(height: 8),
+                    if (report.totalIncome == 0 && report.totalExpense == 0)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          'Nothing to export for ${p.selectedYear}. '
+                          'Pick another year or add transactions.',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
                     Row(
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () =>
-                                _exportFile(_export.exportPdf, report),
+                            onPressed: report.totalIncome == 0 &&
+                                    report.totalExpense == 0
+                                ? null
+                                : () => _exportFile(_export.exportPdf, report),
                             icon: const Icon(Icons.picture_as_pdf_outlined),
                             label: const Text('PDF'),
                           ),
@@ -136,8 +177,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () =>
-                                _exportFile(_export.exportCsv, report),
+                            onPressed: report.totalIncome == 0 &&
+                                    report.totalExpense == 0
+                                ? null
+                                : () => _exportFile(_export.exportCsv, report),
                             icon: const Icon(Icons.table_view_outlined),
                             label: const Text('Excel / CSV'),
                           ),
@@ -487,9 +530,7 @@ class _EmptyChart extends StatelessWidget {
       child: Center(
         child: Text(
           'No transactions found for this year',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ),
     ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/services/notification_service.dart';
+import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/common_delete_dialog.dart';
 import '../../../core/widgets/empty_view.dart';
@@ -11,6 +13,7 @@ import '../providers/investment_provider.dart';
 import '../widgets/investment_card.dart';
 import '../widgets/investment_summary_card.dart';
 import 'add_investment_screen.dart';
+import 'investment_valuation_screen.dart';
 import 'investment_detail_screen.dart';
 
 class InvestmentListScreen extends StatefulWidget {
@@ -210,6 +213,7 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
                               investment: investment,
                               onTap: () => _openDetails(investment),
                               onEdit: () => _editInvestment(investment),
+                              onHistory: () => _openHistory(investment),
                               onDelete: () =>
                                   _deleteInvestment(investment, provider),
                             ),
@@ -315,6 +319,7 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
             investment: item,
             onTap: () => _openDetails(item),
             onEdit: () => _editInvestment(item),
+            onHistory: () => _openHistory(item),
             onDelete: () => _deleteInvestment(item, provider),
           );
         },
@@ -350,6 +355,16 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
     context,
     MaterialPageRoute(builder: (_) => InvestmentDetailScreen(investment: item)),
   );
+  void _openHistory(InvestmentModel item) {
+    if (item.id == null) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => InvestmentValuationScreen(investment: item),
+      ),
+    );
+  }
+
   Future<void> _deleteInvestment(
     InvestmentModel item,
     InvestmentProvider provider,
@@ -359,6 +374,21 @@ class _InvestmentListScreenState extends State<InvestmentListScreen> {
       title: 'Delete investment?',
       message: 'This investment will be permanently deleted.',
     );
-    if (ok && item.id != null) await provider.deleteInvestment(item.id!);
+    if (!ok || item.id == null || !mounted) return;
+    final history = await provider.deleteInvestmentWithHistory(item.id!);
+    if (!mounted) return;
+    _refreshReminders();
+    SnackbarUtils.showUndo(context, 'Investment deleted', () async {
+      await provider.restoreInvestment(item, history);
+      await _refreshReminders();
+    });
+  }
+
+  Future<void> _refreshReminders() async {
+    try {
+      await NotificationService.instance.rescheduleAll();
+    } catch (e) {
+      debugPrint('Unable to refresh reminders: $e');
+    }
   }
 }

@@ -4,13 +4,25 @@ import '../../../core/database/app_database.dart';
 
 import '../models/investment_analytics_model.dart';
 import '../models/investment_model.dart';
+import '../models/investment_valuation_model.dart';
 import '../utils/investment_utils.dart';
 
 class InvestmentRepository {
   Future<int> insertInvestment(InvestmentModel investment) async {
     final Database db = await AppDatabase.database;
 
-    return db.insert('investments', investment.toMap());
+    return db.transaction((txn) async {
+      final id = await txn.insert('investments', investment.toMap());
+      // First point of the value history.
+      await txn.insert('investment_valuations', {
+        'investment_id': id,
+        'value': investment.currentValue,
+        'date': investment.investmentDate,
+        'notes': 'Opening value',
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      return id;
+    });
   }
 
   Future<List<InvestmentModel>> getAllInvestments() async {
@@ -27,18 +39,151 @@ class InvestmentRepository {
   Future<int> updateInvestment(InvestmentModel investment) async {
     final Database db = await AppDatabase.database;
 
-    return db.update(
-      'investments',
-      investment.toMap(),
-      where: 'id = ?',
-      whereArgs: [investment.id],
-    );
+    return db.transaction((txn) async {
+      final before = await txn.query(
+        'investments',
+        columns: ['current_value'],
+        where: 'id = ?',
+        whereArgs: [investment.id],
+        limit: 1,
+      );
+      final changed = await txn.update(
+        'investments',
+        investment.toMap(),
+        where: 'id = ?',
+        whereArgs: [investment.id],
+      );
+      // Editing the current value on the form counts as a new valuation.
+      if (before.isNotEmpty && investment.id != null) {
+        final old = (before.first['current_value'] as num?)?.toDouble();
+        if (old != investment.currentValue) {
+          final today = DateTime.now();
+          await txn.insert('investment_valuations', {
+            'investment_id': investment.id,
+            'value': investment.currentValue,
+            'date': DateTime(
+              today.year,
+              today.month,
+              today.day,
+            ).toIso8601String(),
+            'notes': 'Updated from edit screen',
+            'created_at': today.toIso8601String(),
+          });
+        }
+      }
+      return changed;
+    });
   }
 
   Future<int> deleteInvestment(int id) async {
     final Database db = await AppDatabase.database;
 
-    return db.delete('investments', where: 'id = ?', whereArgs: [id]);
+    return db.transaction((txn) async {
+      await txn.delete(
+        'investment_valuations',
+        where: 'investment_id = ?',
+        whereArgs: [id],
+      );
+      return txn.delete('investments', where: 'id = ?', whereArgs: [id]);
+    });
+  }
+
+  /// Deletes an investment and returns its value history so the delete can
+  /// be undone with [restoreInvestment].
+  Future<List<InvestmentValuation>> deleteInvestmentWithHistory(int id) async {
+    final history = await getValuations(id);
+    await deleteInvestment(id);
+    return history;
+  }
+
+  /// Puts back a deleted investment (same id) with its value history.
+  Future<void> restoreInvestment(
+    InvestmentModel investment,
+    List<InvestmentValuation> valuations,
+  ) async {
+    final Database db = await AppDatabase.database;
+    await db.transaction((txn) async {
+      await txn.insert(
+        'investments',
+        investment.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      for (final v in valuations) {
+        await txn.insert(
+          'investment_valuations',
+          v.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Valuation history
+  // ---------------------------------------------------------------------------
+
+  /// Oldest first.
+  Future<List<InvestmentValuation>> getValuations(int investmentId) async {
+    final Database db = await AppDatabase.database;
+    final rows = await db.query(
+      'investment_valuations',
+      where: 'investment_id = ?',
+      whereArgs: [investmentId],
+      orderBy: 'date(date) ASC, id ASC',
+    );
+    return rows.map(InvestmentValuation.fromMap).toList();
+  }
+
+  /// Records a value and makes the latest dated entry the investment's
+  /// current value.
+  Future<void> addValuation({
+    required int investmentId,
+    required double value,
+    required DateTime date,
+    String? notes,
+  }) async {
+    final Database db = await AppDatabase.database;
+    await db.transaction((txn) async {
+      await txn.insert('investment_valuations', {
+        'investment_id': investmentId,
+        'value': value,
+        'date': DateTime(date.year, date.month, date.day).toIso8601String(),
+        'notes': (notes == null || notes.trim().isEmpty) ? null : notes.trim(),
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      await _syncCurrentValue(txn, investmentId);
+    });
+  }
+
+  Future<void> deleteValuation(int valuationId, int investmentId) async {
+    final Database db = await AppDatabase.database;
+    await db.transaction((txn) async {
+      await txn.delete(
+        'investment_valuations',
+        where: 'id = ?',
+        whereArgs: [valuationId],
+      );
+      await _syncCurrentValue(txn, investmentId);
+    });
+  }
+
+  /// current_value = value of the most recent valuation (kept unchanged when
+  /// no valuation is left).
+  Future<void> _syncCurrentValue(Transaction txn, int investmentId) async {
+    final latest = await txn.query(
+      'investment_valuations',
+      where: 'investment_id = ?',
+      whereArgs: [investmentId],
+      orderBy: 'date(date) DESC, id DESC',
+      limit: 1,
+    );
+    if (latest.isEmpty) return;
+    await txn.update(
+      'investments',
+      {'current_value': latest.first['value']},
+      where: 'id = ?',
+      whereArgs: [investmentId],
+    );
   }
 
   Future<double> getTotalInvestmentValue() async {

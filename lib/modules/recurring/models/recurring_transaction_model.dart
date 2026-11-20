@@ -18,6 +18,9 @@ class RecurringTransactionModel {
   /// Account the generated entries go to (null = default account).
   final int? accountId;
 
+  /// Days before the due date to send a reminder (0 = on the day, null = off).
+  final int? reminderDays;
+
   const RecurringTransactionModel({
     this.id,
     required this.title,
@@ -35,6 +38,7 @@ class RecurringTransactionModel {
     this.status = 'ACTIVE',
     required this.createdAt,
     this.accountId,
+    this.reminderDays,
   });
 
   Map<String, dynamic> toMap() => {
@@ -54,6 +58,7 @@ class RecurringTransactionModel {
     'status': status,
     'created_at': createdAt,
     'account_id': accountId,
+    'reminder_days': reminderDays,
   };
 
   factory RecurringTransactionModel.fromMap(Map<String, dynamic> map) {
@@ -74,6 +79,7 @@ class RecurringTransactionModel {
       status: map['status'] as String,
       createdAt: map['created_at'] as String,
       accountId: map['account_id'] as int?,
+      reminderDays: map['reminder_days'] as int?,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/services/notification_service.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/common_button.dart';
@@ -67,6 +68,12 @@ class _AddLoanPaymentScreenState extends State<AddLoanPaymentScreen> {
 
     if (!mounted) return;
 
+    try {
+      await NotificationService.instance.rescheduleAll();
+    } catch (e) {
+      debugPrint('Unable to refresh reminders: $e');
+    }
+    if (!mounted) return;
     SnackbarUtils.showSnackbar(context, 'EMI Payment Added');
     await context.read<DashboardProvider>().loadDashboardData();
     if (!mounted) return;

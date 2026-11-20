@@ -31,15 +31,17 @@ For released changes, see [CHANGELOG.md](CHANGELOG.md). To propose something new
 | 12    | Accounts and transfers          | ✅ |
 | 13    | Dark mode, savings goals, budget alerts, recurring upgrades | ✅ |
 | 14    | Manage categories, undo, duplicate, date presets | ✅ |
+| 15    | Currency, CSV import, automatic backup, About, investment valuation history | ✅ |
+| 16    | Net worth, monthly insights, quick add | ✅ |
 
 ---
 
 ## Near-Term (Next Release)
 
 - 📋 Polish reports/charts (export-ready views, better empty/error states)
-- 📋 Security hardening: enforce PIN/biometric prompt on app resume, audit `flutter_secure_storage` usage
-- 📋 Performance pass on database queries for large transaction histories
-- 📋 Expand test coverage for repositories and business logic in `data/`
+- ✅ PIN prompt on resume with a "Lock after" setting and hidden app preview (biometric unlock still 💡)
+- ✅ Database indexes and index-friendly report queries
+- 🚧 Expand test coverage (first unit tests added; database tests need `sqflite_common_ffi`)
 
 ## Mid-Term
 
@@ -51,8 +53,12 @@ For released changes, see [CHANGELOG.md](CHANGELOG.md). To propose something new
 - ✅ Accounts / wallets with balances and transfers
 - ✅ Savings goals
 - ✅ Manage categories and subcategories
-- 📋 Edit/duplicate for recurring schedules and account transfers
-- 💡 Undo for investment and budget deletes
+- ✅ Currency setting, CSV import, automatic backup with history
+- ✅ Investment valuation history
+- ✅ Net worth dashboard with 12-month trend
+- ✅ Month-over-month comparison, top spending and quick-add expense
+- ✅ Loan reminders, bill reminders on recurring schedules, edit/duplicate for recurring schedules and account transfers
+- ✅ Undo for investment and budget deletes
 - 💡 Category icons/colors in Manage Categories
 - 💡 Reorder and merge categories
 

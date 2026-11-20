@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
@@ -129,8 +130,9 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
                 labelText: 'Account name',
                 hintText: 'e.g. HDFC Savings',
               ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Enter a name' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? 'Enter a name'
+                  : null,
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<AccountType>(
@@ -161,9 +163,9 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
                 decimal: true,
                 signed: true,
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Opening balance',
-                prefixText: '₹ ',
+                prefixText: '${CurrencyUtils.symbol} ',
                 helperText:
                     'What this account holds right now (use a minus sign for a card you owe on)',
                 helperMaxLines: 2,
@@ -171,9 +173,7 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
               validator: (v) {
                 final t = (v ?? '').trim();
                 if (t.isEmpty) return null; // empty = 0
-                return double.tryParse(t) == null
-                    ? 'Enter a valid amount'
-                    : null;
+                return double.tryParse(t) == null ? 'Enter a valid amount' : null;
               },
             ),
             const SizedBox(height: 16),

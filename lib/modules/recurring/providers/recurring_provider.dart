@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/services/notification_service.dart';
 import '../models/recurring_transaction_model.dart';
 import '../repositories/recurring_repository.dart';
 
@@ -13,6 +14,14 @@ class RecurringProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   int get lastGeneratedCount => _lastGeneratedCount;
 
+  Future<void> _syncReminders() async {
+    try {
+      await NotificationService.instance.rescheduleAll();
+    } catch (e) {
+      debugPrint('Unable to refresh reminders: $e');
+    }
+  }
+
   Future<void> load({bool generateDue = true}) async {
     _isLoading = true;
     notifyListeners();
@@ -25,6 +34,7 @@ class RecurringProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+    await _syncReminders();
   }
 
   Future<void> add(RecurringTransactionModel item) async {

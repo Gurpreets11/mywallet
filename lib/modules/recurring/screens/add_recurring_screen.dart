@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../accounts/widgets/account_dropdown.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../../../core/widgets/compact_form_theme.dart';
@@ -9,7 +10,10 @@ import '../models/recurring_transaction_model.dart';
 import '../providers/recurring_provider.dart';
 
 class AddRecurringScreen extends StatefulWidget {
-  const AddRecurringScreen({super.key});
+  final RecurringTransactionModel? item;
+  final bool isDuplicate;
+
+  const AddRecurringScreen({super.key, this.item, this.isDuplicate = false});
 
   @override
   State<AddRecurringScreen> createState() => _AddRecurringScreenState();
@@ -29,12 +33,42 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
   int? _categoryId;
   String _categoryName = '';
   DateTime _startDate = DateTime.now();
+  DateTime? _originalStart;
   DateTime? _endDate;
+  int? _reminderDays;
   bool _isSaving = false;
+
+  bool get _isEdit => widget.item != null && !widget.isDuplicate;
 
   @override
   void initState() {
     super.initState();
+    final item = widget.item;
+    if (item != null) {
+      _titleController.text = widget.isDuplicate
+          ? '${item.title} (copy)'
+          : item.title;
+      _amountController.text = item.amount.toString();
+      _notesController.text = item.notes ?? '';
+      _type = item.transactionType == 'INCOME' ? 'INCOME' : 'EXPENSE';
+      _frequency = item.frequency;
+      _paymentMode = const ['Cash', 'Card', 'UPI', 'Bank Transfer']
+              .contains(item.paymentMode)
+          ? item.paymentMode
+          : 'Cash';
+      _accountId = item.accountId;
+      _interval = item.intervalValue.clamp(1, 12);
+      _categoryId = item.categoryId;
+      _categoryName = item.categoryName;
+      _reminderDays = item.reminderDays;
+      if (widget.isDuplicate) {
+        _startDate = DateTime.now();
+      } else {
+        _startDate = DateTime.tryParse(item.startDate) ?? DateTime.now();
+        _originalStart = _startDate;
+        _endDate = item.endDate == null ? null : DateTime.tryParse(item.endDate!);
+      }
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<MasterProvider>().loadExpenseCategories();
@@ -105,8 +139,9 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
     setState(() => _isSaving = true);
     try {
       final now = DateTime.now().toIso8601String();
-      await context.read<RecurringProvider>().add(
-        RecurringTransactionModel(
+      final old = widget.item;
+      final model = RecurringTransactionModel(
+          id: _isEdit ? old!.id : null,
           title: _titleController.text.trim(),
           transactionType: _type,
           amount: double.parse(_amountController.text.trim()),
@@ -121,14 +156,27 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
           intervalValue: _interval,
           startDate: _dateOnly(_startDate),
           endDate: _endDate == null ? null : _dateOnly(_endDate!),
-          nextDueDate: _dateOnly(_startDate),
-          createdAt: now,
+          nextDueDate: _isEdit && _startDate == _originalStart
+              ? old!.nextDueDate
+              : _dateOnly(_startDate),
+          status: _isEdit ? old!.status : 'ACTIVE',
+          createdAt: _isEdit ? old!.createdAt : now,
+          reminderDays: _reminderDays,
+        );
+      final provider = context.read<RecurringProvider>();
+      if (_isEdit) {
+        await provider.update(model);
+      } else {
+        await provider.add(model);
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _isEdit ? 'Recurring schedule updated' : 'Recurring schedule added',
+          ),
         ),
       );
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Recurring schedule added')));
       Navigator.pop(context, true);
     } catch (error, stackTrace) {
       debugPrint('Unable to add recurring schedule: $error\n$stackTrace');
@@ -193,7 +241,13 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.save_outlined),
-              label: Text(_isSaving ? 'Saving...' : 'Save recurring'),
+              label: Text(
+                _isSaving
+                    ? 'Saving...'
+                    : _isEdit
+                    ? 'Save changes'
+                    : 'Save recurring',
+              ),
             ),
           ),
         ),
@@ -206,7 +260,13 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
     final theme = Theme.of(context);
     return CompactFormTheme(
       child: Scaffold(
-        appBar: AppBar(title: const Text('Add recurring')),
+        appBar: AppBar(title: Text(
+            _isEdit
+                ? 'Edit recurring'
+                : widget.isDuplicate
+                ? 'Duplicate recurring'
+                : 'Add recurring',
+          )),
         bottomNavigationBar: _buildSaveBar(theme),
         body: AppResponsiveContent(
           maxWidth: 680,
@@ -247,9 +307,9 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Amount',
-                            prefixText: '₹ ',
+                            prefixText: '${CurrencyUtils.symbol} ',
                           ),
                           validator: (value) {
                             final amount = double.tryParse(
@@ -417,6 +477,39 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
                           optional: true,
                           onTap: _pickEndDate,
                           onClear: () => setState(() => _endDate = null),
+                        ),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<int?>(
+                          initialValue: _reminderDays,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Remind me',
+                            prefixIcon: Icon(Icons.alarm_outlined),
+                          ),
+                          items: const [
+                            DropdownMenuItem<int?>(
+                              value: null,
+                              child: Text('No reminder'),
+                            ),
+                            DropdownMenuItem<int?>(
+                              value: 0,
+                              child: Text('On the due date'),
+                            ),
+                            DropdownMenuItem<int?>(
+                              value: 1,
+                              child: Text('1 day before'),
+                            ),
+                            DropdownMenuItem<int?>(
+                              value: 3,
+                              child: Text('3 days before'),
+                            ),
+                            DropdownMenuItem<int?>(
+                              value: 7,
+                              child: Text('7 days before'),
+                            ),
+                          ],
+                          onChanged: (value) =>
+                              setState(() => _reminderDays = value),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(

@@ -18,7 +18,10 @@ class SnackbarUtils {
     messenger.showSnackBar(
       SnackBar(
         content: Text(message),
-        duration: const Duration(seconds: 6),
+        duration: const Duration(seconds: 10),
+        // Newer Flutter keeps a snackbar with an action on screen until it is
+        // dismissed unless persist is false.
+        persist: false,
         action: SnackBarAction(label: 'UNDO', onPressed: () => onUndo()),
       ),
     );

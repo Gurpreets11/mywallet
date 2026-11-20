@@ -6,6 +6,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../database/app_database.dart';
 import '../backup/backup_service.dart';
+import '../settings/app_preferences.dart';
 import 'sha256_lite.dart';
 
 /// PIN-based app lock.
@@ -22,7 +23,9 @@ class AppLockService extends ChangeNotifier {
 
   /// How long the app may stay in the background before it locks again.
   /// (Long enough for system file pickers used by backup / restore / export.)
-  static const Duration backgroundGracePeriod = Duration(seconds: 30);
+  /// Chosen in Settings > Security (default 30 seconds).
+  static Duration get backgroundGracePeriod =>
+      Duration(seconds: AppPreferences.instance.lockDelaySeconds);
 
   static const int _hashRounds = 2000;
   static const int _maxFreeAttempts = 5;

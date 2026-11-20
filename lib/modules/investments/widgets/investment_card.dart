@@ -6,12 +6,14 @@ import '../utils/investment_utils.dart';
 class InvestmentCard extends StatelessWidget {
   final InvestmentModel investment;
   final VoidCallback onTap, onEdit, onDelete;
+  final VoidCallback? onHistory;
   const InvestmentCard({
     super.key,
     required this.investment,
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
+    this.onHistory,
   });
 
   @override
@@ -82,9 +84,17 @@ class InvestmentCard extends StatelessWidget {
                     ),
                   PopupMenuButton<String>(
                     tooltip: 'Investment actions',
-                    onSelected: (v) => v == 'edit' ? onEdit() : onDelete(),
+                    onSelected: (v) {
+                      if (v == 'edit') onEdit();
+                      if (v == 'history') onHistory?.call();
+                      if (v == 'delete') onDelete();
+                    },
                     itemBuilder: (_) => const [
                       PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      PopupMenuItem(
+                        value: 'history',
+                        child: Text('Value history'),
+                      ),
                       PopupMenuItem(value: 'delete', child: Text('Delete')),
                     ],
                   ),

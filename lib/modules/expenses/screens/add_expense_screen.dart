@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../categories/widgets/quick_add.dart';
 import '../../accounts/widgets/account_dropdown.dart';
 import '../../../core/utils/date_utils.dart';
@@ -244,9 +245,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                     const TextInputType.numberWithOptions(
                                       decimal: true,
                                     ),
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   labelText: 'Amount',
-                                  prefixText: '₹ ',
+                                  prefixText: '${CurrencyUtils.symbol} ',
                                   prefixIcon: Icon(Icons.currency_rupee),
                                 ),
                                 validator: (value) {

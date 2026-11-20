@@ -61,6 +61,9 @@ Feature-first UI, one folder per feature:
 - `modules/recurring/` — recurring expense/income schedules (account selector, pause/resume, Skip next); due entries are generated at app start and when the screen opens.
 - `modules/reports/` — yearly reports, charts, PDF/CSV export.
 - `modules/accounts/` — accounts/wallets, balances, transfers, and the shared `AccountDropdown` used by the transaction forms.
+- `modules/investments/` also contains the valuation history (`investment_valuations` table, `InvestmentValuationScreen` with an `fl_chart` line chart). The repository keeps `investments.current_value` equal to the latest valuation.
+- `modules/networth/` — net worth (`NetWorthRepository` combines account balances, investment values and loan outstanding; past months are derived backwards from today's figures). Results are held by `DashboardProvider.netWorth` and shown by the home `NetWorthCard` and `NetWorthScreen`.
+- Home insights: `MonthInsightsRepository` / `MonthInsightsCard` compare this month with the same days of last month and list the top spending categories; `QuickAddExpenseSheet` (in `modules/expenses/widgets/`) is the quick-add flow behind the home Quick add button.
 - `modules/goals/` — savings goals, contributions and history.
 - `modules/categories/` — **Manage Categories** (`CategoryRepository`, Expense/Income tabs, rename/hide/delete) and the inline `quick_add.dart` helpers used on the add forms.
 - `modules/navigation/` — adaptive shell: bottom navigation + More screen on mobile, a navigation rail with every destination on tablet and web.
@@ -91,6 +94,8 @@ No network calls occur at any point in this flow — everything resolves against
 - **Categories**: type id `0` = expense, `1` = income. Hidden categories are filtered out of the add forms (`MasterRepository` takes `alsoIncludeId` so an old entry still shows its own hidden category) and included in list filters (`includeInactive`). Because expenses, budgets and recurring schedules store a copy of the category name, `CategoryRepository.renameCategory` updates those copies in the same operation.
 - **Accounts**: a transaction with no `account_id` belongs to the default account. Balances are computed from the transaction tables, not stored.
 - **Delete + Undo**: lists confirm with `confirmDelete`, delete, then show `SnackbarUtils.showUndo`. Undo re-inserts the removed model with its original id (expenses, income); loans are deleted together with their payments and restored together; goals are restored with their contributions.
+- **Currency**: `CurrencyUtils` (`formatAmount`, `simple`, `symbol`) reads the currency from `AppPreferences`; never hardcode a currency symbol. Changing the currency calls `AppDataRefresher.refreshAll` so open screens redraw.
+- **Import / automatic backup**: `core/services/import/csv_import_service.dart` imports CSV in one transaction (after a safety copy); `core/services/backup/auto_backup_service.dart` runs at app start and saves a scheduled backup when due.
 - **Notifications**: `NotificationService.rescheduleAll()` is the single place that schedules loan EMI reminders (id = loan id), SIP reminders (id = `1000000 + investment id`) and the daily reminder; save screens call it instead of creating ad-hoc ids.
 - **Forms with stored dropdown values**: dropdowns that edit old data must include the saved value even if it is not in the standard list, otherwise Flutter throws an assertion and the screen is blank.
 

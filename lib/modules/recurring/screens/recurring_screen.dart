@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../../core/widgets/common_delete_dialog.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_responsive_content.dart';
@@ -31,12 +32,28 @@ class _RecurringScreenState extends State<RecurringScreen> {
     );
   }
 
+  Future<void> _openForm(
+    RecurringTransactionModel item, {
+    bool duplicate = false,
+  }) async {
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddRecurringScreen(item: item, isDuplicate: duplicate),
+      ),
+    );
+  }
+
   Future<void> _handleAction(
     String action,
     RecurringTransactionModel item,
     RecurringProvider provider,
   ) async {
-    if (action == 'pause') {
+    if (action == 'edit') {
+      await _openForm(item);
+    } else if (action == 'duplicate') {
+      await _openForm(item, duplicate: true);
+    } else if (action == 'pause') {
       await provider.pause(item);
     } else if (action == 'resume') {
       await provider.resume(item);
@@ -79,12 +96,13 @@ class _RecurringScreenState extends State<RecurringScreen> {
         title: Text(item.title),
         content: Text(
           '${item.transactionType} • ${item.categoryName}\n'
-          'Amount: ₹${item.amount.toStringAsFixed(2)}\n'
+          'Amount: ${CurrencyUtils.simple(item.amount, decimals: 2)}\n'
           'Payment: ${item.paymentMode}\n'
           'Repeat: ${_frequencyLabel(item.frequency, item.intervalValue)}\n'
           'Start: ${_displayDate(item.startDate)}\n'
           'End: ${item.endDate == null ? 'No end date' : _displayDate(item.endDate!)}\n'
           'Next due: ${_displayDate(item.nextDueDate)}\n'
+          'Reminder: ${_reminderLabel(item.reminderDays)}\n'
           'Status: ${item.status}\n'
           '${item.notes ?? ''}',
         ),
@@ -134,9 +152,7 @@ class _RecurringScreenState extends State<RecurringScreen> {
                           Icon(
                             Icons.event_repeat,
                             size: 48,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(height: 10),
                           const Text(
@@ -212,7 +228,7 @@ class _RecurringScreenState extends State<RecurringScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                '₹${item.amount.toStringAsFixed(0)}',
+                                CurrencyUtils.simple(item.amount),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -222,6 +238,14 @@ class _RecurringScreenState extends State<RecurringScreen> {
                                 onSelected: (value) =>
                                     _handleAction(value, item, provider),
                                 itemBuilder: (_) => [
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: Text('Edit'),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'duplicate',
+                                    child: Text('Duplicate'),
+                                  ),
                                   if (item.status == 'ACTIVE')
                                     const PopupMenuItem(
                                       value: 'pause',
@@ -260,6 +284,13 @@ class _RecurringScreenState extends State<RecurringScreen> {
     final label = frequency.toLowerCase();
     return interval == 1 ? label : 'every $interval $label';
   }
+
+  static String _reminderLabel(int? days) => switch (days) {
+    null => 'None',
+    0 => 'On the due date',
+    1 => '1 day before',
+    _ => '$days days before',
+  };
 
   static String _displayDate(String value) {
     final date = DateTime.tryParse(value);

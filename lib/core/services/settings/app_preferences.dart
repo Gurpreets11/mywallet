@@ -31,6 +31,40 @@ enum AppThemeChoice {
   final ThemeMode mode;
 }
 
+/// Currencies the user can pick. Amounts use the symbol and number grouping
+/// of the matching locale (e.g. INR groups as 1,00,000).
+enum AppCurrency {
+  inr('INR', '₹', 'en_IN', 'Indian Rupee'),
+  usd('USD', r'$', 'en_US', 'US Dollar'),
+  eur('EUR', '€', 'en_IE', 'Euro'),
+  gbp('GBP', '£', 'en_GB', 'British Pound'),
+  aed('AED', 'AED ', 'en_US', 'UAE Dirham'),
+  sar('SAR', 'SAR ', 'en_US', 'Saudi Riyal'),
+  sgd('SGD', r'S$', 'en_US', 'Singapore Dollar'),
+  aud('AUD', r'A$', 'en_AU', 'Australian Dollar'),
+  cad('CAD', r'C$', 'en_CA', 'Canadian Dollar'),
+  jpy('JPY', '¥', 'ja_JP', 'Japanese Yen');
+
+  const AppCurrency(this.code, this.symbol, this.locale, this.label);
+
+  final String code;
+  final String symbol;
+  final String locale;
+  final String label;
+}
+
+/// How often the app saves an automatic backup copy on this device.
+enum AutoBackupFrequency {
+  off('Off', 0),
+  daily('Daily', 1),
+  weekly('Weekly', 7);
+
+  const AutoBackupFrequency(this.label, this.days);
+
+  final String label;
+  final int days;
+}
+
 class AppPreferences extends ChangeNotifier {
   AppPreferences._();
 
@@ -45,6 +79,10 @@ class AppPreferences extends ChangeNotifier {
   static const String _kFontSize = 'pref_font_size';
   static const String _kThemeMode = 'pref_theme_mode';
   static const String _kBudgetAlerts = 'pref_budget_alerts_enabled';
+  static const String _kCurrency = 'pref_currency';
+  static const String _kBillReminders = 'pref_bill_reminders_enabled';
+  static const String _kLockDelay = 'pref_lock_delay_seconds';
+  static const String _kAutoBackup = 'pref_auto_backup';
 
   /// Date patterns the user can pick from (shown with a live example).
   static const List<String> dateFormatOptions = [
@@ -61,8 +99,20 @@ class AppPreferences extends ChangeNotifier {
   bool _emiRemindersEnabled = true;
   bool _sipRemindersEnabled = true;
   bool _budgetAlertsEnabled = true;
+  bool _billRemindersEnabled = true;
   AppFontSize _fontSize = AppFontSize.medium;
   AppThemeChoice _themeChoice = AppThemeChoice.light;
+  AppCurrency _currency = AppCurrency.inr;
+  AutoBackupFrequency _autoBackup = AutoBackupFrequency.weekly;
+  int _lockDelaySeconds = 30;
+
+  AppCurrency get currency => _currency;
+  AutoBackupFrequency get autoBackup => _autoBackup;
+
+  /// Seconds the app may stay in the background before the PIN is asked
+  /// again (0 = every time).
+  static const List<int> lockDelayOptions = [0, 30, 60, 300];
+  int get lockDelaySeconds => _lockDelaySeconds;
 
   AppThemeChoice get themeChoice => _themeChoice;
   ThemeMode get themeMode => _themeChoice.mode;
@@ -79,6 +129,7 @@ class AppPreferences extends ChangeNotifier {
   bool get emiRemindersEnabled => _emiRemindersEnabled;
   bool get sipRemindersEnabled => _sipRemindersEnabled;
   bool get budgetAlertsEnabled => _budgetAlertsEnabled;
+  bool get billRemindersEnabled => _billRemindersEnabled;
 
   /// Loads saved preferences. Safe to call again (e.g. after a restore).
   /// Falls back to defaults for anything missing or invalid.
@@ -91,8 +142,12 @@ class AppPreferences extends ChangeNotifier {
     _emiRemindersEnabled = true;
     _sipRemindersEnabled = true;
     _budgetAlertsEnabled = true;
+    _billRemindersEnabled = true;
     _fontSize = AppFontSize.medium;
     _themeChoice = AppThemeChoice.light;
+    _currency = AppCurrency.inr;
+    _autoBackup = AutoBackupFrequency.weekly;
+    _lockDelaySeconds = 30;
 
     try {
       final Database db = await AppDatabase.database;
@@ -125,12 +180,27 @@ class AppPreferences extends ChangeNotifier {
       if (values[_kSipReminders] != null) {
         _sipRemindersEnabled = values[_kSipReminders] == '1';
       }
+      if (values[_kBillReminders] != null) {
+        _billRemindersEnabled = values[_kBillReminders] == '1';
+      }
       if (values[_kBudgetAlerts] != null) {
         _budgetAlertsEnabled = values[_kBudgetAlerts] == '1';
       }
       final themeName = values[_kThemeMode];
       for (final option in AppThemeChoice.values) {
         if (option.name == themeName) _themeChoice = option;
+      }
+      final currencyCode = values[_kCurrency];
+      for (final option in AppCurrency.values) {
+        if (option.code == currencyCode) _currency = option;
+      }
+      final delay = int.tryParse(values[_kLockDelay] ?? '');
+      if (delay != null && lockDelayOptions.contains(delay)) {
+        _lockDelaySeconds = delay;
+      }
+      final autoName = values[_kAutoBackup];
+      for (final option in AutoBackupFrequency.values) {
+        if (option.name == autoName) _autoBackup = option;
       }
       final fontName = values[_kFontSize];
       for (final option in AppFontSize.values) {
@@ -179,6 +249,16 @@ class AppPreferences extends ChangeNotifier {
     _sipRemindersEnabled = value;
   }
 
+  Future<void> setLockDelaySeconds(int seconds) async {
+    await _save(_kLockDelay, seconds.toString());
+    _lockDelaySeconds = seconds;
+  }
+
+  Future<void> setBillRemindersEnabled(bool value) async {
+    await _save(_kBillReminders, value ? '1' : '0');
+    _billRemindersEnabled = value;
+  }
+
   Future<void> setBudgetAlertsEnabled(bool value) async {
     await _save(_kBudgetAlerts, value ? '1' : '0');
     _budgetAlertsEnabled = value;
@@ -187,6 +267,18 @@ class AppPreferences extends ChangeNotifier {
   Future<void> setThemeChoice(AppThemeChoice value) async {
     await _save(_kThemeMode, value.name);
     _themeChoice = value;
+    notifyListeners();
+  }
+
+  Future<void> setCurrency(AppCurrency value) async {
+    await _save(_kCurrency, value.code);
+    _currency = value;
+    notifyListeners();
+  }
+
+  Future<void> setAutoBackup(AutoBackupFrequency value) async {
+    await _save(_kAutoBackup, value.name);
+    _autoBackup = value;
     notifyListeners();
   }
 

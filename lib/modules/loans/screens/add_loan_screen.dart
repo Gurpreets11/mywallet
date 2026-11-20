@@ -1,6 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/utils/snackbar_utils.dart';
@@ -32,6 +34,7 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
   String _loanStatus = 'ACTIVE';
   DateTime _startDate = DateTime.now();
   DateTime _nextEmiDate = DateTime.now();
+  DateTime? _dueDate;
   bool _isSaving = false;
 
   bool get isEditMode => widget.loan != null;
@@ -49,13 +52,16 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
       _notesController.text = loan.notes ?? '';
       // Older / demo loans may carry a free-text type (e.g. "Home Loan");
       // anything that is not GIVEN is a borrowed loan.
-      _loanType = loan.loanType.toUpperCase() == 'GIVEN' ? 'GIVEN' : 'BORROWED';
+      _loanType = loan.loanType.toUpperCase() == 'GIVEN'
+          ? 'GIVEN'
+          : 'BORROWED';
       _loanStatus = loan.loanStatus.toUpperCase() == 'CLOSED'
           ? 'CLOSED'
           : 'ACTIVE';
       _startDate = DateTime.tryParse(loan.startDate) ?? DateTime.now();
       _nextEmiDate =
           DateTime.tryParse(loan.nextEmiDate ?? '') ?? DateTime.now();
+      _dueDate = DateTime.tryParse(loan.endDate ?? '');
     }
   }
 
@@ -119,6 +125,16 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
     });
   }
 
+  Future<void> _pickDueDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 30)),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now().add(const Duration(days: 7300)),
+    );
+    if (picked != null && mounted) setState(() => _dueDate = picked);
+  }
+
   Future<void> _saveLoan() async {
     if (_isSaving || !_formKey.currentState!.validate()) return;
     setState(() => _isSaving = true);
@@ -135,7 +151,7 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
         nextEmiDate: _nextEmiDate.toIso8601String(),
         tenureMonths: int.parse(_tenureController.text.trim()),
         startDate: _startDate.toIso8601String(),
-        endDate: old?.endDate,
+        endDate: _dueDate?.toIso8601String(),
         totalPaid: old?.totalPaid ?? 0,
         outstandingAmount:
             old?.outstandingAmount ??
@@ -280,9 +296,9 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
                         TextFormField(
                           controller: _amountController,
                           keyboardType: numberKeyboard,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Principal amount',
-                            prefixText: '₹ ',
+                            prefixText: '${CurrencyUtils.symbol} ',
                           ),
                           validator: _validatePositiveAmount,
                         ),
@@ -290,9 +306,9 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
                         TextFormField(
                           controller: _emiController,
                           keyboardType: numberKeyboard,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'EMI amount',
-                            prefixText: '₹ ',
+                            prefixText: '${CurrencyUtils.symbol} ',
                           ),
                           validator: _validatePositiveAmount,
                         ),
@@ -336,6 +352,33 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
                           label: 'Next EMI date',
                           date: _nextEmiDate,
                           onTap: () => _pickDate(isNextEmiDate: true),
+                        ),
+                        const SizedBox(height: 12),
+                        InkWell(
+                          onTap: _pickDueDate,
+                          borderRadius: BorderRadius.circular(12),
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: _loanType == 'GIVEN'
+                                  ? 'Repay-by date (optional)'
+                                  : 'Pay-by date (optional)',
+                              helperText: 'You get a reminder a day before and on this date',
+                              prefixIcon: const Icon(Icons.alarm_outlined),
+                              suffixIcon: _dueDate == null
+                                  ? const Icon(Icons.edit_calendar_outlined)
+                                  : IconButton(
+                                      tooltip: 'Clear date',
+                                      icon: const Icon(Icons.close),
+                                      onPressed: () =>
+                                          setState(() => _dueDate = null),
+                                    ),
+                            ),
+                            child: Text(
+                              _dueDate == null
+                                  ? 'No due date'
+                                  : AppDateUtils.formatDate(_dueDate!),
+                            ),
+                          ),
                         ),
                         if (isEditMode) ...[
                           const SizedBox(height: 12),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../categories/widgets/quick_add.dart';
 import '../../accounts/widgets/account_dropdown.dart';
 import '../../../core/utils/date_utils.dart';
@@ -14,6 +15,7 @@ import '../providers/income_provider.dart';
 
 class AddIncomeScreen extends StatefulWidget {
   final IncomeModel? income;
+
 
   /// When true, [income] only pre-fills the form and a new entry is saved.
   final bool isDuplicate;
@@ -266,9 +268,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                       const TextInputType.numberWithOptions(
                                         decimal: true,
                                       ),
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     labelText: 'Amount',
-                                    prefixText: '₹ ',
+                                    prefixText: '${CurrencyUtils.symbol} ',
                                     prefixIcon: Icon(Icons.currency_rupee),
                                   ),
                                   validator: _validateAmount,
@@ -411,11 +413,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen> {
                                       value: 'Bank',
                                       child: Text('Bank'),
                                     ),
-                                    if (!const [
-                                      'Cash',
-                                      'UPI',
-                                      'Bank',
-                                    ].contains(_paymentMode))
+                                    if (!const ['Cash', 'UPI', 'Bank'].contains(
+                                      _paymentMode,
+                                    ))
                                       DropdownMenuItem(
                                         value: _paymentMode,
                                         child: Text(_paymentMode),

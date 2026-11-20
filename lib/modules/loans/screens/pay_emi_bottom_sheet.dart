@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../../core/widgets/app_section_header.dart';
 import '../../accounts/widgets/account_dropdown.dart';
 
@@ -102,7 +103,7 @@ class _PayEmiBottomSheetState extends State<PayEmiBottomSheet> {
             },
             decoration: InputDecoration(
               labelText: 'Payment amount',
-              prefixText: '₹ ',
+              prefixText: '${CurrencyUtils.symbol} ',
               errorText: _amountError,
             ),
           ),

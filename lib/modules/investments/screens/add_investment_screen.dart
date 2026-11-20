@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/currency_utils.dart';
 import '../../accounts/widgets/account_dropdown.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/utils/date_utils.dart';
@@ -258,12 +259,12 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                                       _investmentType,
                                   ]
                                   .map(
-                                    (type) => DropdownMenuItem(
-                                      value: type,
-                                      child: Text(type),
-                                    ),
-                                  )
-                                  .toList(),
+                                (type) => DropdownMenuItem(
+                                  value: type,
+                                  child: Text(type),
+                                ),
+                              )
+                              .toList(),
                           onChanged: (value) {
                             if (value != null) {
                               setState(() => _investmentType = value);
@@ -293,9 +294,9 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Invested amount',
-                            prefixText: '₹ ',
+                            prefixText: '${CurrencyUtils.symbol} ',
                           ),
                           validator: _validateAmount,
                         ),
@@ -309,9 +310,9 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Current value',
-                            prefixText: '₹ ',
+                            prefixText: '${CurrencyUtils.symbol} ',
                           ),
                           validator: _validateAmount,
                         ),
@@ -352,9 +353,9 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'SIP amount',
-                              prefixText: '₹ ',
+                              prefixText: '${CurrencyUtils.symbol} ',
                             ),
                             validator: _isSip ? _validateAmount : null,
                           ),

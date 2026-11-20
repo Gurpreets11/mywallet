@@ -121,9 +121,9 @@ class _GoalMoneySheetState extends State<_GoalMoneySheet> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Amount',
-                prefixText: '₹ ',
+                prefixText: '${CurrencyUtils.symbol} ',
               ),
               validator: (v) {
                 final n = double.tryParse((v ?? '').trim());
