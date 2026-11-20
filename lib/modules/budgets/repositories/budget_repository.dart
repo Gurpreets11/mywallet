@@ -28,7 +28,8 @@ class BudgetRepository {
     return db.rawQuery('''
       SELECT id, category_name FROM categories
       WHERE transaction_type_id = 0
-        AND COALESCE(is_active, 1) = 1 ORDER BY category_name COLLATE NOCASE
+        AND COALESCE(is_active, 1) = 1
+        ORDER BY COALESCE(sort_order, id), id
     ''');
   }
 

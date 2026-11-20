@@ -52,7 +52,7 @@ class MasterRepository {
         transactionTypeId,
         if (!includeInactive && alsoIncludeId != null) alsoIncludeId,
       ],
-      orderBy: 'id ASC',
+      orderBy: 'COALESCE(sort_order, id) ASC, id ASC',
     );
   }
 

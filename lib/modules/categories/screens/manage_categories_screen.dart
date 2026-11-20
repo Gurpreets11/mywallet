@@ -4,6 +4,7 @@ import '../../../core/widgets/common_delete_dialog.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/widgets/app_responsive_content.dart';
 import '../models/category_item.dart';
+import '../utils/category_style.dart';
 import '../repositories/category_repository.dart';
 import '../widgets/name_dialog.dart';
 
@@ -47,8 +48,8 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen>
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () =>
-            (isExpense ? _expenseTab : _incomeTab).currentState?.addCategory(),
+        onPressed: () => (isExpense ? _expenseTab : _incomeTab).currentState
+            ?.addCategory(),
         icon: const Icon(Icons.add),
         label: Text(isExpense ? 'Expense category' : 'Income category'),
       ),
@@ -162,6 +163,74 @@ class _CategoryTabState extends State<_CategoryTab>
     await _run(() => _repo.renameSubcategory(s.id, c.id, name));
   }
 
+  Future<void> _pickStyle(CategoryItem c) async {
+    final result = await showModalBottomSheet<(String?, String?)>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => _StyleSheet(icon: c.iconName, color: c.colorCode),
+    );
+    if (result == null) return;
+    await _run(() => _repo.setCategoryStyle(c.id, result.$1, result.$2));
+  }
+
+  Future<void> _merge(CategoryItem c, List<CategoryItem> all) async {
+    final others = all.where((o) => o.id != c.id).toList();
+    if (others.isEmpty) {
+      SnackbarUtils.showSnackbar(context, 'No other category to merge into');
+      return;
+    }
+    final target = await showDialog<CategoryItem>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text('Merge "${c.name}" into…'),
+        children: [
+          SizedBox(
+            width: double.maxFinite,
+            height: 320,
+            child: ListView(
+              children: [
+                for (final o in others)
+                  ListTile(
+                    leading: _avatar(o, radius: 16),
+                    title: Text(o.name),
+                    onTap: () => Navigator.pop(ctx, o),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    if (target == null || !mounted) return;
+    final ok = await confirmDelete(
+      context,
+      title: 'Merge into "${target.name}"?',
+      message:
+          'All entries, budgets, schedules and subcategories of "${c.name}" '
+          'move to "${target.name}", and "${c.name}" is removed. '
+          'This cannot be undone.',
+      confirmLabel: 'Merge',
+    );
+    if (!ok) return;
+    await _run(() => _repo.mergeCategories(c.id, target.id));
+  }
+
+  Widget _avatar(CategoryItem c, {double radius = 18}) {
+    final color =
+        CategoryStyle.colorFor(c.colorCode) ??
+        Theme.of(context).colorScheme.primary;
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: color.withValues(alpha: 0.15),
+      child: Icon(
+        CategoryStyle.iconFor(c.iconName),
+        size: radius * 1.1,
+        color: color,
+      ),
+    );
+  }
+
   Future<bool> _confirm(String title, String message) =>
       confirmDelete(context, title: title, message: message);
 
@@ -203,12 +272,13 @@ class _CategoryTabState extends State<_CategoryTab>
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),
         itemCount: items.length,
-        itemBuilder: (context, i) => _categoryCard(items[i]),
+        itemBuilder: (context, i) => _categoryCard(items, i),
       ),
     );
   }
 
-  Widget _categoryCard(CategoryItem c) {
+  Widget _categoryCard(List<CategoryItem> items, int index) {
+    final c = items[index];
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
     final visibleSubs = c.subcategories.length;
@@ -228,6 +298,7 @@ class _CategoryTabState extends State<_CategoryTab>
           initiallyExpanded: _expanded.contains(c.id),
           onExpansionChanged: (open) =>
               open ? _expanded.add(c.id) : _expanded.remove(c.id),
+          leading: _avatar(c),
           tilePadding: const EdgeInsets.only(left: 14, right: 4),
           childrenPadding: const EdgeInsets.fromLTRB(14, 0, 4, 8),
           title: Text(
@@ -251,6 +322,14 @@ class _CategoryTabState extends State<_CategoryTab>
                   switch (v) {
                     case 'rename':
                       _renameCategory(c);
+                    case 'style':
+                      _pickStyle(c);
+                    case 'up':
+                      _run(() => _repo.moveCategory(c.id, c.typeId, -1));
+                    case 'down':
+                      _run(() => _repo.moveCategory(c.id, c.typeId, 1));
+                    case 'merge':
+                      _merge(c, items);
                     case 'toggle':
                       _run(() => _repo.setCategoryActive(c.id, !c.isActive));
                     case 'delete':
@@ -259,6 +338,18 @@ class _CategoryTabState extends State<_CategoryTab>
                 },
                 itemBuilder: (_) => [
                   const PopupMenuItem(value: 'rename', child: Text('Rename')),
+                  const PopupMenuItem(
+                    value: 'style',
+                    child: Text('Icon & colour'),
+                  ),
+                  if (index > 0)
+                    const PopupMenuItem(value: 'up', child: Text('Move up')),
+                  if (index < items.length - 1)
+                    const PopupMenuItem(value: 'down', child: Text('Move down')),
+                  const PopupMenuItem(
+                    value: 'merge',
+                    child: Text('Merge into…'),
+                  ),
                   PopupMenuItem(
                     value: 'toggle',
                     child: Text(c.isActive ? 'Hide' : 'Show'),
@@ -332,6 +423,108 @@ class _CategoryTabState extends State<_CategoryTab>
           ],
         ),
       ],
+    );
+  }
+}
+
+/// Bottom sheet to choose an icon and a colour. Pops `(icon, colour)`.
+class _StyleSheet extends StatefulWidget {
+  final String? icon;
+  final String? color;
+  const _StyleSheet({this.icon, this.color});
+
+  @override
+  State<_StyleSheet> createState() => _StyleSheetState();
+}
+
+class _StyleSheetState extends State<_StyleSheet> {
+  late String? _icon = widget.icon;
+  late String? _color = widget.color;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final current = CategoryStyle.colorFor(_color) ?? scheme.primary;
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Colour', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                for (final code in CategoryStyle.colors)
+                  InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => setState(() => _color = code),
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: CategoryStyle.colorFor(code),
+                      child: _color == code
+                          ? const Icon(Icons.check, size: 18, color: Colors.white)
+                          : null,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Text('Icon', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final e in CategoryStyle.icons.entries)
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => setState(() => _icon = e.key),
+                    child: Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: _icon == e.key
+                            ? current.withValues(alpha: 0.18)
+                            : null,
+                        border: Border.all(
+                          color: _icon == e.key ? current : scheme.outlineVariant,
+                        ),
+                      ),
+                      child: Icon(
+                        e.value,
+                        color: _icon == e.key ? current : scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop<(String?, String?)>(
+                    context,
+                    (null, null),
+                  ),
+                  child: const Text('Reset'),
+                ),
+                const Spacer(),
+                FilledButton(
+                  onPressed: () => Navigator.pop<(String?, String?)>(
+                    context,
+                    (_icon, _color),
+                  ),
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

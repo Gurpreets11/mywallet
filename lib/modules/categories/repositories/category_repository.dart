@@ -18,7 +18,8 @@ class CategoryRepository {
 
     final categoryRows = await db.rawQuery(
       '''
-      SELECT c.id, c.category_name, COALESCE(c.is_active, 1) AS is_active,
+      SELECT c.id, c.category_name, c.icon_name, c.color_code,
+        COALESCE(c.is_active, 1) AS is_active,
         (SELECT COUNT(*) FROM expenses e WHERE e.category_id = c.id)
         + (SELECT COUNT(*) FROM incomes i WHERE i.category_id = c.id)
         + (SELECT COUNT(*) FROM budgets b WHERE b.category_id = c.id)
@@ -26,7 +27,7 @@ class CategoryRepository {
              WHERE r.category_id = c.id) AS used
       FROM categories c
       WHERE c.transaction_type_id = ?
-      ORDER BY c.id
+      ORDER BY COALESCE(c.sort_order, c.id), c.id
     ''',
       [typeId],
     );
@@ -64,6 +65,8 @@ class CategoryRepository {
           typeId: typeId,
           name: (r['category_name'] ?? '').toString(),
           isActive: r['is_active'] == 1,
+          iconName: r['icon_name'] as String?,
+          colorCode: r['color_code'] as String?,
           usageCount: (r['used'] as num?)?.toInt() ?? 0,
           subcategories: byCategory[r['id'] as int] ?? const [],
         ),
@@ -104,7 +107,11 @@ class CategoryRepository {
       throw CategoryException('"$name" already exists');
     }
 
+    final maxOrder = await db.rawQuery(
+      'SELECT COALESCE(MAX(COALESCE(sort_order, id)), 0) AS m FROM categories',
+    );
     return db.insert('categories', {
+      'sort_order': ((maxOrder.first['m'] as num?)?.toInt() ?? 0) + 1,
       'transaction_type_id': typeId,
       'category_name': name,
       'is_active': 1,
@@ -192,6 +199,171 @@ class CategoryRepository {
     return total;
   }
 
+  /// Sets the icon and colour (either may be null to go back to default).
+  Future<void> setCategoryStyle(int id, String? iconName, String? colorCode) async {
+    final Database db = await AppDatabase.database;
+    await db.update(
+      'categories',
+      {'icon_name': iconName, 'color_code': colorCode},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  /// Moves a category one step up (-1) or down (+1) within its type.
+  Future<void> moveCategory(int id, int typeId, int delta) async {
+    final Database db = await AppDatabase.database;
+    await db.transaction((txn) async {
+      final rows = await txn.query(
+        'categories',
+        columns: ['id'],
+        where: 'transaction_type_id = ?',
+        whereArgs: [typeId],
+        orderBy: 'COALESCE(sort_order, id), id',
+      );
+      final ids = [for (final r in rows) r['id'] as int];
+      final from = ids.indexOf(id);
+      final to = from + delta;
+      if (from < 0 || to < 0 || to >= ids.length) return;
+      ids.insert(to, ids.removeAt(from));
+      for (var i = 0; i < ids.length; i++) {
+        await txn.update(
+          'categories',
+          {'sort_order': i + 1},
+          where: 'id = ?',
+          whereArgs: [ids[i]],
+        );
+      }
+    });
+  }
+
+  Future<bool> _hasColumn(DatabaseExecutor db, String table, String col) async {
+    final info = await db.rawQuery('PRAGMA table_info($table)');
+    return info.any((c) => c['name'] == col);
+  }
+
+  /// Moves everything from [sourceId] into [targetId] (same type) and removes
+  /// the source category. Same-named subcategories are combined; budgets for
+  /// the same month are added together.
+  Future<void> mergeCategories(int sourceId, int targetId) async {
+    if (sourceId == targetId) {
+      throw const CategoryException('Pick a different category');
+    }
+    final Database db = await AppDatabase.database;
+    await db.transaction((txn) async {
+      final t = await txn.query(
+        'categories',
+        where: 'id = ?',
+        whereArgs: [targetId],
+        limit: 1,
+      );
+      final s = await txn.query(
+        'categories',
+        where: 'id = ?',
+        whereArgs: [sourceId],
+        limit: 1,
+      );
+      if (t.isEmpty || s.isEmpty) {
+        throw const CategoryException('Category not found');
+      }
+      if (t.first['transaction_type_id'] != s.first['transaction_type_id']) {
+        throw const CategoryException(
+          'Only categories of the same type can be merged',
+        );
+      }
+      final targetName = (t.first['category_name'] ?? '').toString();
+
+      // Subcategories: reuse a same-named one in the target, else move it.
+      final targetSubs = await txn.query(
+        'subcategories',
+        where: 'category_id = ?',
+        whereArgs: [targetId],
+      );
+      final byName = {
+        for (final r in targetSubs)
+          (r['subcategory_name'] ?? '').toString().toLowerCase(): r['id'] as int,
+      };
+      final sourceSubs = await txn.query(
+        'subcategories',
+        where: 'category_id = ?',
+        whereArgs: [sourceId],
+      );
+      for (final sub in sourceSubs) {
+        final subId = sub['id'] as int;
+        final name = (sub['subcategory_name'] ?? '').toString();
+        final existing = byName[name.toLowerCase()];
+        if (existing == null) {
+          await txn.update(
+            'subcategories',
+            {'category_id': targetId},
+            where: 'id = ?',
+            whereArgs: [subId],
+          );
+        } else {
+          for (final table in ['expenses', 'incomes']) {
+            await txn.update(
+              table,
+              {'subcategory_id': existing},
+              where: 'subcategory_id = ?',
+              whereArgs: [subId],
+            );
+          }
+          await txn.delete('subcategories', where: 'id = ?', whereArgs: [subId]);
+        }
+      }
+
+      // Entries and schedules.
+      for (final table in ['expenses', 'incomes', 'recurring_transactions']) {
+        final values = <String, Object?>{'category_id': targetId};
+        if (await _hasColumn(txn, table, 'category_name')) {
+          values['category_name'] = targetName;
+        }
+        await txn.update(
+          table,
+          values,
+          where: 'category_id = ?',
+          whereArgs: [sourceId],
+        );
+      }
+
+      // Budgets (one per category and month).
+      final budgets = await txn.query(
+        'budgets',
+        where: 'category_id = ?',
+        whereArgs: [sourceId],
+      );
+      for (final b in budgets) {
+        final clash = await txn.query(
+          'budgets',
+          where: 'category_id = ? AND month = ? AND year = ?',
+          whereArgs: [targetId, b['month'], b['year']],
+          limit: 1,
+        );
+        if (clash.isEmpty) {
+          await txn.update(
+            'budgets',
+            {'category_id': targetId, 'category_name': targetName},
+            where: 'id = ?',
+            whereArgs: [b['id']],
+          );
+        } else {
+          final sum =
+              ((clash.first['amount'] as num?) ?? 0).toDouble() +
+              ((b['amount'] as num?) ?? 0).toDouble();
+          await txn.update(
+            'budgets',
+            {'amount': sum},
+            where: 'id = ?',
+            whereArgs: [clash.first['id']],
+          );
+          await txn.delete('budgets', where: 'id = ?', whereArgs: [b['id']]);
+        }
+      }
+
+      await txn.delete('categories', where: 'id = ?', whereArgs: [sourceId]);
+    });
+  }
+
   // ---- Subcategories ----
 
   Future<int> addSubcategory(int categoryId, String rawName) async {
@@ -221,7 +393,11 @@ class CategoryRepository {
     });
   }
 
-  Future<void> renameSubcategory(int id, int categoryId, String rawName) async {
+  Future<void> renameSubcategory(
+    int id,
+    int categoryId,
+    String rawName,
+  ) async {
     final Database db = await AppDatabase.database;
     final name = _cleanName(rawName, 'subcategory');
 

@@ -23,6 +23,8 @@ class CategoryItem {
   final int typeId; // 0 = expense, 1 = income
   final String name;
   final bool isActive;
+  final String? iconName;
+  final String? colorCode;
 
   /// Entries + budgets + recurring schedules that use it. A category that is
   /// in use can be hidden but not deleted.
@@ -34,6 +36,8 @@ class CategoryItem {
     required this.typeId,
     required this.name,
     required this.isActive,
+    this.iconName,
+    this.colorCode,
     required this.usageCount,
     required this.subcategories,
   });

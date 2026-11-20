@@ -13,3 +13,35 @@ Date 08-05-2026
 
 
 
+Done
+
+Core modules (phases 1–7): Expenses, Income, Dashboard, Investments, Loans/EMI, Reports and charts.
+Settings, Backup and Navigation (phases 9–11): Settings with backup/restore, PIN lock and font size, the tablet/web navigation rail, All Transactions with search.
+Accounts and Transfers (phase 12): Accounts and transfers, plus edit and duplicate for transfers (this batch).
+Dark Mode, Goals and Alerts (phase 13): Dark mode, savings goals, budget alerts, recurring upgrades.
+Categories and Quick Wins (phase 14): Manage Categories, undo after delete, duplicate for expenses and income, date presets, a single shared delete dialog, and the edit-screen crash fix.
+Settings and Investments (phase 15): Currency setting, CSV import, automatic backup with history, About screen, investment value history.
+Net Worth and Insights (phase 16): Net worth card and screen with a 12-month trend, month-over-month comparison, top spending, and quick-add expense.
+Reminders and Recurring (this batch): Loan pay-by reminders, bill reminders on recurring schedules, and edit/duplicate for recurring schedules.
+Release: v1.1.0 is tagged.
+
+Waiting for your feedback
+
+The last three batches (Settings/Investments, Net Worth/Dashboard, and this one) have no test feedback from you yet. Please run flutter analyze and test them.
+
+Pending
+
+Phase 8 (Security and optimization): Still in progress.
+Enforce the PIN or biometric prompt when the app resumes.
+Review flutter_secure_storage usage.
+Speed up database queries for large histories.
+Add tests for repositories and business logic.
+Polish reports (export-ready views, empty and error states).
+Undo for deletes: Undo for investment and budget deletes.
+Category polish: Icons and colours for categories, and reorder/merge.
+Remaining feature-document items: Any points from your feature document that we haven’t picked up yet. I can re-check that list against what’s now done if you want.
+
+On hold or later ideas
+
+On hold: Firebase / cloud sync, which you paused.
+Ideas only: Encrypted cloud backup, OCR receipt scanning, AI spending insights, true multi-currency.

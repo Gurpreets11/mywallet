@@ -519,13 +519,15 @@ The supplied archive contained only the `lib/` directory and did not include `pu
 - Reports: retry button on errors, empty-year message with export disabled, multi-page PDF export, and the selected currency code in exports.
 - First unit tests (SHA-256 used by the PIN lock, model round trips).
 - Undo after deleting an investment (with its value history) or a budget.
+- Category icons and colours (picker on Manage Categories), move up/down ordering that applies to all category lists, and Merge into another category (entries, budgets, schedules and subcategories move over).
 
 ### Changed
-- Database version 17 (indexes); version 16 added `recurring_transactions.reminder_days`; version 15 added `investment_valuations`.
+- Database version 18 (`categories.sort_order`); version 17 added indexes; version 16 added `recurring_transactions.reminder_days`; version 15 added `investment_valuations`.
 - Reminders are refreshed after an EMI payment, a loan delete/undo and any recurring change.
 - Amounts and amount fields use the selected currency instead of a fixed rupee symbol.
 
 ### Fixed
+- Undo snackbars now dismiss themselves after 6 seconds.
 - PDF report no longer cuts off after one page and no longer always says INR.
 - Yearly report queries now use the date index.
 

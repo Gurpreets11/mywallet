@@ -59,8 +59,7 @@ For released changes, see [CHANGELOG.md](CHANGELOG.md). To propose something new
 - ✅ Month-over-month comparison, top spending and quick-add expense
 - ✅ Loan reminders, bill reminders on recurring schedules, edit/duplicate for recurring schedules and account transfers
 - ✅ Undo for investment and budget deletes
-- 💡 Category icons/colors in Manage Categories
-- 💡 Reorder and merge categories
+- ✅ Category icons and colours, reorder and merge
 
 ## Long-Term / Exploratory
 

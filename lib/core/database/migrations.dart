@@ -20,6 +20,7 @@ class Migrations {
     await _applyV15Schema(db);
     await _applyV16Schema(db);
     await _applyV17Schema(db);
+    await _applyV18Schema(db);
   }
 
   static Future<void> onUpgrade(
@@ -65,6 +66,19 @@ class Migrations {
     }
     if (oldVersion < 17) {
       await _applyV17Schema(db);
+    }
+    if (oldVersion < 18) {
+      await _applyV18Schema(db);
+    }
+  }
+
+  /// Category order: `categories.sort_order` (NULL falls back to id).
+  /// Safe to run more than once.
+  static Future<void> _applyV18Schema(Database db) async {
+    final info = await db.rawQuery('PRAGMA table_info(categories)');
+    if (info.isNotEmpty && !info.any((c) => c['name'] == 'sort_order')) {
+      await db.execute('ALTER TABLE categories ADD COLUMN sort_order INTEGER');
+      await db.execute('UPDATE categories SET sort_order = id');
     }
   }
 

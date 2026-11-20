@@ -5,7 +5,7 @@ My Wallet stores all data locally on-device using SQLite via the [`sqflite`](htt
 > **Note:** This document describes the schema as implemented in `core/database/migrations.dart`. If you change table/column definitions there, update this file in the same PR so they stay in sync (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 - Database file: `my_wallet.db`
-- Current schema version: **17**
+- Current schema version: **18**
 
 ## Overview
 
@@ -298,6 +298,7 @@ Preference keys are prefixed `pref_` (e.g. `pref_theme_mode`, `pref_font_size`, 
 | 14 → 15 | Investment valuation history (`investment_valuations`, one opening entry per existing investment) |
 | 15 → 16 | Bill reminders: `recurring_transactions.reminder_days` (nullable INTEGER; days before the due date, 0 = on the day) |
 | 16 → 17 | Indexes: `expenses` (date, category_id, account_id), `incomes` (date, account_id), `loan_payments` (loan_id, payment_date), `account_transfers` (date), `savings_goal_contributions` (goal_id) |
+| 17 → 18 | `categories.sort_order` (INTEGER, backfilled with id; NULL falls back to id) |
 | 13 → 14 | Savings goals (`savings_goals`, `savings_goal_contributions`), `budgets.last_alert_level`, `recurring_transactions.account_id` |
 
 Manage Categories, undo, duplicate and date presets did **not** change the schema.
