@@ -18,6 +18,7 @@ class Migrations {
     await _applyAccountsSchema(db);
     await _applyV14Schema(db);
     await _applyV15Schema(db);
+    await _applyV16Schema(db);
   }
 
   static Future<void> onUpgrade(
@@ -57,6 +58,20 @@ class Migrations {
     }
     if (oldVersion < 15) {
       await _applyV15Schema(db);
+    }
+    if (oldVersion < 16) {
+      await _applyV16Schema(db);
+    }
+  }
+
+  /// Bill reminders: days before the due date to remind (NULL = no reminder).
+  /// Safe to run more than once.
+  static Future<void> _applyV16Schema(Database db) async {
+    final info = await db.rawQuery('PRAGMA table_info(recurring_transactions)');
+    if (info.isNotEmpty && !info.any((c) => c['name'] == 'reminder_days')) {
+      await db.execute(
+        'ALTER TABLE recurring_transactions ADD COLUMN reminder_days INTEGER',
+      );
     }
   }
 

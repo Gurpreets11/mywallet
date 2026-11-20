@@ -12,18 +12,30 @@ import '../repositories/account_repository.dart';
 Future<void> showTransferFormSheet(
   BuildContext context, {
   required List<AccountModel> accounts,
+  AccountTransferModel? transfer,
+  bool duplicate = false,
 }) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    builder: (_) => _TransferFormSheet(accounts: accounts),
+    builder: (_) => _TransferFormSheet(
+      accounts: accounts,
+      transfer: transfer,
+      duplicate: duplicate,
+    ),
   );
 }
 
 class _TransferFormSheet extends StatefulWidget {
   final List<AccountModel> accounts;
-  const _TransferFormSheet({required this.accounts});
+  final AccountTransferModel? transfer;
+  final bool duplicate;
+  const _TransferFormSheet({
+    required this.accounts,
+    this.transfer,
+    this.duplicate = false,
+  });
 
   @override
   State<_TransferFormSheet> createState() => _TransferFormSheetState();
@@ -41,9 +53,20 @@ class _TransferFormSheetState extends State<_TransferFormSheet> {
   @override
   void initState() {
     super.initState();
-    _fromId = widget.accounts.first.id!;
-    _toId = widget.accounts[1].id!;
+    final ids = widget.accounts.map((a) => a.id!).toList();
+    _fromId = ids.first;
+    _toId = ids[1];
+    final t = widget.transfer;
+    if (t != null) {
+      if (ids.contains(t.fromAccountId)) _fromId = t.fromAccountId;
+      if (ids.contains(t.toAccountId)) _toId = t.toAccountId;
+      _amountController.text = t.amount.toString();
+      _notesController.text = t.notes ?? '';
+      if (!widget.duplicate) _date = DateTime.tryParse(t.date) ?? _date;
+    }
   }
+
+  bool get _isEdit => widget.transfer != null && !widget.duplicate;
 
   @override
   void dispose() {
@@ -73,8 +96,8 @@ class _TransferFormSheetState extends State<_TransferFormSheet> {
     final dashboard = context.read<DashboardProvider>();
     final navigator = Navigator.of(context);
     try {
-      await AccountRepository().addTransfer(
-        AccountTransferModel(
+      final model = AccountTransferModel(
+          id: _isEdit ? widget.transfer!.id : null,
           fromAccountId: _fromId,
           toAccountId: _toId,
           amount: double.parse(_amountController.text.trim()),
@@ -82,9 +105,15 @@ class _TransferFormSheetState extends State<_TransferFormSheet> {
           notes: _notesController.text.trim().isEmpty
               ? null
               : _notesController.text.trim(),
-          createdAt: AppDateUtils.getCurrentTimestamp(),
-        ),
-      );
+          createdAt: _isEdit
+              ? widget.transfer!.createdAt
+              : AppDateUtils.getCurrentTimestamp(),
+        );
+      if (_isEdit) {
+        await AccountRepository().updateTransfer(model);
+      } else {
+        await AccountRepository().addTransfer(model);
+      }
       await dashboard.loadAccounts();
       navigator.pop();
     } catch (e) {
@@ -118,7 +147,11 @@ class _TransferFormSheetState extends State<_TransferFormSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Transfer money',
+              _isEdit
+                  ? 'Edit transfer'
+                  : widget.duplicate
+                  ? 'Duplicate transfer'
+                  : 'Transfer money',
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -184,7 +217,7 @@ class _TransferFormSheetState extends State<_TransferFormSheet> {
               child: FilledButton.icon(
                 onPressed: _saving ? null : _save,
                 icon: const Icon(Icons.swap_horiz_rounded),
-                label: const Text('Transfer'),
+                label: Text(_isEdit ? 'Save changes' : 'Transfer'),
               ),
             ),
           ],

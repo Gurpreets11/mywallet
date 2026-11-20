@@ -32,12 +32,28 @@ class _RecurringScreenState extends State<RecurringScreen> {
     );
   }
 
+  Future<void> _openForm(
+    RecurringTransactionModel item, {
+    bool duplicate = false,
+  }) async {
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddRecurringScreen(item: item, isDuplicate: duplicate),
+      ),
+    );
+  }
+
   Future<void> _handleAction(
     String action,
     RecurringTransactionModel item,
     RecurringProvider provider,
   ) async {
-    if (action == 'pause') {
+    if (action == 'edit') {
+      await _openForm(item);
+    } else if (action == 'duplicate') {
+      await _openForm(item, duplicate: true);
+    } else if (action == 'pause') {
       await provider.pause(item);
     } else if (action == 'resume') {
       await provider.resume(item);
@@ -86,6 +102,7 @@ class _RecurringScreenState extends State<RecurringScreen> {
           'Start: ${_displayDate(item.startDate)}\n'
           'End: ${item.endDate == null ? 'No end date' : _displayDate(item.endDate!)}\n'
           'Next due: ${_displayDate(item.nextDueDate)}\n'
+          'Reminder: ${_reminderLabel(item.reminderDays)}\n'
           'Status: ${item.status}\n'
           '${item.notes ?? ''}',
         ),
@@ -221,6 +238,14 @@ class _RecurringScreenState extends State<RecurringScreen> {
                                 onSelected: (value) =>
                                     _handleAction(value, item, provider),
                                 itemBuilder: (_) => [
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: Text('Edit'),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'duplicate',
+                                    child: Text('Duplicate'),
+                                  ),
                                   if (item.status == 'ACTIVE')
                                     const PopupMenuItem(
                                       value: 'pause',
@@ -259,6 +284,13 @@ class _RecurringScreenState extends State<RecurringScreen> {
     final label = frequency.toLowerCase();
     return interval == 1 ? label : 'every $interval $label';
   }
+
+  static String _reminderLabel(int? days) => switch (days) {
+    null => 'None',
+    0 => 'On the due date',
+    1 => '1 day before',
+    _ => '$days days before',
+  };
 
   static String _displayDate(String value) {
     final date = DateTime.tryParse(value);

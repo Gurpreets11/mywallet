@@ -11,6 +11,8 @@ import '../../modules/expenses/screens/expense_list_screen.dart';
 import '../../modules/investments/repositories/investment_repository.dart';
 import '../../modules/income/screens/income_list_screen.dart';
 import '../../modules/loans/repositories/loan_repository.dart';
+import '../../modules/recurring/repositories/recurring_repository.dart';
+import '../../modules/recurring/screens/recurring_screen.dart';
 import '../../modules/loans/screens/loan_detail_screen.dart';
 import '../../modules/navigation/screens/main_navigation_screen.dart';
 import 'navigation_service.dart';
@@ -104,6 +106,7 @@ class NotificationService {
     final prefs = AppPreferences.instance;
     if (type == 'loan' && !prefs.emiRemindersEnabled) return;
     if (type == 'investment' && !prefs.sipRemindersEnabled) return;
+    if (type == 'recurring' && !prefs.billRemindersEnabled) return;
 
     await _notificationsPlugin.zonedSchedule(
       id,
@@ -197,15 +200,76 @@ class NotificationService {
       if (id == null || next == null) continue;
       if (loan.loanStatus.toUpperCase() == 'CLOSED') continue;
 
-      final remindAt = next.subtract(const Duration(days: 1));
-      if (!remindAt.isAfter(now)) continue;
+      final isGiven = loan.loanType.toUpperCase() == 'GIVEN';
+      final remindAt = DateTime(next.year, next.month, next.day, 9)
+          .subtract(const Duration(days: 1));
+      if (remindAt.isAfter(now)) {
+        await scheduleNotification(
+          id: id,
+          title: isGiven ? 'EMI to collect' : 'EMI due',
+          body: isGiven
+              ? 'Collect ${CurrencyUtils.simple(loan.emiAmount)} from '
+                    '${loan.personName} tomorrow'
+              : 'Pay ${CurrencyUtils.simple(loan.emiAmount)} to '
+                    '${loan.personName} tomorrow',
+          scheduledDate: remindAt,
+          payload: jsonEncode({'type': 'loan', 'loanId': id}),
+        );
+      }
+    }
 
+    // Pay-by / repay-by dates of lent and borrowed money.
+    for (final loan in loans) {
+      final id = loan.id;
+      final due = loan.endDate == null ? null : DateTime.tryParse(loan.endDate!);
+      if (id == null || due == null) continue;
+      if (loan.loanStatus.toUpperCase() == 'CLOSED') continue;
+      final isGiven = loan.loanType.toUpperCase() == 'GIVEN';
+      final amount = CurrencyUtils.simple(loan.outstandingAmount);
+      final payload = jsonEncode({'type': 'loan', 'loanId': id});
+      final onDay = DateTime(due.year, due.month, due.day, 9);
+
+      for (final (offsetDays, idBase) in [(1, 2000000), (0, 3000000)]) {
+        final at = onDay.subtract(Duration(days: offsetDays));
+        if (!at.isAfter(now)) continue;
+        final when = offsetDays == 0 ? 'today' : 'tomorrow';
+        await scheduleNotification(
+          id: idBase + id,
+          title: isGiven ? 'Money to get back' : 'Money to repay',
+          body: isGiven
+              ? '${loan.personName} should repay $amount $when'
+              : 'Repay $amount to ${loan.personName} $when',
+          scheduledDate: at,
+          payload: payload,
+        );
+      }
+    }
+
+    // Bill / recurring reminders.
+    final schedules = await RecurringRepository().getAll();
+    for (final item in schedules) {
+      final id = item.id;
+      final days = item.reminderDays;
+      final due = DateTime.tryParse(item.nextDueDate);
+      if (id == null || days == null || due == null) continue;
+      if (item.status != 'ACTIVE') continue;
+      final at = DateTime(due.year, due.month, due.day, 9)
+          .subtract(Duration(days: days));
+      if (!at.isAfter(now)) continue;
+      final isExpense = item.transactionType == 'EXPENSE';
+      final when = days == 0
+          ? 'today'
+          : days == 1
+          ? 'tomorrow'
+          : 'in $days days';
       await scheduleNotification(
-        id: id,
-        title: 'EMI Reminder',
-        body: 'EMI payment due for ${loan.personName}',
-        scheduledDate: remindAt,
-        payload: jsonEncode({'type': 'loan', 'loanId': id}),
+        id: 4000000 + id,
+        title: isExpense ? 'Bill due' : 'Income expected',
+        body:
+            '${item.title} - ${CurrencyUtils.simple(item.amount)} '
+            '${isExpense ? 'due' : 'expected'} $when',
+        scheduledDate: at,
+        payload: jsonEncode({'type': 'recurring', 'recurringId': id}),
       );
     }
 
@@ -269,6 +333,10 @@ class NotificationService {
           );
         }
 
+        break;
+
+      case 'recurring':
+        await NavigationService.instance.navigateTo(const RecurringScreen());
         break;
 
       case 'expense':

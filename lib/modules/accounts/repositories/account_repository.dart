@@ -35,7 +35,10 @@ class AccountRepository {
   Future<List<AccountModel>> getAccounts() async {
     await ensureDefaultAccount();
     final Database db = await AppDatabase.database;
-    final rows = await db.query('accounts', orderBy: 'is_default DESC, id ASC');
+    final rows = await db.query(
+      'accounts',
+      orderBy: 'is_default DESC, id ASC',
+    );
     return rows.map(AccountModel.fromMap).toList();
   }
 
@@ -65,8 +68,7 @@ class AccountRepository {
     void add(Map<int, double> target, List<Map<String, Object?>> rows) {
       for (final r in rows) {
         final id = resolve(r['aid']);
-        target[id] =
-            (target[id] ?? 0) + ((r['total'] as num?)?.toDouble() ?? 0);
+        target[id] = (target[id] ?? 0) + ((r['total'] as num?)?.toDouble() ?? 0);
       }
     }
 
@@ -237,6 +239,19 @@ class AccountRepository {
     final Database db = await AppDatabase.database;
     final map = transfer.toMap()..remove('id');
     return db.insert('account_transfers', map);
+  }
+
+  Future<void> updateTransfer(AccountTransferModel transfer) async {
+    final Database db = await AppDatabase.database;
+    final map = transfer.toMap()
+      ..remove('id')
+      ..remove('created_at');
+    await db.update(
+      'account_transfers',
+      map,
+      where: 'id = ?',
+      whereArgs: [transfer.id],
+    );
   }
 
   Future<void> deleteTransfer(int id) async {

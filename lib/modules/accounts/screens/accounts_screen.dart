@@ -74,6 +74,20 @@ class _AccountsScreenState extends State<AccountsScreen> {
     );
   }
 
+  Future<void> _editTransfer(
+    List<AccountBalance> balances,
+    AccountTransferModel t, {
+    bool duplicate = false,
+  }) async {
+    if (balances.length < 2) return;
+    await showTransferFormSheet(
+      context,
+      accounts: balances.map((b) => b.account).toList(),
+      transfer: t,
+      duplicate: duplicate,
+    );
+  }
+
   Future<void> _deleteTransfer(AccountTransferModel t) async {
     final ok = await _confirm(
       'Delete transfer?',
@@ -149,6 +163,9 @@ class _AccountsScreenState extends State<AccountsScreen> {
                     transfer: t,
                     from: names[t.fromAccountId] ?? 'Account',
                     to: names[t.toAccountId] ?? 'Account',
+                    onEdit: () => _editTransfer(balances, t),
+                    onDuplicate: () =>
+                        _editTransfer(balances, t, duplicate: true),
                     onDelete: () => _deleteTransfer(t),
                   ),
               ],
@@ -323,9 +340,13 @@ class _TransferTile extends StatelessWidget {
   final AccountTransferModel transfer;
   final String from;
   final String to;
+  final VoidCallback onEdit;
+  final VoidCallback onDuplicate;
   final VoidCallback onDelete;
 
   const _TransferTile({
+    required this.onEdit,
+    required this.onDuplicate,
     required this.transfer,
     required this.from,
     required this.to,
@@ -351,9 +372,7 @@ class _TransferTile extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 16,
-              backgroundColor: Theme.of(
-                context,
-              ).colorScheme.surfaceContainerHighest,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: Icon(Icons.swap_horiz_rounded, size: 18),
             ),
             const SizedBox(width: 10),
@@ -385,10 +404,18 @@ class _TransferTile extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            IconButton(
-              tooltip: 'Delete transfer',
-              icon: const Icon(Icons.delete_outline, size: 20),
-              onPressed: onDelete,
+            PopupMenuButton<String>(
+              tooltip: 'More',
+              onSelected: (v) {
+                if (v == 'edit') onEdit();
+                if (v == 'duplicate') onDuplicate();
+                if (v == 'delete') onDelete();
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(value: 'edit', child: Text('Edit')),
+                PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
+                PopupMenuItem(value: 'delete', child: Text('Delete')),
+              ],
             ),
           ],
         ),

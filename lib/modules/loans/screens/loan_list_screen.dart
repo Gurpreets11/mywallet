@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/services/notification_service.dart';
 import '../../../core/widgets/common_delete_dialog.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../../core/utils/currency_utils.dart';
@@ -33,20 +34,31 @@ class _LoanListScreenState extends State<LoanListScreen> {
     });
   }
 
+  Future<void> _refreshReminders() async {
+    try {
+      await NotificationService.instance.rescheduleAll();
+    } catch (e) {
+      debugPrint('Unable to refresh reminders: $e');
+    }
+  }
+
   Future<void> _confirmDelete(LoanProvider provider, LoanModel loan) async {
     final confirmed = await confirmDelete(
       context,
       title: 'Delete loan?',
-      message: '"${loan.personName}" and its payment history will be deleted.',
+      message:
+          '"${loan.personName}" and its payment history will be deleted.',
     );
     if (confirmed && loan.id != null) {
       final payments = await provider.deleteLoanWithPayments(loan.id!);
       if (!mounted) return;
       final dashboard = context.read<DashboardProvider>();
       dashboard.loadDashboardData();
+      _refreshReminders();
       SnackbarUtils.showUndo(context, 'Loan deleted', () async {
         await provider.restoreLoan(loan, payments);
         await dashboard.loadDashboardData();
+        await _refreshReminders();
       });
     }
   }

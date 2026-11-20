@@ -548,6 +548,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _toggleBillReminders(bool value) async {
+    await _prefs.setBillRemindersEnabled(value);
+    if (!mounted) return;
+    setState(() {});
+    await _applyReminderChange(
+      () => value
+          ? NotificationService.instance.rescheduleAll()
+          : NotificationService.instance.cancelByType('recurring'),
+    );
+  }
+
   Future<void> _applyReminderChange(Future<void> Function() action) async {
     try {
       await action();
@@ -880,6 +891,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       value: _prefs.sipRemindersEnabled,
                       onChanged: _toggleSipReminders,
+                    ),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.receipt_long_outlined),
+                      title: const Text('Bill & recurring reminders'),
+                      subtitle: const Text(
+                        'Before a recurring bill or income is due',
+                      ),
+                      value: _prefs.billRemindersEnabled,
+                      onChanged: _toggleBillReminders,
                     ),
                     SwitchListTile(
                       secondary: const Icon(Icons.savings_outlined),
