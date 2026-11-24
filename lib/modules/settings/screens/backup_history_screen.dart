@@ -175,9 +175,9 @@ class _BackupHistoryScreenState extends State<BackupHistoryScreen> {
               padding: const EdgeInsets.only(left: 4, bottom: 10),
               child: Text(
                 'Backup history',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
               ),
             ),
             if (_loading)
@@ -191,7 +191,10 @@ class _BackupHistoryScreenState extends State<BackupHistoryScreen> {
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text('No backup copies on this device yet.', style: muted),
+                  child: Text(
+                    'No backup copies on this device yet.',
+                    style: muted,
+                  ),
                 ),
               )
             else

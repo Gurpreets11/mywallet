@@ -158,7 +158,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
                           'Nothing to export for ${p.selectedYear}. '
                           'Pick another year or add transactions.',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -166,7 +168,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: report.totalIncome == 0 &&
+                            onPressed:
+                                report.totalIncome == 0 &&
                                     report.totalExpense == 0
                                 ? null
                                 : () => _exportFile(_export.exportPdf, report),
@@ -177,7 +180,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: report.totalIncome == 0 &&
+                            onPressed:
+                                report.totalIncome == 0 &&
                                     report.totalExpense == 0
                                 ? null
                                 : () => _exportFile(_export.exportCsv, report),
@@ -530,7 +534,9 @@ class _EmptyChart extends StatelessWidget {
       child: Center(
         child: Text(
           'No transactions found for this year',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     ),

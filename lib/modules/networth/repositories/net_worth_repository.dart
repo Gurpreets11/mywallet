@@ -98,7 +98,9 @@ class NetWorthRepository {
       for (final p in payments) {
         final d = _date(p['date']);
         if (d == null || d.isBefore(end)) continue;
-        flowAfter += p['type'] == 'GIVEN' ? _num(p['amount']) : -_num(p['amount']);
+        flowAfter += p['type'] == 'GIVEN'
+            ? _num(p['amount'])
+            : -_num(p['amount']);
       }
       final cash = cashNow - flowAfter;
 
@@ -121,8 +123,7 @@ class NetWorthRepository {
       for (final l in loans) {
         final started = _date(l['start_date']);
         if (started != null && !started.isBefore(end)) continue;
-        final closed =
-            (l['loan_status'] as String?)?.toUpperCase() == 'CLOSED';
+        final closed = (l['loan_status'] as String?)?.toUpperCase() == 'CLOSED';
         var out = closed ? 0.0 : _num(l['outstanding_amount']);
         for (final p in payments) {
           if (p['loan_id'] != l['id']) continue;
@@ -151,10 +152,7 @@ class NetWorthRepository {
     }
 
     trend.add(
-      NetWorthPoint(
-        month: DateTime(now.year, now.month, 1),
-        snapshot: current,
-      ),
+      NetWorthPoint(month: DateTime(now.year, now.month, 1), snapshot: current),
     );
 
     return NetWorthResult(current: current, trend: trend);

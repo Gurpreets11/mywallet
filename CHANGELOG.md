@@ -520,6 +520,8 @@ The supplied archive contained only the `lib/` directory and did not include `pu
 - First unit tests (SHA-256 used by the PIN lock, model round trips).
 - Undo after deleting an investment (with its value history) or a budget.
 - Category icons and colours (picker on Manage Categories), move up/down ordering that applies to all category lists, and Merge into another category (entries, budgets, schedules and subcategories move over).
+- Biometric unlock (fingerprint / face) as a shortcut next to the PIN, with a Settings switch (needs the `local_auth` package).
+- Automated tests for the whole app: database migrations; every repository; models; utilities; preferences; providers; backup, restore, reset and automatic backup; CSV import; PIN lock; and the shared widgets and cards. See `docs/TESTING.md`.
 
 ### Changed
 - Database version 18 (`categories.sort_order`); version 17 added indexes; version 16 added `recurring_transactions.reminder_days`; version 15 added `investment_valuations`.

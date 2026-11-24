@@ -48,8 +48,8 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen>
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => (isExpense ? _expenseTab : _incomeTab).currentState
-            ?.addCategory(),
+        onPressed: () =>
+            (isExpense ? _expenseTab : _incomeTab).currentState?.addCategory(),
         icon: const Icon(Icons.add),
         label: Text(isExpense ? 'Expense category' : 'Income category'),
       ),
@@ -345,7 +345,10 @@ class _CategoryTabState extends State<_CategoryTab>
                   if (index > 0)
                     const PopupMenuItem(value: 'up', child: Text('Move up')),
                   if (index < items.length - 1)
-                    const PopupMenuItem(value: 'down', child: Text('Move down')),
+                    const PopupMenuItem(
+                      value: 'down',
+                      child: Text('Move down'),
+                    ),
                   const PopupMenuItem(
                     value: 'merge',
                     child: Text('Merge into…'),
@@ -465,7 +468,11 @@ class _StyleSheetState extends State<_StyleSheet> {
                       radius: 16,
                       backgroundColor: CategoryStyle.colorFor(code),
                       child: _color == code
-                          ? const Icon(Icons.check, size: 18, color: Colors.white)
+                          ? const Icon(
+                              Icons.check,
+                              size: 18,
+                              color: Colors.white,
+                            )
                           : null,
                     ),
                   ),
@@ -491,12 +498,16 @@ class _StyleSheetState extends State<_StyleSheet> {
                             ? current.withValues(alpha: 0.18)
                             : null,
                         border: Border.all(
-                          color: _icon == e.key ? current : scheme.outlineVariant,
+                          color: _icon == e.key
+                              ? current
+                              : scheme.outlineVariant,
                         ),
                       ),
                       child: Icon(
                         e.value,
-                        color: _icon == e.key ? current : scheme.onSurfaceVariant,
+                        color: _icon == e.key
+                            ? current
+                            : scheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -506,18 +517,16 @@ class _StyleSheetState extends State<_StyleSheet> {
             Row(
               children: [
                 TextButton(
-                  onPressed: () => Navigator.pop<(String?, String?)>(
-                    context,
-                    (null, null),
-                  ),
+                  onPressed: () =>
+                      Navigator.pop<(String?, String?)>(context, (null, null)),
                   child: const Text('Reset'),
                 ),
                 const Spacer(),
                 FilledButton(
-                  onPressed: () => Navigator.pop<(String?, String?)>(
-                    context,
-                    (_icon, _color),
-                  ),
+                  onPressed: () => Navigator.pop<(String?, String?)>(context, (
+                    _icon,
+                    _color,
+                  )),
                   child: const Text('Save'),
                 ),
               ],

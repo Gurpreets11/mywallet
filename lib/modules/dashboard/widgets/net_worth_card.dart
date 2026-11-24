@@ -79,7 +79,11 @@ class NetWorthCard extends StatelessWidget {
     final pct = r.changePercent;
     return Row(
       children: [
-        Icon(up ? Icons.trending_up : Icons.trending_down, size: 16, color: color),
+        Icon(
+          up ? Icons.trending_up : Icons.trending_down,
+          size: 16,
+          color: color,
+        ),
         const SizedBox(width: 4),
         Flexible(
           child: Text(

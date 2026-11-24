@@ -29,11 +29,12 @@ class DataResetService {
       if (removeAppLock) {
         await txn.delete(
           'app_metadata',
-          where: 'meta_key IN (?, ?, ?)',
+          where: 'meta_key IN (?, ?, ?, ?)',
           whereArgs: [
             BackupMetaKeys.appLockEnabled,
             BackupMetaKeys.appLockSalt,
             BackupMetaKeys.appLockHash,
+            BackupMetaKeys.appLockBiometric,
           ],
         );
       }

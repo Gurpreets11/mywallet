@@ -20,6 +20,7 @@ class BackupMetaKeys {
   static const String appLockEnabled = 'app_lock_enabled';
   static const String appLockSalt = 'app_lock_salt';
   static const String appLockHash = 'app_lock_hash';
+  static const String appLockBiometric = 'app_lock_biometric';
 
   static const Set<String> deviceLocal = {
     lastBackupAt,
@@ -28,6 +29,7 @@ class BackupMetaKeys {
     appLockEnabled,
     appLockSalt,
     appLockHash,
+    appLockBiometric,
   };
 }
 

@@ -14,6 +14,7 @@ import '../../../core/services/export/csv_export_service.dart';
 import '../../../core/services/import/csv_import_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/security/app_lock_service.dart';
+import '../../../core/services/security/biometric_service.dart';
 import '../../../core/services/settings/app_preferences.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/snackbar_utils.dart';
@@ -116,7 +117,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final Database db = await AppDatabase.database;
       final path = await _lock.runWithoutLock(
-            () => BackupService(db).exportBackupToUserChosenLocation(),
+        () => BackupService(db).exportBackupToUserChosenLocation(),
       );
       if (!mounted) return;
       if (path == null) {
@@ -142,7 +143,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final Database db = await AppDatabase.database;
       final backupMap = await _lock.runWithoutLock(
-            () => RestoreService(db).pickAndParseBackupFile(),
+        () => RestoreService(db).pickAndParseBackupFile(),
       );
       if (backupMap == null) return; // user cancelled the picker
       await _runRestore(backupMap);
@@ -174,8 +175,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               padding: EdgeInsets.fromLTRB(24, 0, 24, 12),
               child: Text(
                 'Copies are saved automatically before every restore or '
-                    'reset. Pick the state you want to go back to.',
-                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                'reset. Pick the state you want to go back to.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
             for (final f in files)
@@ -274,8 +278,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 16),
               const Text(
                 'This will REPLACE all data currently in the app with the '
-                    'data from this backup. A safety copy of your current data '
-                    'is saved automatically before restoring.',
+                'data from this backup. A safety copy of your current data '
+                'is saved automatically before restoring.',
               ),
             ],
           ),
@@ -312,7 +316,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final Database db = await AppDatabase.database;
       final result = await _lock.runWithoutLock(
-            () => CsvExportService(
+        () => CsvExportService(
           db,
         ).export(scope: options.scope, from: options.from, to: options.to),
       );
@@ -409,7 +413,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ];
       _snack(
         'Imported ${result.imported} records'
-            '${extra.isEmpty ? '' : ' (${extra.join(', ')})'}',
+        '${extra.isEmpty ? '' : ' (${extra.join(', ')})'}',
       );
     } on CsvImportException catch (e) {
       _snack(e.message);
@@ -446,29 +450,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const Text(
                     'The file has no Type column. Import these rows as:',
                   ),
-                  RadioListTile<_ImportDefault>(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    title: const Text('Expenses'),
-                    value: _ImportDefault.expense,
+                  RadioGroup<_ImportDefault>(
                     groupValue: choice,
-                    onChanged: (v) => setLocal(() => choice = v!),
-                  ),
-                  RadioListTile<_ImportDefault>(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    title: const Text('Income'),
-                    value: _ImportDefault.income,
-                    groupValue: choice,
-                    onChanged: (v) => setLocal(() => choice = v!),
-                  ),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setLocal(() => choice = value);
+                      }
+                    },
+                    child: Column(
+                      children: [
+                        RadioListTile<_ImportDefault>(
+                          contentPadding: EdgeInsets.zero,
+                          dense: true,
+                          title: const Text('Income'),
+                          value: _ImportDefault.income,
+                        ),
+                        RadioListTile<_ImportDefault>(
+                          contentPadding: EdgeInsets.zero,
+                          dense: true,
+                          title: const Text('Expense'),
+                          value: _ImportDefault.expense,
+                        ),
+                      ],
+                    ),
+                  )
                 ],
                 if (parsed.problems.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Text(
                     '${parsed.problems.length} rows will be skipped:\n'
-                        '${parsed.problems.take(5).join('\n')}'
-                        '${parsed.problems.length > 5 ? '\n...' : ''}',
+                    '${parsed.problems.take(5).join('\n')}'
+                    '${parsed.problems.length > 5 ? '\n...' : ''}',
                     style: TextStyle(
                       fontSize: 12,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -478,8 +490,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 12),
                 const Text(
                   'Missing categories are created automatically and entries '
-                      'already in the app are skipped. A safety copy is saved '
-                      'before importing.',
+                  'already in the app are skipped. A safety copy is saved '
+                  'before importing.',
                   style: TextStyle(fontSize: 12),
                 ),
               ],
@@ -505,7 +517,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     setState(() {});
     await _applyReminderChange(
-          () => NotificationService.instance.scheduleDailyReminder(),
+      () => NotificationService.instance.scheduleDailyReminder(),
     );
   }
 
@@ -522,7 +534,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     setState(() {});
     await _applyReminderChange(
-          () => NotificationService.instance.scheduleDailyReminder(),
+      () => NotificationService.instance.scheduleDailyReminder(),
     );
   }
 
@@ -531,7 +543,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     setState(() {});
     await _applyReminderChange(
-          () => value
+      () => value
           ? NotificationService.instance.rescheduleAll()
           : NotificationService.instance.cancelByType('loan'),
     );
@@ -542,10 +554,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     setState(() {});
     await _applyReminderChange(
-          () => value
+      () => value
           ? NotificationService.instance.rescheduleAll()
           : NotificationService.instance.cancelByType('investment'),
     );
+  }
+
+  Future<void> _toggleBiometric(bool value) async {
+    if (value) {
+      // Prove it works on this device before turning it on.
+      final ok = await _lock.runWithoutLock(
+        () => BiometricService.instance.authenticate(
+          'Confirm to turn on biometric unlock',
+        ),
+      );
+      if (!ok) {
+        if (mounted) {
+          SnackbarUtils.showSnackbar(context, 'Biometric check was cancelled');
+        }
+        return;
+      }
+    }
+    await _lock.setBiometricEnabled(value);
+    if (mounted) setState(() {});
   }
 
   Future<void> _toggleBillReminders(bool value) async {
@@ -553,7 +584,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     setState(() {});
     await _applyReminderChange(
-          () => value
+      () => value
           ? NotificationService.instance.rescheduleAll()
           : NotificationService.instance.cancelByType('recurring'),
     );
@@ -609,7 +640,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context,
       title: 'Erase all data?',
       message:
-      'This permanently deletes all expenses, income, investments, loans, '
+          'This permanently deletes all expenses, income, investments, loans, '
           'budgets and recurring items and restores the default categories. '
           'A safety copy is saved first, so you can undo this from '
           '"Restore from safety copy".',
@@ -719,7 +750,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ListTile(
                       leading: const Icon(Icons.category_outlined),
                       title: const Text('Manage categories'),
-                      subtitle: const Text('Add or edit expense and income categories'),
+                      subtitle: const Text(
+                        'Add or edit expense and income categories',
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Navigator.push(
                         context,
@@ -811,7 +844,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             children: [
                               Icon(
                                 Icons.format_size_rounded,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                               SizedBox(width: 16),
                               Text('Text size', style: TextStyle(fontSize: 16)),
@@ -839,11 +874,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const SizedBox(height: 8),
                           Text(
                             'Changes the text size across the whole app. '
-                                'It is added to your phone\'s own font-size setting.',
+                            'It is added to your phone\'s own font-size setting.',
                             style: TextStyle(
                               fontSize: 12,
                               height: 1.4,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -923,11 +960,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: const Text('App lock (PIN)'),
                       subtitle: const Text(
                         'Ask for a PIN when the app opens or returns from the '
-                            'background',
+                        'background',
                       ),
                       value: _lock.isEnabled,
                       onChanged: _toggleAppLock,
                     ),
+                    if (_lock.isEnabled)
+                      FutureBuilder<bool>(
+                        future: BiometricService.instance.isAvailable(),
+                        builder: (context, snap) {
+                          if (snap.data != true) return const SizedBox.shrink();
+                          return SwitchListTile(
+                            secondary: const Icon(Icons.fingerprint),
+                            title: const Text('Unlock with biometrics'),
+                            subtitle: const Text(
+                              'Use fingerprint or face instead of typing the PIN',
+                            ),
+                            value: _lock.isBiometricEnabled,
+                            onChanged: _toggleBiometric,
+                          );
+                        },
+                      ),
                     if (_lock.isEnabled)
                       ListTile(
                         leading: const Icon(Icons.timer_outlined),
@@ -1005,7 +1058,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       subtitle: const Text(
                         'Deletes everything and starts fresh. A safety copy is '
-                            'saved first.',
+                        'saved first.',
                       ),
                       enabled: !_busy,
                       onTap: _resetAllData,
@@ -1056,22 +1109,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(16),
         child: _loadingOverview
             ? const Center(
-          child: Padding(
-            padding: EdgeInsets.all(8),
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        )
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
             : Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            for (final entry in _overviewTables.entries)
-              _StatTile(
-                label: entry.value,
-                value: _counts[entry.key] ?? 0,
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  for (final entry in _overviewTables.entries)
+                    _StatTile(
+                      label: entry.value,
+                      value: _counts[entry.key] ?? 0,
+                    ),
+                ],
               ),
-          ],
-        ),
       ),
     );
   }
@@ -1138,11 +1191,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 12),
             Text(
               'Backup saves all your expenses, income, investments, loans, '
-                  'budgets and recurring items into one file. Keep it somewhere '
-                  'safe, such as Google Drive.\n\n'
-                  'Restore replaces everything currently in the app with the '
-                  'contents of a backup file. Your app-lock PIN is never stored '
-                  'in backup files.',
+              'budgets and recurring items into one file. Keep it somewhere '
+              'safe, such as Google Drive.\n\n'
+              'Restore replaces everything currently in the app with the '
+              'contents of a backup file. Your app-lock PIN is never stored '
+              'in backup files.',
               style: TextStyle(
                 fontSize: 12,
                 height: 1.4,

@@ -86,7 +86,9 @@ class CsvImportService {
     if (bytes == null && file.path != null) {
       bytes = await File(file.path!).readAsBytes();
     }
-    if (bytes == null) throw const CsvImportException('Could not read the file.');
+    if (bytes == null) {
+      throw const CsvImportException('Could not read the file.');
+    }
     return utf8.decode(bytes, allowMalformed: true);
   }
 
@@ -146,7 +148,9 @@ class CsvImportService {
   /// Removes the apostrophe the exporter adds in front of =, +, @ and -.
   static String _clean(String value) {
     var v = value.trim();
-    if (v.length > 1 && v[0] == "'" && '=+@-'.contains(v[1])) v = v.substring(1);
+    if (v.length > 1 && v[0] == "'" && '=+@-'.contains(v[1])) {
+      v = v.substring(1);
+    }
     return v;
   }
 

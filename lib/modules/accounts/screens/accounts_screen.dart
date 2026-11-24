@@ -372,7 +372,9 @@ class _TransferTile extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 16,
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
               child: Icon(Icons.swap_horiz_rounded, size: 18),
             ),
             const SizedBox(width: 10),

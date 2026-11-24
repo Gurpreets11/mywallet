@@ -48,7 +48,11 @@ class PinPad extends StatelessWidget {
     required this.onDigit,
     required this.onBackspace,
     this.enabled = true,
+    this.leading,
   });
+
+  /// Optional key at the bottom-left (e.g. fingerprint).
+  final Widget? leading;
 
   final ValueChanged<String> onDigit;
   final VoidCallback onBackspace;
@@ -85,7 +89,7 @@ class PinPad extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              const SizedBox(width: 72, height: 72),
+              leading ?? const SizedBox(width: 72, height: 72),
               key('0'),
               _PadKey(
                 onTap: enabled ? onBackspace : null,

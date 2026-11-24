@@ -152,7 +152,9 @@ class _RecurringScreenState extends State<RecurringScreen> {
                           Icon(
                             Icons.event_repeat,
                             size: 48,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(height: 10),
                           const Text(

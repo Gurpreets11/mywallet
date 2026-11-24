@@ -19,11 +19,7 @@ class MonthInsightsRepository {
     final lastSameEnd = DateTime(lastStart.year, lastStart.month, compareDay);
     final lastEnd = DateTime(now.year, now.month, 0);
 
-    Future<double> total(
-      String table,
-      DateTime from,
-      DateTime to,
-    ) async {
+    Future<double> total(String table, DateTime from, DateTime to) async {
       final rows = await db.rawQuery(
         'SELECT SUM(amount) AS total FROM $table '
         'WHERE date(date) >= date(?) AND date(date) <= date(?)',

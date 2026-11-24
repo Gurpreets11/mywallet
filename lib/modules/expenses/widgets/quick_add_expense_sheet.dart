@@ -148,7 +148,10 @@ class _QuickAddExpenseSheetState extends State<QuickAddExpenseSheet> {
       await dashboard.loadDashboardData();
     } catch (_) {
       if (mounted) {
-        SnackbarUtils.showSnackbar(context, 'Unable to save. Please try again.');
+        SnackbarUtils.showSnackbar(
+          context,
+          'Unable to save. Please try again.',
+        );
         setState(() => _saving = false);
       }
     }
@@ -157,9 +160,7 @@ class _QuickAddExpenseSheetState extends State<QuickAddExpenseSheet> {
   void _openFullForm() {
     final navigator = Navigator.of(context);
     navigator.pop();
-    navigator.push(
-      MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
-    );
+    navigator.push(MaterialPageRoute(builder: (_) => const AddExpenseScreen()));
   }
 
   @override

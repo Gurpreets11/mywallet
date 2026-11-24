@@ -201,8 +201,12 @@ class NotificationService {
       if (loan.loanStatus.toUpperCase() == 'CLOSED') continue;
 
       final isGiven = loan.loanType.toUpperCase() == 'GIVEN';
-      final remindAt = DateTime(next.year, next.month, next.day, 9)
-          .subtract(const Duration(days: 1));
+      final remindAt = DateTime(
+        next.year,
+        next.month,
+        next.day,
+        9,
+      ).subtract(const Duration(days: 1));
       if (remindAt.isAfter(now)) {
         await scheduleNotification(
           id: id,
@@ -221,7 +225,9 @@ class NotificationService {
     // Pay-by / repay-by dates of lent and borrowed money.
     for (final loan in loans) {
       final id = loan.id;
-      final due = loan.endDate == null ? null : DateTime.tryParse(loan.endDate!);
+      final due = loan.endDate == null
+          ? null
+          : DateTime.tryParse(loan.endDate!);
       if (id == null || due == null) continue;
       if (loan.loanStatus.toUpperCase() == 'CLOSED') continue;
       final isGiven = loan.loanType.toUpperCase() == 'GIVEN';
@@ -253,8 +259,12 @@ class NotificationService {
       final due = DateTime.tryParse(item.nextDueDate);
       if (id == null || days == null || due == null) continue;
       if (item.status != 'ACTIVE') continue;
-      final at = DateTime(due.year, due.month, due.day, 9)
-          .subtract(Duration(days: days));
+      final at = DateTime(
+        due.year,
+        due.month,
+        due.day,
+        9,
+      ).subtract(Duration(days: days));
       if (!at.isAfter(now)) continue;
       final isExpense = item.transactionType == 'EXPENSE';
       final when = days == 0

@@ -92,30 +92,31 @@ class FinanceManagerApp extends StatelessWidget {
       child: ListenableBuilder(
         listenable: AppPreferences.instance,
         builder: (context, _) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'My Wallet',
+          debugShowCheckedModeBanner: false,
+          title: 'My Wallet',
 
-        themeMode: AppPreferences.instance.themeMode,
+          themeMode: AppPreferences.instance.themeMode,
 
-        theme: AppTheme.lightTheme,
+          theme: AppTheme.lightTheme,
 
-        darkTheme: AppTheme.darkTheme,
-        // App-wide text size (Settings > Preferences) + PIN lock overlay.
-        builder: (context, child) => ListenableBuilder(
-          listenable: AppPreferences.instance,
-          builder: (context, _) {
-            final media = MediaQuery.of(context);
-            // Multiply the user's choice with the phone's own text setting.
-            final scale =
-                media.textScaler.scale(1.0) * AppPreferences.instance.fontScale;
-            return MediaQuery(
-              data: media.copyWith(textScaler: TextScaler.linear(scale)),
-              child: AppLockGate(child: child ?? const SizedBox.shrink()),
-            );
-          },
-        ),
-        home: const MainNavigationScreen(),
-        navigatorKey: NavigationService.instance.navigatorKey,
+          darkTheme: AppTheme.darkTheme,
+          // App-wide text size (Settings > Preferences) + PIN lock overlay.
+          builder: (context, child) => ListenableBuilder(
+            listenable: AppPreferences.instance,
+            builder: (context, _) {
+              final media = MediaQuery.of(context);
+              // Multiply the user's choice with the phone's own text setting.
+              final scale =
+                  media.textScaler.scale(1.0) *
+                  AppPreferences.instance.fontScale;
+              return MediaQuery(
+                data: media.copyWith(textScaler: TextScaler.linear(scale)),
+                child: AppLockGate(child: child ?? const SizedBox.shrink()),
+              );
+            },
+          ),
+          home: const MainNavigationScreen(),
+          navigatorKey: NavigationService.instance.navigatorKey,
         ),
       ),
     );

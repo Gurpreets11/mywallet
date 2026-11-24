@@ -253,7 +253,7 @@ class _InvestmentValuationScreenState extends State<InvestmentValuationScreen> {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (change != null) change,
+          ?change,
           IconButton(
             tooltip: 'Delete',
             icon: const Icon(Icons.delete_outline_rounded),
@@ -270,9 +270,7 @@ class _InvestmentValuationScreenState extends State<InvestmentValuationScreen> {
     final low = values.isEmpty ? inv.currentValue : values.reduce(math.min);
 
     final start = DateTime.tryParse(inv.investmentDate);
-    final days = start == null
-        ? 0
-        : DateTime.now().difference(start).inDays;
+    final days = start == null ? 0 : DateTime.now().difference(start).inDays;
     String annualised = '-';
     if (days >= 30 && inv.investedAmount > 0 && inv.currentValue > 0) {
       final cagr =
@@ -533,7 +531,10 @@ class _ValuationSheetState extends State<_ValuationSheet> {
             SizedBox(
               width: double.infinity,
               height: 48,
-              child: ElevatedButton(onPressed: _save, child: const Text('Save')),
+              child: ElevatedButton(
+                onPressed: _save,
+                child: const Text('Save'),
+              ),
             ),
           ],
         ),

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -52,9 +51,7 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
       _notesController.text = loan.notes ?? '';
       // Older / demo loans may carry a free-text type (e.g. "Home Loan");
       // anything that is not GIVEN is a borrowed loan.
-      _loanType = loan.loanType.toUpperCase() == 'GIVEN'
-          ? 'GIVEN'
-          : 'BORROWED';
+      _loanType = loan.loanType.toUpperCase() == 'GIVEN' ? 'GIVEN' : 'BORROWED';
       _loanStatus = loan.loanStatus.toUpperCase() == 'CLOSED'
           ? 'CLOSED'
           : 'ACTIVE';
@@ -362,7 +359,8 @@ class _AddLoanScreenState extends State<AddLoanScreen> {
                               labelText: _loanType == 'GIVEN'
                                   ? 'Repay-by date (optional)'
                                   : 'Pay-by date (optional)',
-                              helperText: 'You get a reminder a day before and on this date',
+                              helperText:
+                                  'You get a reminder a day before and on this date',
                               prefixIcon: const Icon(Icons.alarm_outlined),
                               suffixIcon: _dueDate == null
                                   ? const Icon(Icons.edit_calendar_outlined)

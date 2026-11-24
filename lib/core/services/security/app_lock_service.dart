@@ -38,10 +38,14 @@ class AppLockService extends ChangeNotifier {
   int _failedAttempts = 0;
   DateTime? _lockedOutUntil;
   bool _suspended = false;
+  bool _biometric = false;
 
   bool get isEnabled => _enabled;
   bool get isLocked => _locked;
   bool get isSuspended => _suspended;
+
+  /// Fingerprint / face unlock as a shortcut next to the PIN.
+  bool get isBiometricEnabled => _enabled && _biometric;
 
   /// Remaining wait after too many wrong PINs (null = not locked out).
   Duration? get lockoutRemaining {
@@ -87,6 +91,14 @@ class AppLockService extends ChangeNotifier {
       _salt = stored.salt;
       _hash = stored.hash;
       _enabled = stored.enabled;
+      final db = await AppDatabase.database;
+      final bio = await db.query(
+        _table,
+        where: 'meta_key = ?',
+        whereArgs: [BackupMetaKeys.appLockBiometric],
+        limit: 1,
+      );
+      _biometric = bio.isNotEmpty && bio.first['meta_value'] == '1';
       debugPrint('AppLock: loaded, enabled=$_enabled');
     } catch (e, st) {
       // Do not hide this: a failing read means the lock silently turns off.
@@ -152,6 +164,21 @@ class AppLockService extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setBiometricEnabled(bool value) async {
+    await _put(BackupMetaKeys.appLockBiometric, value ? '1' : '0');
+    _biometric = value;
+    notifyListeners();
+  }
+
+  /// Unlocks without a PIN after the system biometric prompt succeeded.
+  void unlockWithBiometric() {
+    if (!isBiometricEnabled || !_locked) return;
+    _locked = false;
+    _failedAttempts = 0;
+    _lockedOutUntil = null;
+    notifyListeners();
+  }
+
   /// Checks [pin] without changing the lock state. Counts wrong attempts and
   /// imposes a growing wait after 5 failures.
   bool checkPin(String pin) {
@@ -200,13 +227,15 @@ class AppLockService extends ChangeNotifier {
     final Database db = await AppDatabase.database;
     await db.delete(
       _table,
-      where: 'meta_key IN (?, ?, ?)',
+      where: 'meta_key IN (?, ?, ?, ?)',
       whereArgs: [
         BackupMetaKeys.appLockEnabled,
         BackupMetaKeys.appLockSalt,
         BackupMetaKeys.appLockHash,
+        BackupMetaKeys.appLockBiometric,
       ],
     );
+    _biometric = false;
     _enabled = false;
     _locked = false;
     _salt = null;

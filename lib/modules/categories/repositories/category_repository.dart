@@ -200,7 +200,11 @@ class CategoryRepository {
   }
 
   /// Sets the icon and colour (either may be null to go back to default).
-  Future<void> setCategoryStyle(int id, String? iconName, String? colorCode) async {
+  Future<void> setCategoryStyle(
+    int id,
+    String? iconName,
+    String? colorCode,
+  ) async {
     final Database db = await AppDatabase.database;
     await db.update(
       'categories',
@@ -281,7 +285,8 @@ class CategoryRepository {
       );
       final byName = {
         for (final r in targetSubs)
-          (r['subcategory_name'] ?? '').toString().toLowerCase(): r['id'] as int,
+          (r['subcategory_name'] ?? '').toString().toLowerCase():
+              r['id'] as int,
       };
       final sourceSubs = await txn.query(
         'subcategories',
@@ -308,7 +313,11 @@ class CategoryRepository {
               whereArgs: [subId],
             );
           }
-          await txn.delete('subcategories', where: 'id = ?', whereArgs: [subId]);
+          await txn.delete(
+            'subcategories',
+            where: 'id = ?',
+            whereArgs: [subId],
+          );
         }
       }
 
@@ -393,11 +402,7 @@ class CategoryRepository {
     });
   }
 
-  Future<void> renameSubcategory(
-    int id,
-    int categoryId,
-    String rawName,
-  ) async {
+  Future<void> renameSubcategory(int id, int categoryId, String rawName) async {
     final Database db = await AppDatabase.database;
     final name = _cleanName(rawName, 'subcategory');
 

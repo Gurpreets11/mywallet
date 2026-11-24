@@ -52,8 +52,13 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
       _notesController.text = item.notes ?? '';
       _type = item.transactionType == 'INCOME' ? 'INCOME' : 'EXPENSE';
       _frequency = item.frequency;
-      _paymentMode = const ['Cash', 'Card', 'UPI', 'Bank Transfer']
-              .contains(item.paymentMode)
+      _paymentMode =
+          const [
+            'Cash',
+            'Card',
+            'UPI',
+            'Bank Transfer',
+          ].contains(item.paymentMode)
           ? item.paymentMode
           : 'Cash';
       _accountId = item.accountId;
@@ -66,7 +71,9 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
       } else {
         _startDate = DateTime.tryParse(item.startDate) ?? DateTime.now();
         _originalStart = _startDate;
-        _endDate = item.endDate == null ? null : DateTime.tryParse(item.endDate!);
+        _endDate = item.endDate == null
+            ? null
+            : DateTime.tryParse(item.endDate!);
       }
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -141,28 +148,28 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
       final now = DateTime.now().toIso8601String();
       final old = widget.item;
       final model = RecurringTransactionModel(
-          id: _isEdit ? old!.id : null,
-          title: _titleController.text.trim(),
-          transactionType: _type,
-          amount: double.parse(_amountController.text.trim()),
-          categoryId: _categoryId!,
-          categoryName: _categoryName,
-          paymentMode: _paymentMode,
-          accountId: _accountId,
-          notes: _notesController.text.trim().isEmpty
-              ? null
-              : _notesController.text.trim(),
-          frequency: _frequency,
-          intervalValue: _interval,
-          startDate: _dateOnly(_startDate),
-          endDate: _endDate == null ? null : _dateOnly(_endDate!),
-          nextDueDate: _isEdit && _startDate == _originalStart
-              ? old!.nextDueDate
-              : _dateOnly(_startDate),
-          status: _isEdit ? old!.status : 'ACTIVE',
-          createdAt: _isEdit ? old!.createdAt : now,
-          reminderDays: _reminderDays,
-        );
+        id: _isEdit ? old!.id : null,
+        title: _titleController.text.trim(),
+        transactionType: _type,
+        amount: double.parse(_amountController.text.trim()),
+        categoryId: _categoryId!,
+        categoryName: _categoryName,
+        paymentMode: _paymentMode,
+        accountId: _accountId,
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+        frequency: _frequency,
+        intervalValue: _interval,
+        startDate: _dateOnly(_startDate),
+        endDate: _endDate == null ? null : _dateOnly(_endDate!),
+        nextDueDate: _isEdit && _startDate == _originalStart
+            ? old!.nextDueDate
+            : _dateOnly(_startDate),
+        status: _isEdit ? old!.status : 'ACTIVE',
+        createdAt: _isEdit ? old!.createdAt : now,
+        reminderDays: _reminderDays,
+      );
       final provider = context.read<RecurringProvider>();
       if (_isEdit) {
         await provider.update(model);
@@ -260,13 +267,15 @@ class _AddRecurringScreenState extends State<AddRecurringScreen> {
     final theme = Theme.of(context);
     return CompactFormTheme(
       child: Scaffold(
-        appBar: AppBar(title: Text(
+        appBar: AppBar(
+          title: Text(
             _isEdit
                 ? 'Edit recurring'
                 : widget.isDuplicate
                 ? 'Duplicate recurring'
                 : 'Add recurring',
-          )),
+          ),
+        ),
         bottomNavigationBar: _buildSaveBar(theme),
         body: AppResponsiveContent(
           maxWidth: 680,

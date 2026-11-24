@@ -40,7 +40,8 @@ class _NetWorthScreenState extends State<NetWorthScreen> {
         child: result == null
             ? const Center(child: CircularProgressIndicator())
             : RefreshIndicator(
-                onRefresh: () => context.read<DashboardProvider>().loadNetWorth(),
+                onRefresh: () =>
+                    context.read<DashboardProvider>().loadNetWorth(),
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.all(16),
@@ -290,7 +291,11 @@ class _NetWorthScreenState extends State<NetWorthScreen> {
             color: s.cash < 0 ? Colors.red : null,
           ),
           row(Icons.trending_up_rounded, 'Investments', s.investments),
-          row(Icons.arrow_circle_up_outlined, 'Money lent to others', s.receivable),
+          row(
+            Icons.arrow_circle_up_outlined,
+            'Money lent to others',
+            s.receivable,
+          ),
           const Divider(height: 1),
           header('Liabilities', s.liabilities, Colors.red),
           row(Icons.arrow_circle_down_outlined, 'Loans you owe', s.liabilities),

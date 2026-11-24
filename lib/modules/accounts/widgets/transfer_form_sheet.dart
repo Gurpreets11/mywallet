@@ -97,18 +97,18 @@ class _TransferFormSheetState extends State<_TransferFormSheet> {
     final navigator = Navigator.of(context);
     try {
       final model = AccountTransferModel(
-          id: _isEdit ? widget.transfer!.id : null,
-          fromAccountId: _fromId,
-          toAccountId: _toId,
-          amount: double.parse(_amountController.text.trim()),
-          date: _date.toIso8601String(),
-          notes: _notesController.text.trim().isEmpty
-              ? null
-              : _notesController.text.trim(),
-          createdAt: _isEdit
-              ? widget.transfer!.createdAt
-              : AppDateUtils.getCurrentTimestamp(),
-        );
+        id: _isEdit ? widget.transfer!.id : null,
+        fromAccountId: _fromId,
+        toAccountId: _toId,
+        amount: double.parse(_amountController.text.trim()),
+        date: _date.toIso8601String(),
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+        createdAt: _isEdit
+            ? widget.transfer!.createdAt
+            : AppDateUtils.getCurrentTimestamp(),
+      );
       if (_isEdit) {
         await AccountRepository().updateTransfer(model);
       } else {

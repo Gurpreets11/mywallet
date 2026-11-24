@@ -66,7 +66,8 @@ class MonthInsightsCard extends StatelessWidget {
                       style: TextStyle(color: muted, fontSize: 13),
                     )
                   else
-                    for (final c in data.topCategories) _categoryRow(context, c),
+                    for (final c in data.topCategories)
+                      _categoryRow(context, c),
                 ],
               ),
       ),
@@ -138,7 +139,7 @@ class MonthInsightsCard extends StatelessWidget {
             ],
           ),
         ),
-        if (chip != null) chip,
+        ?chip,
       ],
     );
   }
@@ -150,7 +151,8 @@ class MonthInsightsCard extends StatelessWidget {
     Color? deltaColor;
     if (c.lastMonthAmount > 0) {
       final pct = (c.amount - c.lastMonthAmount) / c.lastMonthAmount * 100;
-      delta = '${pct >= 0 ? '+' : '-'}${pct.abs().toStringAsFixed(0)}% vs last month';
+      delta =
+          '${pct >= 0 ? '+' : '-'}${pct.abs().toStringAsFixed(0)}% vs last month';
       deltaColor = pct > 0 ? Colors.red : Colors.green;
     }
     return Padding(
@@ -193,10 +195,7 @@ class MonthInsightsCard extends StatelessWidget {
               ),
               const Spacer(),
               if (delta != null)
-                Text(
-                  delta,
-                  style: TextStyle(fontSize: 11, color: deltaColor),
-                ),
+                Text(delta, style: TextStyle(fontSize: 11, color: deltaColor)),
             ],
           ),
         ],

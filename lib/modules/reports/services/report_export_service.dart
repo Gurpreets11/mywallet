@@ -76,7 +76,9 @@ class ReportExportService {
     const perPage = 50;
     final streams = <String>[];
     for (var start = 0; start < lines.length; start += perPage) {
-      final end = start + perPage > lines.length ? lines.length : start + perPage;
+      final end = start + perPage > lines.length
+          ? lines.length
+          : start + perPage;
       final c = StringBuffer('BT\n/F1 10 Tf\n50 790 Td\n14 TL\n');
       for (var i = start; i < end; i++) {
         if (i > start) c.write('T*\n');
@@ -111,7 +113,9 @@ class ReportExportService {
     for (var i = 1; i < offsets.length; i++) {
       out.write('${offsets[i].toString().padLeft(10, '0')} 00000 n \n');
     }
-    out.write('trailer\n<< /Size $size /Root 1 0 R >>\nstartxref\n$xref\n%%EOF');
+    out.write(
+      'trailer\n<< /Size $size /Root 1 0 R >>\nstartxref\n$xref\n%%EOF',
+    );
     return FilePicker.platform.saveFile(
       dialogTitle: 'Save PDF report',
       fileName: 'mywallet_report_${r.year}.pdf',

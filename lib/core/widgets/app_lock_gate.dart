@@ -9,6 +9,7 @@ import '../services/backup/data_reset_service.dart';
 import '../services/navigation_service.dart';
 import '../services/notification_service.dart';
 import '../services/security/app_lock_service.dart';
+import '../services/security/biometric_service.dart';
 import '../services/settings/app_preferences.dart';
 import '../theme/app_colors.dart';
 import 'pin_pad.dart';
@@ -91,7 +92,9 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
             // Until the lock state is known, cover the app (no content flash).
             if (!_lock.isLoaded)
               Positioned.fill(
-                child: ColoredBox(color: Theme.of(context).scaffoldBackgroundColor),
+                child: ColoredBox(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
               )
             else if (_lock.isLocked)
               const Positioned.fill(child: _LockScreen())
@@ -133,6 +136,18 @@ class _LockScreenState extends State<_LockScreen> {
   void initState() {
     super.initState();
     _startTickerIfLockedOut();
+    // Offer biometrics straight away (the PIN pad stays available).
+    if (_lock.isBiometricEnabled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _tryBiometric());
+    }
+  }
+
+  Future<void> _tryBiometric() async {
+    if (_busy || !mounted || !_lock.isBiometricEnabled) return;
+    final ok = await _lock.runWithoutLock(
+      () => BiometricService.instance.authenticate('Unlock My Wallet'),
+    );
+    if (ok && mounted) _lock.unlockWithBiometric();
   }
 
   @override
@@ -279,6 +294,9 @@ class _LockScreenState extends State<_LockScreen> {
                   onDigit: _onDigit,
                   onBackspace: _onBackspace,
                   enabled: !_busy && !lockedOut,
+                  leading: _lock.isBiometricEnabled
+                      ? _BiometricKey(onTap: _busy ? null : _tryBiometric)
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextButton(
@@ -289,6 +307,25 @@ class _LockScreenState extends State<_LockScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _BiometricKey extends StatelessWidget {
+  const _BiometricKey({required this.onTap});
+
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 72,
+      height: 72,
+      child: IconButton(
+        tooltip: 'Use fingerprint or face',
+        onPressed: onTap,
+        icon: const Icon(Icons.fingerprint, size: 34, color: AppColors.primary),
       ),
     );
   }
