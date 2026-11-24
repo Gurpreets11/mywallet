@@ -473,7 +473,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
                 if (parsed.problems.isNotEmpty) ...[
                   const SizedBox(height: 12),
