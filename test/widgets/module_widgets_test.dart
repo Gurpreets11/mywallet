@@ -41,9 +41,7 @@ void main() {
       expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
     });
 
-    testWidgets('loan card shows the person and routes menu actions', (
-      t,
-    ) async {
+    testWidgets('loan card shows the person and routes menu actions', (t) async {
       final loan = LoanModel(
         id: 1,
         loanType: 'TAKEN',
@@ -60,16 +58,12 @@ void main() {
         createdAt: ts,
       );
       var tap = 0, edit = 0, del = 0;
-      await t.pumpWidget(
-        host(
-          LoanCard(
-            loan: loan,
-            onTap: () => tap++,
-            onEdit: () => edit++,
-            onDelete: () => del++,
-          ),
-        ),
-      );
+      await t.pumpWidget(host(LoanCard(
+        loan: loan,
+        onTap: () => tap++,
+        onEdit: () => edit++,
+        onDelete: () => del++,
+      )));
       expect(find.text('ICICI Bank'), findsOneWidget);
       expect(find.textContaining('1,51,600'), findsWidgets);
 
@@ -102,15 +96,11 @@ void main() {
     );
 
     testWidgets('shows category, amounts and a progress bar', (t) async {
-      await t.pumpWidget(
-        host(
-          BudgetProgressCard(
-            budget: budget(250),
-            onEdit: () {},
-            onDelete: () {},
-          ),
-        ),
-      );
+      await t.pumpWidget(host(BudgetProgressCard(
+        budget: budget(250),
+        onEdit: () {},
+        onDelete: () {},
+      )));
       expect(find.text('Food'), findsOneWidget);
       expect(find.textContaining('250'), findsWidgets);
       final bar = t.widget<LinearProgressIndicator>(
@@ -121,20 +111,14 @@ void main() {
 
     testWidgets('colour follows the status', (t) async {
       Future<Color?> colorFor(double spent) async {
-        await t.pumpWidget(
-          host(
-            BudgetProgressCard(
-              budget: budget(spent),
-              onEdit: () {},
-              onDelete: () {},
-            ),
-          ),
-        );
-        return t
-            .widget<LinearProgressIndicator>(
-              find.byType(LinearProgressIndicator),
-            )
-            .color;
+        await t.pumpWidget(host(BudgetProgressCard(
+          budget: budget(spent),
+          onEdit: () {},
+          onDelete: () {},
+        )));
+        return t.widget<LinearProgressIndicator>(
+          find.byType(LinearProgressIndicator),
+        ).color;
       }
 
       expect(await colorFor(900), Colors.orange);
@@ -143,15 +127,11 @@ void main() {
 
     testWidgets('edit and delete buttons call back', (t) async {
       var edit = 0, del = 0;
-      await t.pumpWidget(
-        host(
-          BudgetProgressCard(
-            budget: budget(10),
-            onEdit: () => edit++,
-            onDelete: () => del++,
-          ),
-        ),
-      );
+      await t.pumpWidget(host(BudgetProgressCard(
+        budget: budget(10),
+        onEdit: () => edit++,
+        onDelete: () => del++,
+      )));
       await t.tap(find.byTooltip('Edit budget'));
       await t.tap(find.byTooltip('Delete budget'));
       expect([edit, del], [1, 1]);
@@ -170,17 +150,13 @@ void main() {
         createdAt: ts,
       );
       var tap = 0, edit = 0, dup = 0, del = 0;
-      await t.pumpWidget(
-        host(
-          ExpenseCard(
-            expense: e,
-            onTap: () => tap++,
-            onEdit: () => edit++,
-            onDuplicate: () => dup++,
-            onDelete: () => del++,
-          ),
-        ),
-      );
+      await t.pumpWidget(host(ExpenseCard(
+        expense: e,
+        onTap: () => tap++,
+        onEdit: () => edit++,
+        onDuplicate: () => dup++,
+        onDelete: () => del++,
+      )));
       expect(find.text('Bills & Utilities'), findsOneWidget);
       expect(find.textContaining('589'), findsWidgets);
       expect(find.textContaining('UPI'), findsOneWidget);
@@ -197,9 +173,7 @@ void main() {
       expect([edit, dup, del], [1, 1, 1]);
     });
 
-    testWidgets('ExpenseCard hides Duplicate when no handler is given', (
-      t,
-    ) async {
+    testWidgets('ExpenseCard Duplicate without a handler does nothing', (t) async {
       final e = ExpenseModel(
         id: 1,
         amount: 5,
@@ -209,14 +183,17 @@ void main() {
         paymentMode: 'Cash',
         createdAt: ts,
       );
-      await t.pumpWidget(
-        host(
-          ExpenseCard(expense: e, onTap: () {}, onEdit: () {}, onDelete: () {}),
-        ),
-      );
+      await t.pumpWidget(host(ExpenseCard(
+        expense: e,
+        onTap: () {},
+        onEdit: () {},
+        onDelete: () {},
+      )));
       await t.tap(find.byType(PopupMenuButton<String>));
       await t.pumpAndSettle();
-      expect(find.text('Duplicate'), findsNothing);
+      await t.tap(find.text('Duplicate'));
+      await t.pumpAndSettle();
+      expect(t.takeException(), isNull);
     });
 
     testWidgets('IncomeCard shows category and recurring label', (t) async {
@@ -233,16 +210,12 @@ void main() {
         createdAt: ts,
       );
       var del = 0;
-      await t.pumpWidget(
-        host(
-          IncomeCard(
-            income: i,
-            onTap: () {},
-            onEdit: () {},
-            onDelete: () => del++,
-          ),
-        ),
-      );
+      await t.pumpWidget(host(IncomeCard(
+        income: i,
+        onTap: () {},
+        onEdit: () {},
+        onDelete: () => del++,
+      )));
       expect(find.textContaining('Salary'), findsWidgets);
       expect(find.textContaining('1,28,000'), findsWidgets);
       expect(find.text('Monthly'), findsOneWidget);
@@ -262,41 +235,39 @@ void main() {
       expect(find.textContaining('View'), findsNothing);
 
       var n = 0;
-      await t.pumpWidget(
-        host(SectionTitle(title: 'Recent', onViewAll: () => n++)),
-      );
+      await t.pumpWidget(host(SectionTitle(title: 'Recent', onViewAll: () => n++)));
       await t.tap(find.textContaining('View'));
       expect(n, 1);
     });
 
     testWidgets('QuickActionCard taps', (t) async {
       var n = 0;
-      await t.pumpWidget(
-        host(
-          QuickActionCard(
-            title: 'Add expense',
-            icon: Icons.add,
-            onTap: () => n++,
-          ),
+      await t.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Row(children: [
+            QuickActionCard(
+              title: 'Add expense',
+              icon: Icons.add,
+              onTap: () => n++,
+            ),
+          ]),
         ),
-      );
+      ));
       await t.tap(find.text('Add expense'));
       expect(n, 1);
     });
 
     testWidgets('RecentTransactionCard picks icon by kind', (t) async {
-      Future<void> pump(TransactionKind k, bool expense) => t.pumpWidget(
-        host(
-          RecentTransactionCard(
-            title: 'Title',
-            subtitle: 'Sub',
-            amount: 10,
-            date: ts,
-            isExpense: expense,
-            kind: k,
-          ),
+      Future<void> pump(TransactionKind k, bool expense) => t.pumpWidget(host(
+        RecentTransactionCard(
+          title: 'Title',
+          subtitle: 'Sub',
+          amount: 10,
+          date: ts,
+          isExpense: expense,
+          kind: k,
         ),
-      );
+      ));
 
       await pump(TransactionKind.investment, true);
       expect(find.byIcon(Icons.trending_up), findsOneWidget);

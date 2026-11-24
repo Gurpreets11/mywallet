@@ -28,17 +28,17 @@ void main() {
     // BackupService asks path_provider for the documents folder.
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('plugins.flutter.io/path_provider'),
-          (call) async => docs.path,
-        );
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (call) async => docs.path,
+    );
   });
 
   tearDownAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('plugins.flutter.io/path_provider'),
-          null,
-        );
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      null,
+    );
     try {
       docs.deleteSync(recursive: true);
     } catch (_) {}
@@ -94,26 +94,23 @@ void main() {
     )!;
   }
 
-  /*File writeBackup(Map<String, dynamic> content, [String name = 'b.json']) {
+  File writeBackup(Map<String, dynamic> content, [String name = 'b.json']) {
     final f = File('${docs.path}/$name');
     f.writeAsStringSync(jsonEncode(content));
     return f;
-  }*/
+  }
 
   group('BackupMetaKeys / BackupModel', () {
     test('device-local keys include the PIN and biometric settings', () {
-      expect(
-        BackupMetaKeys.deviceLocal,
-        containsAll([
-          'last_backup_at',
-          'last_restore_at',
-          'last_auto_backup_at',
-          'app_lock_enabled',
-          'app_lock_salt',
-          'app_lock_hash',
-          'app_lock_biometric',
-        ]),
-      );
+      expect(BackupMetaKeys.deviceLocal, containsAll([
+        'last_backup_at',
+        'last_restore_at',
+        'last_auto_backup_at',
+        'app_lock_enabled',
+        'app_lock_salt',
+        'app_lock_hash',
+        'app_lock_biometric',
+      ]));
     });
 
     test('BackupModel JSON round trip', () {
@@ -140,9 +137,7 @@ void main() {
 
     test('backup file is valid JSON with meta and data sections', () async {
       await addExpense(42, notes: 'saved');
-      final file = await BackupService(
-        await db(),
-      ).createBackupFileInAppStorage();
+      final file = await BackupService(await db()).createBackupFileInAppStorage();
       expect(file.existsSync(), isTrue);
       final map = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
       expect(map['meta']['app'], 'MyWallet');
@@ -156,9 +151,7 @@ void main() {
       await putMeta('app_lock_salt', 'SALT');
       await putMeta('app_lock_biometric', '1');
       await putMeta('pref_currency', 'USD'); // preferences DO travel
-      final file = await BackupService(
-        await db(),
-      ).createBackupFileInAppStorage();
+      final file = await BackupService(await db()).createBackupFileInAppStorage();
       final text = file.readAsStringSync();
       expect(text, isNot(contains('SECRET')));
       expect(text, isNot(contains('app_lock_biometric')));
@@ -179,12 +172,10 @@ void main() {
     });
 
     test('only the 5 newest safety backups are kept', () async {
-      final dir = Directory('${docs.path}/auto_backups')
-        ..createSync(recursive: true);
+      final dir = Directory('${docs.path}/auto_backups')..createSync(recursive: true);
       for (var i = 1; i <= 6; i++) {
-        File(
-          '${dir.path}/mywallet_before_restore_2020010${i}_000000.json',
-        ).writeAsStringSync('{}');
+        File('${dir.path}/mywallet_before_restore_2020010${i}_000000.json')
+            .writeAsStringSync('{}');
       }
       final svc = BackupService(await db());
       await svc.createSafetyBackup();
@@ -195,36 +186,25 @@ void main() {
       expect(left.any((f) => f.path.contains('20200102_')), isFalse);
     });
 
-    test(
-      'only the 7 newest automatic backups are kept and the time is stored',
-      () async {
-        final dir = Directory('${docs.path}/auto_backups')
-          ..createSync(recursive: true);
-        for (var i = 1; i <= 8; i++) {
-          File(
-            '${dir.path}/mywallet_auto_2020010${i}_000000.json',
-          ).writeAsStringSync('{}');
-        }
-        final svc = BackupService(await db());
-        expect(await svc.getLastAutoBackupAt(), isNull);
-        await svc.createAutoBackup();
-        expect(await svc.listAutoBackups(), hasLength(7));
-        expect(await svc.getLastAutoBackupAt(), isNotNull);
-      },
-    );
+    test('only the 7 newest automatic backups are kept and the time is stored',
+        () async {
+      final dir = Directory('${docs.path}/auto_backups')..createSync(recursive: true);
+      for (var i = 1; i <= 8; i++) {
+        File('${dir.path}/mywallet_auto_2020010${i}_000000.json')
+            .writeAsStringSync('{}');
+      }
+      final svc = BackupService(await db());
+      expect(await svc.getLastAutoBackupAt(), isNull);
+      await svc.createAutoBackup();
+      expect(await svc.listAutoBackups(), hasLength(7));
+      expect(await svc.getLastAutoBackupAt(), isNotNull);
+    });
 
     test('the private backup list is labelled and newest first', () async {
-      final dir = Directory('${docs.path}/auto_backups')
-        ..createSync(recursive: true);
-      File(
-        '${dir.path}/mywallet_auto_20240102_000000.json',
-      ).writeAsStringSync('{}');
-      File(
-        '${dir.path}/mywallet_before_reset_20240103_000000.json',
-      ).writeAsStringSync('{}');
-      File(
-        '${dir.path}/mywallet_before_import_20240101_000000.json',
-      ).writeAsStringSync('{}');
+      final dir = Directory('${docs.path}/auto_backups')..createSync(recursive: true);
+      File('${dir.path}/mywallet_auto_20240102_000000.json').writeAsStringSync('{}');
+      File('${dir.path}/mywallet_before_reset_20240103_000000.json').writeAsStringSync('{}');
+      File('${dir.path}/mywallet_before_import_20240101_000000.json').writeAsStringSync('{}');
       final all = await BackupService(await db()).listAllPrivateBackups();
       expect(all.map((e) => e.label), [
         'Before reset',
@@ -260,49 +240,32 @@ void main() {
       );
     });
 
-    test(
-      'inspect rejects other apps, newer versions and damaged tables',
-      () async {
-        final svc = RestoreService(await db());
-        Matcher bad() => throwsA(isA<BackupFormatException>());
+    test('inspect rejects other apps, newer versions and damaged tables', () async {
+      final svc = RestoreService(await db());
+      Matcher bad() => throwsA(isA<BackupFormatException>());
 
-        await expectLater(svc.inspectBackup({}), bad());
-        await expectLater(
-          svc.inspectBackup({
-            'meta': {'app': 'Other'},
-            'data': {'expenses': []},
-          }),
-          bad(),
-        );
-        await expectLater(
-          svc.inspectBackup({
-            'meta': {'dbVersion': 999},
-            'data': {'expenses': []},
-          }),
-          bad(),
-        );
-        await expectLater(
-          svc.inspectBackup({
-            'data': {'expenses': 'oops'},
-          }),
-          bad(),
-        );
-        await expectLater(
-          svc.inspectBackup({
-            'data': {
-              'expenses': [1, 2],
-            },
-          }),
-          bad(),
-        );
-        await expectLater(
-          svc.inspectBackup({
-            'data': {'no_such_table': []},
-          }),
-          bad(),
-        );
-      },
-    );
+      await expectLater(svc.inspectBackup({}), bad());
+      await expectLater(
+        svc.inspectBackup({'meta': {'app': 'Other'}, 'data': {'expenses': []}}),
+        bad(),
+      );
+      await expectLater(
+        svc.inspectBackup({'meta': {'dbVersion': 999}, 'data': {'expenses': []}}),
+        bad(),
+      );
+      await expectLater(
+        svc.inspectBackup({'data': {'expenses': 'oops'}}),
+        bad(),
+      );
+      await expectLater(
+        svc.inspectBackup({'data': {'expenses': [1, 2]}}),
+        bad(),
+      );
+      await expectLater(
+        svc.inspectBackup({'data': {'no_such_table': []}}),
+        bad(),
+      );
+    });
 
     test('inspect reports counts, version and total', () async {
       final svc = RestoreService(await db());
@@ -313,14 +276,9 @@ void main() {
           'dbVersion': 18,
         },
         'data': {
-          'expenses': [
-            {'id': 1},
-            {'id': 2},
-          ],
+          'expenses': [{'id': 1}, {'id': 2}],
           'loans': [],
-          'ignored_table': [
-            {'id': 1},
-          ],
+          'ignored_table': [{'id': 1}],
         },
       });
       expect(info.dbVersion, 18);
@@ -332,41 +290,33 @@ void main() {
   });
 
   group('RestoreService.restore', () {
-    test(
-      'replace mode brings back the backed-up data and drops the rest',
-      () async {
-        final keepId = await addExpense(111, notes: 'keep');
-        final file = await BackupService(
-          await db(),
-        ).createBackupFileInAppStorage();
-        final map = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+    test('replace mode brings back the backed-up data and drops the rest', () async {
+      final keepId = await addExpense(111, notes: 'keep');
+      final file = await BackupService(await db()).createBackupFileInAppStorage();
+      final map = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
 
-        await ExpenseRepository().deleteExpense(keepId);
-        await addExpense(999, notes: 'added later');
-        expect(await count('expenses'), 1);
+      await ExpenseRepository().deleteExpense(keepId);
+      await addExpense(999, notes: 'added later');
+      expect(await count('expenses'), 1);
 
-        final restored = await RestoreService(
-          await db(),
-        ).restoreFromBackupMap(map);
-        expect(restored, greaterThan(0));
+      final restored = await RestoreService(await db()).restoreFromBackupMap(map);
+      expect(restored, greaterThan(0));
 
-        final all = await ExpenseRepository().getAllExpenses();
-        expect(all.map((e) => e.notes), ['keep']);
-        expect(await getMeta('last_restore_at'), isNotNull);
-      },
-    );
+      final all = await ExpenseRepository().getAllExpenses();
+      expect(all.map((e) => e.notes), ['keep']);
+      expect(await getMeta('last_restore_at'), isNotNull);
+    });
 
     test('merge mode keeps what is already there', () async {
       await addExpense(1, notes: 'in backup');
-      final file = await BackupService(
-        await db(),
-      ).createBackupFileInAppStorage();
+      final file = await BackupService(await db()).createBackupFileInAppStorage();
       final map = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
 
       await addExpense(2, notes: 'only on device');
-      await RestoreService(
-        await db(),
-      ).restoreFromBackupMap(map, mode: RestoreMode.merge);
+      await RestoreService(await db()).restoreFromBackupMap(
+        map,
+        mode: RestoreMode.merge,
+      );
       final notes = (await ExpenseRepository().getAllExpenses())
           .map((e) => e.notes)
           .toSet();
@@ -375,9 +325,7 @@ void main() {
 
     test('the PIN settings on this device survive a replace restore', () async {
       await addExpense(1);
-      final file = await BackupService(
-        await db(),
-      ).createBackupFileInAppStorage();
+      final file = await BackupService(await db()).createBackupFileInAppStorage();
       final map = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
 
       await putMeta('app_lock_hash', 'LOCAL_HASH');
@@ -397,9 +345,10 @@ void main() {
           ],
         },
       };
-      await RestoreService(
-        await db(),
-      ).restoreFromBackupMap(map, mode: RestoreMode.merge);
+      await RestoreService(await db()).restoreFromBackupMap(
+        map,
+        mode: RestoreMode.merge,
+      );
       expect(await getMeta('app_lock_hash'), isNull);
       expect(await getMeta('pref_currency'), 'USD');
     });
@@ -414,6 +363,7 @@ void main() {
               'id': 500,
               'amount': 5.0,
               'category_id': cat,
+              'category_name': 'Zz Cols',
               'date': '2026-11-10T00:00:00.000',
               'payment_mode': 'Cash',
               'created_at': '2026-11-10T00:00:00.000',
@@ -422,9 +372,10 @@ void main() {
           ],
         },
       };
-      await RestoreService(
-        await db(),
-      ).restoreFromBackupMap(map, mode: RestoreMode.merge);
+      await RestoreService(await db()).restoreFromBackupMap(
+        map,
+        mode: RestoreMode.merge,
+      );
       expect((await ExpenseRepository().getExpenseById(500))!.amount, 5.0);
     });
   });
@@ -493,19 +444,16 @@ void main() {
       expect(await autoFiles(), 1);
     });
 
-    test(
-      'runs again when the last backup is older than the frequency',
-      () async {
-        await prefs.load();
-        await prefs.setAutoBackup(AutoBackupFrequency.daily);
-        await addExpense(1);
-        await putMeta(
-          'last_auto_backup_at',
-          DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
-        );
-        await AutoBackupService.runIfDue();
-        expect(await autoFiles(), 1);
-      },
-    );
+    test('runs again when the last backup is older than the frequency', () async {
+      await prefs.load();
+      await prefs.setAutoBackup(AutoBackupFrequency.daily);
+      await addExpense(1);
+      await putMeta(
+        'last_auto_backup_at',
+        DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
+      );
+      await AutoBackupService.runIfDue();
+      expect(await autoFiles(), 1);
+    });
   });
 }

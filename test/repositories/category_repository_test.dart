@@ -127,10 +127,16 @@ void main() {
     });
 
     test('moving the first item up does nothing', () async {
+      // Arrange: Create a category.
+      final firstId = await repo.addCategory(0, 'Zz First Category');
+
+      // Act: Try moving the first category up.
+      await repo.moveCategory(firstId, 0, -1);
+
+      // Assert: Its position should remain unchanged.
       final list = await repo.getCategories(0);
-      final first = list.first.id;
-      await repo.moveCategory(first, 0, -1);
-      expect((await repo.getCategories(0)).first.id, first);
+
+      expect(list.first.id, firstId);
     });
   });
 
