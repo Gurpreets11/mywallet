@@ -19,12 +19,16 @@ void main() {
   group('simple widgets', () {
     testWidgets('EmptyView shows message, icon and optional action', (t) async {
       var tapped = 0;
-      await t.pumpWidget(host(EmptyView(
-        message: 'Nothing here',
-        icon: Icons.savings,
-        actionText: 'Add one',
-        onAction: () => tapped++,
-      )));
+      await t.pumpWidget(
+        host(
+          EmptyView(
+            message: 'Nothing here',
+            icon: Icons.savings,
+            actionText: 'Add one',
+            onAction: () => tapped++,
+          ),
+        ),
+      );
       expect(find.text('Nothing here'), findsOneWidget);
       expect(find.byIcon(Icons.savings), findsOneWidget);
       await t.tap(find.text('Add one'));
@@ -44,16 +48,21 @@ void main() {
 
     testWidgets('CommonButton fires onPressed', (t) async {
       var n = 0;
-      await t.pumpWidget(host(CommonButton(text: 'Save', onPressed: () => n++)));
+      await t.pumpWidget(
+        host(CommonButton(text: 'Save', onPressed: () => n++)),
+      );
       await t.tap(find.text('Save'));
       expect(n, 1);
     });
 
-    testWidgets('AppSectionHeader shows the title and trailing widget', (t) async {
-      await t.pumpWidget(host(const AppSectionHeader(
-        title: 'Recent',
-        trailing: Text('View all'),
-      )));
+    testWidgets('AppSectionHeader shows the title and trailing widget', (
+      t,
+    ) async {
+      await t.pumpWidget(
+        host(
+          const AppSectionHeader(title: 'Recent', trailing: Text('View all')),
+        ),
+      );
       expect(find.text('Recent'), findsOneWidget);
       expect(find.text('View all'), findsOneWidget);
     });
@@ -62,25 +71,33 @@ void main() {
       t.view.physicalSize = const Size(2000, 800);
       t.view.devicePixelRatio = 1;
       addTearDown(t.view.reset);
-      await t.pumpWidget(host(const AppResponsiveContent(
-        maxWidth: 600,
-        padding: EdgeInsets.zero,
-        child: SizedBox.expand(key: Key('inner')),
-      )));
+      await t.pumpWidget(
+        host(
+          const AppResponsiveContent(
+            maxWidth: 600,
+            padding: EdgeInsets.zero,
+            child: SizedBox.expand(key: Key('inner')),
+          ),
+        ),
+      );
       expect(t.getSize(find.byKey(const Key('inner'))).width, 600);
     });
 
     testWidgets('CommonTextField validates through a Form', (t) async {
       final key = GlobalKey<FormState>();
       final c = TextEditingController();
-      await t.pumpWidget(host(Form(
-        key: key,
-        child: CommonTextField(
-          controller: c,
-          label: 'Name',
-          validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+      await t.pumpWidget(
+        host(
+          Form(
+            key: key,
+            child: CommonTextField(
+              controller: c,
+              label: 'Name',
+              validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+            ),
+          ),
         ),
-      )));
+      );
       expect(key.currentState!.validate(), isFalse);
       await t.pump();
       expect(find.text('Required'), findsOneWidget);
@@ -93,7 +110,11 @@ void main() {
     test('presets cover the expected ranges', () {
       final presets = DateRangePresets.presets();
       expect(presets.map((p) => p.$1), [
-        'This month', 'Last month', 'Last 7 days', 'Last 30 days', 'This year',
+        'This month',
+        'Last month',
+        'Last 7 days',
+        'Last 30 days',
+        'This year',
       ]);
       final today = DateTime.now();
       final thisMonth = presets[0].$2;
@@ -107,14 +128,16 @@ void main() {
       expect(lastMonth.end.add(const Duration(days: 1)).day, 1);
     });
 
-    testWidgets('selecting a chip reports its range and marks the match', (t) async {
+    testWidgets('selecting a chip reports its range and marks the match', (
+      t,
+    ) async {
       DateTimeRange? picked;
       final current = DateRangePresets.presets()[2].$2;
-      await t.pumpWidget(host(DateRangePresets(
-        range: current,
-        onSelected: (r) => picked = r,
-      )));
-      final selected = t.widgetList<ChoiceChip>(find.byType(ChoiceChip))
+      await t.pumpWidget(
+        host(DateRangePresets(range: current, onSelected: (r) => picked = r)),
+      );
+      final selected = t
+          .widgetList<ChoiceChip>(find.byType(ChoiceChip))
           .where((c) => c.selected)
           .toList();
       expect(selected, hasLength(1));
@@ -126,24 +149,30 @@ void main() {
   });
 
   group('TransactionListHeader', () {
-    testWidgets('shows summary and count, and reports search / sort', (t) async {
+    testWidgets('shows summary and count, and reports search / sort', (
+      t,
+    ) async {
       final controller = TextEditingController();
       String? searched;
       var cleared = 0;
       String? sorted;
-      await t.pumpWidget(host(TransactionListHeader(
-        searchController: controller,
-        onSearchChanged: (v) => searched = v,
-        onSearchCleared: () => cleared++,
-        summaryLabel: 'Spent this month',
-        summaryAmount: '₹100.00',
-        summaryIcon: Icons.trending_up,
-        summaryIconColor: Colors.red,
-        summaryIconBackground: Colors.red.shade100,
-        countText: '3 transactions',
-        sortValue: 'newest',
-        onSortChanged: (v) => sorted = v,
-      )));
+      await t.pumpWidget(
+        host(
+          TransactionListHeader(
+            searchController: controller,
+            onSearchChanged: (v) => searched = v,
+            onSearchCleared: () => cleared++,
+            summaryLabel: 'Spent this month',
+            summaryAmount: '₹100.00',
+            summaryIcon: Icons.trending_up,
+            summaryIconColor: Colors.red,
+            summaryIconBackground: Colors.red.shade100,
+            countText: '3 transactions',
+            sortValue: 'newest',
+            onSortChanged: (v) => sorted = v,
+          ),
+        ),
+      );
       expect(find.text('Spent this month'), findsOneWidget);
       expect(find.text('₹100.00'), findsOneWidget);
       expect(find.text('3 transactions'), findsOneWidget);
@@ -164,22 +193,26 @@ void main() {
   });
 
   group('delete confirmations', () {
-    testWidgets('confirmDelete returns true on Delete and false on Cancel', (t) async {
+    testWidgets('confirmDelete returns true on Delete and false on Cancel', (
+      t,
+    ) async {
       bool? result;
-      await t.pumpWidget(MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: ElevatedButton(
-              onPressed: () async => result = await confirmDelete(
-                context,
-                title: 'Delete expense?',
-                message: 'This cannot be undone.',
+      await t.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: ElevatedButton(
+                onPressed: () async => result = await confirmDelete(
+                  context,
+                  title: 'Delete expense?',
+                  message: 'This cannot be undone.',
+                ),
+                child: const Text('open'),
               ),
-              child: const Text('open'),
             ),
           ),
         ),
-      ));
+      );
 
       await t.tap(find.text('open'));
       await t.pumpAndSettle();
@@ -196,19 +229,26 @@ void main() {
       expect(result, isFalse);
     });
 
-    testWidgets('confirmDelete returns false when dismissed outside', (t) async {
+    testWidgets('confirmDelete returns false when dismissed outside', (
+      t,
+    ) async {
       bool? result;
-      await t.pumpWidget(MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: ElevatedButton(
-              onPressed: () async => result =
-                  await confirmDelete(context, title: 'T', message: 'M'),
-              child: const Text('open'),
+      await t.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: ElevatedButton(
+                onPressed: () async => result = await confirmDelete(
+                  context,
+                  title: 'T',
+                  message: 'M',
+                ),
+                child: const Text('open'),
+              ),
             ),
           ),
         ),
-      ));
+      );
       await t.tap(find.text('open'));
       await t.pumpAndSettle();
       await t.tapAt(const Offset(5, 5)); // barrier
@@ -217,21 +257,23 @@ void main() {
     });
 
     testWidgets('confirmLabel can be customised', (t) async {
-      await t.pumpWidget(MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: ElevatedButton(
-              onPressed: () => confirmDelete(
-                context,
-                title: 'T',
-                message: 'M',
-                confirmLabel: 'Remove',
+      await t.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: ElevatedButton(
+                onPressed: () => confirmDelete(
+                  context,
+                  title: 'T',
+                  message: 'M',
+                  confirmLabel: 'Remove',
+                ),
+                child: const Text('open'),
               ),
-              child: const Text('open'),
             ),
           ),
         ),
-      ));
+      );
       await t.tap(find.text('open'));
       await t.pumpAndSettle();
       expect(find.text('Remove'), findsOneWidget);
@@ -239,15 +281,17 @@ void main() {
 
     testWidgets('CommonDeleteDialog calls onConfirm', (t) async {
       var confirmed = 0;
-      await t.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: CommonDeleteDialog(
-            title: 'Sure?',
-            message: 'msg',
-            onConfirm: () => confirmed++,
+      await t.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CommonDeleteDialog(
+              title: 'Sure?',
+              message: 'msg',
+              onConfirm: () => confirmed++,
+            ),
           ),
         ),
-      ));
+      );
       await t.tap(find.text('Delete'));
       await t.pump();
       expect(confirmed, 1);
@@ -256,21 +300,25 @@ void main() {
 
   group('TypeToConfirmDialog', () {
     Future<void> open(WidgetTester t, void Function(bool) onResult) async {
-      await t.pumpWidget(MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: ElevatedButton(
-              onPressed: () async => onResult(await TypeToConfirmDialog.show(
-                context,
-                title: 'Erase everything',
-                message: 'All data will go.',
-                confirmLabel: 'Erase',
-              )),
-              child: const Text('open'),
+      await t.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: ElevatedButton(
+                onPressed: () async => onResult(
+                  await TypeToConfirmDialog.show(
+                    context,
+                    title: 'Erase everything',
+                    message: 'All data will go.',
+                    confirmLabel: 'Erase',
+                  ),
+                ),
+                child: const Text('open'),
+              ),
             ),
           ),
         ),
-      ));
+      );
       await t.tap(find.text('open'));
       await t.pumpAndSettle();
     }
@@ -306,25 +354,36 @@ void main() {
   });
 
   group('promptForName', () {
-    Future<void> open(WidgetTester t, void Function(String?) onResult,
-        {String? initial}) async {
-      await t.pumpWidget(MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: ElevatedButton(
-              onPressed: () async => onResult(
-                await promptForName(context, title: 'New category', initial: initial),
+    Future<void> open(
+      WidgetTester t,
+      void Function(String?) onResult, {
+      String? initial,
+    }) async {
+      await t.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: ElevatedButton(
+                onPressed: () async => onResult(
+                  await promptForName(
+                    context,
+                    title: 'New category',
+                    initial: initial,
+                  ),
+                ),
+                child: const Text('open'),
               ),
-              child: const Text('open'),
             ),
           ),
         ),
-      ));
+      );
       await t.tap(find.text('open'));
       await t.pumpAndSettle();
     }
 
-    testWidgets('empty name shows an error and keeps the dialog open', (t) async {
+    testWidgets('empty name shows an error and keeps the dialog open', (
+      t,
+    ) async {
       String? result = 'unset';
       await open(t, (v) => result = v);
       await t.tap(find.text('Save'));
@@ -360,37 +419,43 @@ void main() {
 
   group('SnackbarUtils', () {
     testWidgets('showSnackbar shows the message', (t) async {
-      await t.pumpWidget(MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: ElevatedButton(
-              onPressed: () => SnackbarUtils.showSnackbar(context, 'Saved'),
-              child: const Text('go'),
+      await t.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: ElevatedButton(
+                onPressed: () => SnackbarUtils.showSnackbar(context, 'Saved'),
+                child: const Text('go'),
+              ),
             ),
           ),
         ),
-      ));
+      );
       await t.tap(find.text('go'));
       await t.pump();
       expect(find.text('Saved'), findsOneWidget);
     });
 
-    testWidgets('showUndo shows UNDO, runs the callback and auto-dismisses', (t) async {
+    testWidgets('showUndo shows UNDO, runs the callback and auto-dismisses', (
+      t,
+    ) async {
       var undone = 0;
-      await t.pumpWidget(MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: ElevatedButton(
-              onPressed: () => SnackbarUtils.showUndo(
-                context,
-                'Expense deleted',
-                () async => undone++,
+      await t.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: ElevatedButton(
+                onPressed: () => SnackbarUtils.showUndo(
+                  context,
+                  'Expense deleted',
+                  () async => undone++,
+                ),
+                child: const Text('go'),
               ),
-              child: const Text('go'),
             ),
           ),
         ),
-      ));
+      );
       await t.tap(find.text('go'));
       await t.pump(); // start the slide-in
       await t.pump(const Duration(milliseconds: 750)); // finish it
