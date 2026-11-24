@@ -94,11 +94,11 @@ void main() {
     )!;
   }
 
-  File writeBackup(Map<String, dynamic> content, [String name = 'b.json']) {
+  /*File writeBackup(Map<String, dynamic> content, [String name = 'b.json']) {
     final f = File('${docs.path}/$name');
     f.writeAsStringSync(jsonEncode(content));
     return f;
-  }
+  }*/
 
   group('BackupMetaKeys / BackupModel', () {
     test('device-local keys include the PIN and biometric settings', () {
